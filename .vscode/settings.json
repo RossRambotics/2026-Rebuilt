@@ -63,6 +63,9 @@
     "edu.wpi.first.math.**.struct.*"
   ],
   "java.dependency.enableDependencyCheckup": false,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnType": true,
   "editor.defaultFormatter": "richardwillis.vscode-spotless-gradle",
   "[json]": {
     "editor.defaultFormatter": "richardwillis.vscode-spotless-gradle"
