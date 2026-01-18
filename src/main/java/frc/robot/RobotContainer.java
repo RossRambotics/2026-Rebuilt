@@ -135,7 +135,8 @@ public class RobotContainer {
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            // () -> -controller.getRightX()
+            () -> -controller.getRawAxis(2)));
 
     // Lock to 0° when A button is held
     controller
@@ -147,12 +148,23 @@ public class RobotContainer {
                 () -> -controller.getLeftX(),
                 () -> Rotation2d.kZero));
 
+    // Robot centric drive when B button is held
+    controller
+        .b()
+        .whileTrue(
+            DriveCommands.joystickDriveRobotCentric(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                // () -> -controller.getRightX()
+                () -> -controller.getRawAxis(2)));
+
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
     controller
-        .b()
+        .back()
         .onTrue(
             Commands.runOnce(
                     () ->
