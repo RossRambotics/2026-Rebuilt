@@ -7,12 +7,19 @@ package frc.robot.subsystems.shooter;
 import static edu.wpi.first.units.Units.Degrees;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
+import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   private final Turret turret = new Turret();
@@ -71,5 +78,19 @@ public class Shooter extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    Pose2d robotPose2d = RobotContainer.getInstance().getRobotPose2d();
+    Pose2d turretPose2d =
+        new Pose2d(
+            robotPose2d.getTranslation().getX() + 0.25,
+            robotPose2d.getTranslation().getY() - 0.25,
+            Rotation2d.fromDegrees(turret.getAngle().in(Degrees)));
+    turretPose2d =
+        turretPose2d.rotateAround(
+            new Translation2d(
+                robotPose2d.getTranslation().getX(), robotPose2d.getTranslation().getY()),
+            robotPose2d.getRotation()); // turret offset
+    Pose3d turretPosed3d =
+        new Pose3d(turretPose2d).plus(new Transform3d(0.0, 0.0, 0.25, new Rotation3d()));
+    Logger.recordOutput("TurretPose", turretPosed3d);
   }
 }
