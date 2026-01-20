@@ -27,7 +27,7 @@ public class Shooter extends SubsystemBase {
   private final double TURRET_X_OFFSET = 0.25; // meters
   private final double TURRET_Y_OFFSET = -0.25; // meters
   private final double TURRET_Z_OFFSET = 0.25; // meters
-  
+
   private Pose3d m_turrPose3dFR = null; // Field Relative turret pose
 
   private final Turret turret = new Turret();
@@ -115,25 +115,6 @@ public class Shooter extends SubsystemBase {
     m_currentTurretDegrees.set(turret.getAngle().in(Degrees));
 
     double robotHeading = robotPose.getRotation().getDegrees();
-    m_currentRobotDegrees.set(robotHeading);
-    m_currentTurretTarget.set(turretTarget);
-    m_currentTurretError.set(a.in(Degrees));
-
-    return a;
-  }
-
-  @Deprecated // has errors - don't use
-  private Angle getTurretTargetAngleError() {
-    double robotHeading = RobotContainer.getInstance().getRobotPose2d().getRotation().getDegrees();
-    double turretTarget = -robotHeading;
-    double turretHeading = turret.getAngle().in(Degrees);
-    double error = turretTarget - turretHeading;
-    Angle a = Degrees.of(error);
-
-    if (turretHeading > 170 && error > 0) a = Degrees.of(0);
-    else if (turretHeading < -170 && error < 0) a = Degrees.of(0);
-
-    m_currentTurretDegrees.set(turret.getAngle().in(Degrees));
     m_currentRobotDegrees.set(robotHeading);
     m_currentTurretTarget.set(turretTarget);
     m_currentTurretError.set(a.in(Degrees));
