@@ -17,6 +17,9 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
@@ -52,6 +55,9 @@ public class Shooter extends SubsystemBase {
               }
               return 0.0;
             }));
+
+    Shuffleboard.getTab("Shooter").add(this.getSetTargetBlueHub());
+    Shuffleboard.getTab("Shooter").add(this.getSetTargetRedHub());
   }
 
   /**
@@ -97,7 +103,7 @@ public class Shooter extends SubsystemBase {
     double turretHeading = m_turret.getAngle().in(Degrees);
     double error = turretTarget - turretHeading;
 
-    // clamp error to 100 degrees
+    // clamp error to prevent extreme values
     error = MathUtil.clamp(error, -20, 20);
 
     Angle a = Degrees.of(error);
@@ -130,20 +136,20 @@ public class Shooter extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
-    updateTurrePose();
+    updateTurretPose();
     updateTargetData();
   }
 
   private void updateTargetData() {
     // Updates target data for logging
-    Pose2d robotPose2d = RobotContainer.getInstance().getRobotPose2d();
+    Pose2d robotPose2d = getTurretPose3dFieldRelative().toPose2d();
     Translation2d toTarget =
         m_targetPose.toPose2d().getTranslation().minus(robotPose2d.getTranslation());
     double distanceToTarget = toTarget.getNorm();
     Logger.recordOutput("Shooter/DistanceToTarget", distanceToTarget);
   }
 
-  private void updateTurrePose() {
+  private void updateTurretPose() {
     // Updates the turret pose in field relative coordinates
     Pose2d robotPose2d = RobotContainer.getInstance().getRobotPose2d();
     Pose2d turretPose2d =
@@ -160,5 +166,29 @@ public class Shooter extends SubsystemBase {
         new Pose3d(turretPose2d).plus(new Transform3d(0.0, 0.0, TURRET_Z_OFFSET, new Rotation3d()));
     Logger.recordOutput("Shooter/TurretPose", turretPosed3d);
     m_turrPose3dFR = turretPosed3d;
+  }
+
+  public Command getSetTargetBlueHub() {
+    Command c =
+        Commands.runOnce(
+                () -> {
+                  this.setTargetPose(new Pose3d(4.5, 4.1, 1.83, new Rotation3d()));
+                })
+            .ignoringDisable(true);
+    c.setName("Target/Blue Hub");
+
+    return c;
+  }
+
+  public Command getSetTargetRedHub() {
+    Command c =
+        Commands.runOnce(
+                () -> {
+                  this.setTargetPose(new Pose3d(12.0, 4.1, 1.83, new Rotation3d()));
+                })
+            .ignoringDisable(true);
+    c.setName("Target/Red Hub");
+
+    return c;
   }
 }
