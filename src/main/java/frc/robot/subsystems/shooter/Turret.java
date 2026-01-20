@@ -30,12 +30,15 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class Turret extends SubsystemBase {
+  public static final int TURRET_DEGREES_MIN = -90;
+  public static final int TURRET_DEGREES_MAX = 90;
+
   private final TalonFX turretMotor = new TalonFX(1);
   private final SmartMotorControllerConfig motorConfig =
       new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.CLOSED_LOOP)
           .withClosedLoopController(
-              4, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(90))
+              4, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(90))
           // Configure Motor and Mechanism properties
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
           .withIdleMode(MotorMode.BRAKE)
@@ -59,10 +62,11 @@ public class Turret extends SubsystemBase {
           // spin
           // infinitely
           .withHardLimit(
-              Degrees.of(-175), Degrees.of(175)) // Hard limit bc wiring prevents infinite
+              Degrees.of(TURRET_DEGREES_MIN - 10),
+              Degrees.of(TURRET_DEGREES_MAX + 10)) // Hard limit bc wiring prevents infinite
           .withSoftLimits(
-              Degrees.of(-170),
-              Degrees.of(170)) // Soft limits to prevent mechanical interference when
+              Degrees.of(TURRET_DEGREES_MIN),
+              Degrees.of(TURRET_DEGREES_MAX)) // Soft limits to prevent mechanical interference when
           // spinning
           .withTelemetry("TurretMech", TelemetryVerbosity.HIGH) // Telemetry
           .withMechanismPositionConfig(mechConfig)

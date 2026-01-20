@@ -6,6 +6,7 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Degrees;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -23,7 +24,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   private final Turret turret = new Turret();
-  private PIDController turretPIDController = new PIDController(0.001, 0, 0);
+  private PIDController turretPIDController = new PIDController(0.0035, 0, 0);
   private boolean isTurretActive = true;
   private DoubleEntry m_currentTurretDegrees = null;
   private DoubleEntry m_currentRobotDegrees = null;
@@ -75,20 +76,38 @@ public class Shooter extends SubsystemBase {
 
   private Angle getTurretTargetAngleError2() {
     Pose2d robotPose = RobotContainer.getInstance().getRobotPose2d();
-    Pose2d targetPose =
-        new Pose2d(4.6, 4.05, new Rotation2d()); // Example blue goal target at (4.6,4.05)
-    Rotation2d angleToTarget = getAngleToTarget(robotPose, targetPose);
 
-    double robotHeading = robotPose.getRotation().getDegrees();
+    // use the turrets location, but the robots heading
+    // this is because we need to adjust the turret based on its angle being robot relative.
+    Pose2d temp = getTurretPose3dFieldRelative().toPose2d();
+    Pose2d turretPose = new Pose2d(temp.getX(), temp.getY(), robotPose.getRotation());
+
+    Pose2d targetPose =
+        new Pose2d(4.5, 4.1, new Rotation2d()); // Example blue goal target at (4.6,4.05)
+    Rotation2d angleToTarget = getAngleToTarget(turretPose, targetPose);
+
+    // clamp the turret target to the rotation available for the turret
     double turretTarget = angleToTarget.getDegrees();
+    turretTarget =
+        MathUtil.clamp(turretTarget, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX);
+
     double turretHeading = turret.getAngle().in(Degrees);
     double error = turretTarget - turretHeading;
+
+    // clamp error to 100 degrees
+    error = MathUtil.clamp(error, -20, 20);
+
     Angle a = Degrees.of(error);
 
-    if (turretHeading > 170 && error > 0) a = Degrees.of(0);
-    else if (turretHeading < -170 && error < 0) a = Degrees.of(0);
+    if (turretHeading > Turret.TURRET_DEGREES_MAX && error > 0) {
+      a = Degrees.of(0);
+    } else if (turretHeading < Turret.TURRET_DEGREES_MIN && error < 0) {
+      a = Degrees.of(0);
+    }
 
     m_currentTurretDegrees.set(turret.getAngle().in(Degrees));
+
+    double robotHeading = robotPose.getRotation().getDegrees();
     m_currentRobotDegrees.set(robotHeading);
     m_currentTurretTarget.set(turretTarget);
     m_currentTurretError.set(a.in(Degrees));
