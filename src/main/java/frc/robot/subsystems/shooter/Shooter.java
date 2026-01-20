@@ -23,20 +23,21 @@ import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
-    // TODO update the location of the turret relative to the robot
+  // TODO update the location of the turret relative to the robot
   private final double TURRET_X_OFFSET = 0.25; // meters
   private final double TURRET_Y_OFFSET = -0.25; // meters
   private final double TURRET_Z_OFFSET = 0.25; // meters
 
   private Pose3d m_turrPose3dFR = null; // Field Relative turret pose
 
-  private final Turret turret = new Turret();
-  private PIDController turretPIDController = new PIDController(0.0035, 0, 0);
-  private boolean isTurretActive = true;
+  private final Turret m_turret = new Turret();
+  private PIDController m_turretPIDController = new PIDController(0.0035, 0, 0);
+  private boolean m_isTurretActive = true;
   private DoubleEntry m_currentTurretDegrees = null;
   private DoubleEntry m_currentRobotDegrees = null;
   private DoubleEntry m_currentTurretTarget = null;
   private DoubleEntry m_currentTurretError = null;
+  private Pose3d m_targetPose = new Pose3d(4.5, 4.1, 1.0, new Rotation3d());
 
   /** Creates a new Shooter. */
   public Shooter() {
@@ -55,11 +56,12 @@ public class Shooter extends SubsystemBase {
     // turretPIDController.enableContinuousInput(-180, 180);
     // turret.setAngle(() -> getTurretTargetAngle());
 
-    turret.setDefaultCommand(
-        turret.setDutyCycle(
+    m_turret.setDefaultCommand(
+        m_turret.setDutyCycle(
             () -> {
-              if (isTurretActive) {
-                return turretPIDController.calculate(-getTurretTargetAngleError2().in(Degrees), 0);
+              if (m_isTurretActive) {
+                return m_turretPIDController.calculate(
+                    -getTurretTargetAngleError2().in(Degrees), 0);
               }
               return 0.0;
             }));
@@ -89,16 +91,14 @@ public class Shooter extends SubsystemBase {
     Pose2d temp = getTurretPose3dFieldRelative().toPose2d();
     Pose2d turretPose = new Pose2d(temp.getX(), temp.getY(), robotPose.getRotation());
 
-    Pose2d targetPose =
-        new Pose2d(4.5, 4.1, new Rotation2d()); // Example blue goal target at (4.6,4.05)
-    Rotation2d angleToTarget = getAngleToTarget(turretPose, targetPose);
+    Rotation2d angleToTarget = getAngleToTarget(turretPose, m_targetPose.toPose2d());
 
     // clamp the turret target to the rotation available for the turret
     double turretTarget = angleToTarget.getDegrees();
     turretTarget =
         MathUtil.clamp(turretTarget, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX);
 
-    double turretHeading = turret.getAngle().in(Degrees);
+    double turretHeading = m_turret.getAngle().in(Degrees);
     double error = turretTarget - turretHeading;
 
     // clamp error to 100 degrees
@@ -112,7 +112,7 @@ public class Shooter extends SubsystemBase {
       a = Degrees.of(0);
     }
 
-    m_currentTurretDegrees.set(turret.getAngle().in(Degrees));
+    m_currentTurretDegrees.set(m_turret.getAngle().in(Degrees));
 
     double robotHeading = robotPose.getRotation().getDegrees();
     m_currentRobotDegrees.set(robotHeading);
@@ -122,7 +122,7 @@ public class Shooter extends SubsystemBase {
     return a;
   }
 
-
+  /* returns the pose of the turret relative to the field */
   public Pose3d getTurretPose3dFieldRelative() {
     return m_turrPose3dFR;
   }
@@ -130,12 +130,14 @@ public class Shooter extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
+    // Updates the turret pose in field relative coordinates
     Pose2d robotPose2d = RobotContainer.getInstance().getRobotPose2d();
     Pose2d turretPose2d =
         new Pose2d(
             robotPose2d.getTranslation().getX() + TURRET_X_OFFSET,
             robotPose2d.getTranslation().getY() + TURRET_Y_OFFSET,
-            Rotation2d.fromDegrees(turret.getAngle().in(Degrees)));
+            Rotation2d.fromDegrees(m_turret.getAngle().in(Degrees)));
     turretPose2d =
         turretPose2d.rotateAround(
             new Translation2d(
