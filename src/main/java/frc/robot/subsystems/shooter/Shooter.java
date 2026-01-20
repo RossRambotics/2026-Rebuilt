@@ -23,6 +23,13 @@ import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
+    // TODO update the location of the turret relative to the robot
+  private final double TURRET_X_OFFSET = 0.25; // meters
+  private final double TURRET_Y_OFFSET = -0.25; // meters
+  private final double TURRET_Z_OFFSET = 0.25; // meters
+  
+  private Pose3d m_turrPose3dFR = null; // Field Relative turret pose
+
   private final Turret turret = new Turret();
   private PIDController turretPIDController = new PIDController(0.0035, 0, 0);
   private boolean isTurretActive = true;
@@ -115,6 +122,7 @@ public class Shooter extends SubsystemBase {
     return a;
   }
 
+  @Deprecated // has errors - don't use
   private Angle getTurretTargetAngleError() {
     double robotHeading = RobotContainer.getInstance().getRobotPose2d().getRotation().getDegrees();
     double turretTarget = -robotHeading;
@@ -133,11 +141,6 @@ public class Shooter extends SubsystemBase {
     return a;
   }
 
-  // TODO update the location of the turret relative to the robot
-  private final double TURRET_X_OFFSET = 0.25; // meters
-  private final double TURRET_Y_OFFSET = -0.25; // meters
-  private final double TURRET_Z_OFFSET = 0.25; // meters
-  private Pose3d m_turrPose3dFR = null; // Field Relative turret pose
 
   public Pose3d getTurretPose3dFieldRelative() {
     return m_turrPose3dFR;
