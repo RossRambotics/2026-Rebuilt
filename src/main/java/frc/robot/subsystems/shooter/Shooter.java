@@ -35,6 +35,7 @@ public class Shooter extends SubsystemBase {
   private final Turret m_turret = new Turret();
   private PIDController m_turretPIDController = new PIDController(0.0035, 0, 0);
   private boolean m_isTurretActive = true;
+  private String m_targetName = "Blue Hub";
 
   private Pose3d m_targetPose = new Pose3d(4.5, 4.1, 1.83, new Rotation3d());
 
@@ -55,9 +56,11 @@ public class Shooter extends SubsystemBase {
               }
               return 0.0;
             }));
-
-    Shuffleboard.getTab("Shooter").add(this.getSetTargetBlueHub());
-    Shuffleboard.getTab("Shooter").add(this.getSetTargetRedHub());
+    // Add Shuffleboard commands for targeting
+    Shuffleboard.getTab("Shooter")
+        .add(this.getSetTargetCmd("Blue Hub", new Pose3d(4.5, 4.1, 1.83, new Rotation3d())));
+    Shuffleboard.getTab("Shooter")
+        .add(this.getSetTargetCmd("Red Hub", new Pose3d(12.0, 4.1, 1.83, new Rotation3d())));
   }
 
   /**
@@ -65,8 +68,9 @@ public class Shooter extends SubsystemBase {
    *
    * @param targetPose The target pose in field-relative coordinates.
    */
-  public void setTargetPose(Pose3d targetPose) {
+  public void setTargetPose(String name, Pose3d targetPose) {
     m_targetPose = targetPose;
+    setTargetName(name);
   }
 
   private Rotation2d getAngleToTarget(Pose2d robotPose, Pose2d targetPose) {
@@ -120,6 +124,9 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/TurretTargetDegrees", turretTarget);
     Logger.recordOutput("Shooter/TurretErrorDegrees", a.in(Degrees));
 
+    boolean onTarget = Math.abs(a.in(Degrees)) < 1.0;
+    Logger.recordOutput("Shooter/TurretOnTarget", onTarget);
+
     return a;
   }
 
@@ -168,26 +175,19 @@ public class Shooter extends SubsystemBase {
     m_turrPose3dFR = turretPosed3d;
   }
 
-  public Command getSetTargetBlueHub() {
-    Command c =
-        Commands.runOnce(
-                () -> {
-                  this.setTargetPose(new Pose3d(4.5, 4.1, 1.83, new Rotation3d()));
-                })
-            .ignoringDisable(true);
-    c.setName("Target/Blue Hub");
-
-    return c;
+  private void setTargetName(String name) {
+    m_targetName = name;
+    Logger.recordOutput("Shooter/TargetName", m_targetName);
   }
 
-  public Command getSetTargetRedHub() {
+  public Command getSetTargetCmd(String name, Pose3d target) {
     Command c =
         Commands.runOnce(
                 () -> {
-                  this.setTargetPose(new Pose3d(12.0, 4.1, 1.83, new Rotation3d()));
+                  this.setTargetPose(name, target);
                 })
             .ignoringDisable(true);
-    c.setName("Target/Red Hub");
+    c.setName("Target/" + name);
 
     return c;
   }
