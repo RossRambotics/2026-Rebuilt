@@ -14,7 +14,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Angle;
@@ -33,25 +32,13 @@ public class Shooter extends SubsystemBase {
   private final Turret m_turret = new Turret();
   private PIDController m_turretPIDController = new PIDController(0.0035, 0, 0);
   private boolean m_isTurretActive = true;
-  private DoubleEntry m_currentTurretDegrees = null;
-  private DoubleEntry m_currentRobotDegrees = null;
-  private DoubleEntry m_currentTurretTarget = null;
-  private DoubleEntry m_currentTurretError = null;
-  private Pose3d m_targetPose = new Pose3d(4.5, 4.1, 1.0, new Rotation3d());
+
+  private Pose3d m_targetPose = new Pose3d(4.5, 4.1, 1.83, new Rotation3d());
 
   /** Creates a new Shooter. */
   public Shooter() {
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable table = inst.getTable("Shooter");
-
-    m_currentTurretDegrees = table.getDoubleTopic("Current Turret Degrees").getEntry(0);
-    m_currentTurretDegrees.set(0);
-    m_currentRobotDegrees = table.getDoubleTopic("Current Robot Degrees").getEntry(0);
-    m_currentRobotDegrees.set(0);
-    m_currentTurretTarget = table.getDoubleTopic("Current Turret Target Degrees").getEntry(0);
-    m_currentTurretTarget.set(0);
-    m_currentTurretError = table.getDoubleTopic("Current Turret Error Degrees").getEntry(0);
-    m_currentTurretError.set(0);
 
     // turretPIDController.enableContinuousInput(-180, 180);
     // turret.setAngle(() -> getTurretTargetAngle());
@@ -67,7 +54,16 @@ public class Shooter extends SubsystemBase {
             }));
   }
 
-  public Rotation2d getAngleToTarget(Pose2d robotPose, Pose2d targetPose) {
+  /**
+   * Sets the target pose for the shooter.
+   *
+   * @param targetPose The target pose in field-relative coordinates.
+   */
+  public void setTargetPose(Pose3d targetPose) {
+    m_targetPose = targetPose;
+  }
+
+  private Rotation2d getAngleToTarget(Pose2d robotPose, Pose2d targetPose) {
 
     // Vector from robot to target
     double dx = targetPose.getX() - robotPose.getX();
@@ -112,17 +108,20 @@ public class Shooter extends SubsystemBase {
       a = Degrees.of(0);
     }
 
-    m_currentTurretDegrees.set(m_turret.getAngle().in(Degrees));
-
     double robotHeading = robotPose.getRotation().getDegrees();
-    m_currentRobotDegrees.set(robotHeading);
-    m_currentTurretTarget.set(turretTarget);
-    m_currentTurretError.set(a.in(Degrees));
+    Logger.recordOutput("Shooter/CurrentTurretDegrees", m_turret.getAngle().in(Degrees));
+    Logger.recordOutput("Shooter/robotHeading", robotHeading);
+    Logger.recordOutput("Shooter/TurretTargetDegrees", turretTarget);
+    Logger.recordOutput("Shooter/TurretErrorDegrees", a.in(Degrees));
 
     return a;
   }
 
-  /* returns the pose of the turret relative to the field */
+  /**
+   * returns the pose of the turret relative to the field
+   *
+   * @return Pose3d of the turret in field-relative coordinates
+   */
   public Pose3d getTurretPose3dFieldRelative() {
     return m_turrPose3dFR;
   }
@@ -131,6 +130,20 @@ public class Shooter extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
+    updateTurrePose();
+    updateTargetData();
+  }
+
+  private void updateTargetData() {
+    // Updates target data for logging
+    Pose2d robotPose2d = RobotContainer.getInstance().getRobotPose2d();
+    Translation2d toTarget =
+        m_targetPose.toPose2d().getTranslation().minus(robotPose2d.getTranslation());
+    double distanceToTarget = toTarget.getNorm();
+    Logger.recordOutput("Shooter/DistanceToTarget", distanceToTarget);
+  }
+
+  private void updateTurrePose() {
     // Updates the turret pose in field relative coordinates
     Pose2d robotPose2d = RobotContainer.getInstance().getRobotPose2d();
     Pose2d turretPose2d =
@@ -145,7 +158,7 @@ public class Shooter extends SubsystemBase {
             robotPose2d.getRotation()); // turret offset
     Pose3d turretPosed3d =
         new Pose3d(turretPose2d).plus(new Transform3d(0.0, 0.0, TURRET_Z_OFFSET, new Rotation3d()));
-    Logger.recordOutput("TurretPose", turretPosed3d);
+    Logger.recordOutput("Shooter/TurretPose", turretPosed3d);
     m_turrPose3dFR = turretPosed3d;
   }
 }

@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "dashboardId": "teleop",
+  "dashboards": {
+    "auto": {
+      "id": "auto",
+      "widgets": []
+    },
+    "teleop": {
+      "id": "teleop",
+      "widgets": [
+        {
+          "id": "354f0752-e547-4a3f-97a3-efc0523f562d",
+          "type": "field2d",
+          "layout": {
+            "left": 26,
+            "top": 1,
+            "width": 15,
+            "height": 20
+          },
+          "constraints": {
+            "width": {
+              "min": 6
+            },
+            "height": {
+              "min": 11
+            }
+          },
+          "slot": "nt:/AdvantageKit/RealOutputs/Odometry/Robot",
+          "lookback": 5,
+          "props": {
+            "style": "2026-empty",
+            "orientation": "90",
+            "bumperSizeInch": 30
+          }
+        },
+        {
+          "id": "ae97c601-b92c-4617-9447-51041970f2e3",
+          "type": "value",
+          "layout": {
+            "left": 1,
+            "top": 2,
+            "width": 6,
+            "height": 6
+          },
+          "constraints": {
+            "width": {
+              "min": 4
+            },
+            "height": {
+              "min": 4
+            }
+          },
+          "slot": "nt:/AdvantageKit/RealOutputs/Shooter/robotHeading",
+          "props": {
+            "alignment": "center",
+            "size": "lg",
+            "mono": false,
+            "valueFormat": {
+              "maximumFractionDigits": 2
+            }
+          }
+        }
+      ]
+    },
+    "custom": []
+  }
+}
