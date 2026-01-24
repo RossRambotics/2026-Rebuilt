@@ -26,12 +26,13 @@
             "/Shuffleboard/Shooter/Target",
             "/CameraPublisher",
             "/AdvantageKit/RealOutputs/Vision",
-            "/AdvantageKit/RealOutputs/Vision/Camera0",
-            "/AdvantageKit/RealOutputs/Vision/Camera1"
+            "/AdvantageKit/RealOutputs/Vision/Camera1",
+            "/AdvantageKit/RealOutputs/Vision/Camera0/RobotPoses",
+            "/AdvantageKit/RealOutputs/Vision/Camera0"
           ]
         },
         "tabs": {
-          "selected": 2,
+          "selected": 4,
           "tabs": [
             {
               "type": 0,
@@ -107,6 +108,24 @@
                     "options": {
                       "color": "#00ff00"
                     }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/Camera0/RobotPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff8c00"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/Camera1/RobotPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ffff"
+                    }
                   }
                 ],
                 "field": "FRC:2026 Field",
@@ -115,7 +134,7 @@
               },
               "controllerUUID": "ht0k3cd3fkinxqfruca6ztfm9tld5ok1",
               "renderer": null,
-              "controlsHeight": 200
+              "controlsHeight": 156
             },
             {
               "type": 4,
@@ -168,6 +187,26 @@
                       "color": "#00ff00",
                       "position": "center"
                     }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/Camera0/RobotPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "model": "KitBot",
+                      "color": "#ff8c00"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/Camera1/RobotPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "model": "KitBot",
+                      "color": "#00ffff"
+                    }
                   }
                 ],
                 "game": "FRC:2026 Field"
@@ -187,7 +226,7 @@
                   0
                 ]
               },
-              "controlsHeight": 200
+              "controlsHeight": 300
             }
           ]
         }
