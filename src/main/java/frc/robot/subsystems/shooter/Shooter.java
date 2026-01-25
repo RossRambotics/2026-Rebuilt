@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Angle;
@@ -34,15 +35,22 @@ public class Shooter extends SubsystemBase {
 
   private final Turret m_turret = new Turret();
   private PIDController m_turretPIDController = new PIDController(0.0035, 0, 0);
+
+  private final HoodOld m_hood = new HoodOld();
+
   private boolean m_isTurretActive = true;
+
   private String m_targetName = "Blue Hub";
 
   private Pose3d m_targetPose = new Pose3d(4.5, 4.1, 1.83, new Rotation3d());
+  private DoubleEntry m_TargetHoodAngleDegrees = null;
 
   /** Creates a new Shooter. */
   public Shooter() {
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable table = inst.getTable("Shooter");
+    m_TargetHoodAngleDegrees = table.getDoubleTopic("TargetHoodAngleDegrees").getEntry(0.0);
+    m_TargetHoodAngleDegrees.set(Hood.HOOD_DEGREES_MIN);
 
     // turretPIDController.enableContinuousInput(-180, 180);
     // turret.setAngle(() -> getTurretTargetAngle());
@@ -56,11 +64,14 @@ public class Shooter extends SubsystemBase {
               }
               return 0.0;
             }));
+
     // Add Shuffleboard commands for targeting
     Shuffleboard.getTab("Shooter")
         .add(this.getSetTargetCmd("Blue Hub", new Pose3d(4.5, 4.1, 1.83, new Rotation3d())));
     Shuffleboard.getTab("Shooter")
         .add(this.getSetTargetCmd("Red Hub", new Pose3d(12.0, 4.1, 1.83, new Rotation3d())));
+    Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 20", Degrees.of(20.0)));
+    Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 40", Degrees.of(40.0)));
   }
 
   /**
@@ -119,7 +130,7 @@ public class Shooter extends SubsystemBase {
     }
 
     double robotHeading = robotPose.getRotation().getDegrees();
-    Logger.recordOutput("Shooter/CurrentTurretDegrees", m_turret.getAngle().in(Degrees));
+    Logger.recordOutput("Shooter/TurretCurrentDegrees", m_turret.getAngle().in(Degrees));
     Logger.recordOutput("Shooter/robotHeading", robotHeading);
     Logger.recordOutput("Shooter/TurretTargetDegrees", turretTarget);
     Logger.recordOutput("Shooter/TurretErrorDegrees", a.in(Degrees));
@@ -188,6 +199,13 @@ public class Shooter extends SubsystemBase {
                 })
             .ignoringDisable(true);
     c.setName("Target/" + name);
+
+    return c;
+  }
+
+  public Command getHoodAngleTestCmd(String name, Angle a) {
+    Command c = m_hood.getSetGoalCommand(a);
+    c.setName("Hood/" + name);
 
     return c;
   }

@@ -19,12 +19,12 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import org.littletonrobotics.junction.Logger;
 
 public class HoodOld extends SubsystemBase {
   final TalonFX m_LeftMotor = new TalonFX(24);
@@ -45,8 +45,6 @@ public class HoodOld extends SubsystemBase {
   private GenericEntry m_GE_Velocity = null;
   private GenericEntry m_GE_Goal = null;
   private GenericEntry m_GE_Timer = null;
-  private Timer m_timer = new Timer();
-  // private RandomExecutionLimiter m_executionLimiter = new RandomExecutionLimiter();
 
   private Angle m_goal = Degrees.of(0);
 
@@ -88,7 +86,7 @@ public class HoodOld extends SubsystemBase {
         .withMotionMagicJerk(RotationsPerSecondPerSecond.per(Second).of(10));
 
     Slot0Configs slot0 = fx_cfg.Slot0;
-    slot0.GravityType = GravityTypeValue.Elevator_Static;
+    slot0.GravityType = GravityTypeValue.Arm_Cosine;
     slot0.kS = 0.25; // Add 0.25 V output to overcome static friction
     slot0.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
     slot0.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
@@ -113,9 +111,9 @@ public class HoodOld extends SubsystemBase {
     // setup software limits
     SoftwareLimitSwitchConfigs swLimits = new SoftwareLimitSwitchConfigs();
     swLimits.ForwardSoftLimitEnable = true;
-    swLimits.ForwardSoftLimitThreshold = Degrees.of(125).in(Rotations);
+    swLimits.ForwardSoftLimitThreshold = Degrees.of(45).in(Degrees);
     swLimits.ReverseSoftLimitEnable = true;
-    swLimits.ReverseSoftLimitThreshold = Degrees.of(-175).in(Rotations);
+    swLimits.ReverseSoftLimitThreshold = Degrees.of(15).in(Degrees);
     fx_cfg.SoftwareLimitSwitch = swLimits;
 
     StatusCode status = StatusCode.StatusCodeNotInitialized;
@@ -128,16 +126,9 @@ public class HoodOld extends SubsystemBase {
       // hi
 
     }
-    Shuffleboard.getTab("Hood").add(this.getZeroHoodAngleCmd());
-    Shuffleboard.getTab("Hood").add(this.getOpenCommand());
-    Shuffleboard.getTab("Hood").add(this.getCloseCommand());
   }
 
   private void setGoal(Angle angle) {
-    if (angle.baseUnitMagnitude() != m_goal.baseUnitMagnitude()) {
-      m_timer.reset();
-      m_timer.start();
-    }
     m_LeftMotor.setControl(m_mmReq.withPosition(angle.in(Rotations)).withSlot(0));
     m_GE_Goal.setDouble(angle.in(Degrees));
     m_goal = angle;
@@ -166,16 +157,11 @@ public class HoodOld extends SubsystemBase {
 
   @Override
   public void periodic() {
+    Logger.recordOutput("Shooter/HoodErrorDegrees", this.getError().in(Degrees));
+    Logger.recordOutput("Shooter/HoodTargetAngleDegrees", this.m_goal.in(Degrees));
+    Logger.recordOutput(
+        "Shooter/HoodCurrentDegrees", this.m_LeftMotor.getPosition().getValue().in(Degrees));
     // if (!RobotContainer.isTuning) {
-    //     return;
-    // }
-
-    if (this.getError().in(Degree) <= m_kGoalTolerance) {
-      m_timer.stop();
-    }
-
-    // Check if we should execute this cycle
-    // if (!m_executionLimiter.shouldExecute()) {
     //     return;
     // }
 
@@ -197,8 +183,6 @@ public class HoodOld extends SubsystemBase {
     // This method will be called once per scheduler run
     m_GE_Velocity.setDouble(m_LeftMotor.getVelocity().getValueAsDouble());
     m_GE_Position.setDouble(m_LeftMotor.getPosition().getValue().in(Degree));
-
-    m_GE_Timer.setDouble(m_timer.get());
   }
 
   public void simulationInit() {
