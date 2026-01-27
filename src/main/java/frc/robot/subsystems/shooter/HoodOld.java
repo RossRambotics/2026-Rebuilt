@@ -10,13 +10,9 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -50,51 +46,28 @@ public class HoodOld extends SubsystemBase {
 
   /** Creates a new Hood. */
   public HoodOld() {
-    // CAN Coder configuration
-    // CANcoderConfiguration cc_cfg = new CANcoderConfiguration();
-    // cc_cfg.MagnetSensor.withAbsoluteSensorDiscontinuityPoint(Degrees.of(160));
-    // cc_cfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-    // cc_cfg.MagnetSensor.withMagnetOffset(Rotations.of(0.11 + .334));
-    // m_HoodCANcoder.getConfigurator().apply(cc_cfg);
-
-    // TalonFX configuration
-    TalonFXConfiguration fx_cfg = new TalonFXConfiguration();
+    TalonFXConfiguration cfg = new TalonFXConfiguration();
 
     /* Configure gear ratio */
-    FeedbackConfigs fdb = fx_cfg.Feedback;
-    double gearRatio = 1.0;
-
-    // use internal encoder
-    // if (Robot.isSimulation()) {
-    fdb.SensorToMechanismRatio = gearRatio;
-    // } else {
-    //     // use external encoder (CANCoder)
-    //     fdb.SensorToMechanismRatio = 1.0; // 1:1 ratio
-    //     fdb.FeedbackRemoteSensorID = m_HoodCANcoder.getDeviceID();
-    //     fdb.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-    //     fdb.RotorToSensorRatio = gearRatio;
-    // }
-
-    fx_cfg.MotorOutput =
-        fx_cfg.MotorOutput.withInverted(InvertedValue.Clockwise_Positive)
-            .withNeutralMode(NeutralModeValue.Brake);
+    FeedbackConfigs fdb = cfg.Feedback;
+    fdb.SensorToMechanismRatio = 1; // 12.8 rotor rotations per mechanism rotation
 
     /* Configure Motion Magic */
-    MotionMagicConfigs mm = fx_cfg.MotionMagic;
-    mm.withMotionMagicCruiseVelocity(RotationsPerSecond.of(1))
-        .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(5))
+    MotionMagicConfigs mm = cfg.MotionMagic;
+    mm.withMotionMagicCruiseVelocity(
+            RotationsPerSecond.of(1)) // 5 (mechanism) rotations per second cruise
+        .withMotionMagicAcceleration(
+            RotationsPerSecondPerSecond.of(1)) // Take approximately 0.5 seconds to reach max vel
+        // Take approximately 0.1 seconds to reach max accel
         .withMotionMagicJerk(RotationsPerSecondPerSecond.per(Second).of(10));
 
-    Slot0Configs slot0 = fx_cfg.Slot0;
-    slot0.GravityType = GravityTypeValue.Arm_Cosine;
+    Slot0Configs slot0 = cfg.Slot0;
     slot0.kS = 0.25; // Add 0.25 V output to overcome static friction
     slot0.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
     slot0.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
-    slot0.kP = 50; // A position error of 0.2 rotations results in 12 V output
+    slot0.kP = 1; // A position error of 0.2 rotations results in 12 V output
     slot0.kI = 0; // No output for integrated error
-    slot0.kG = 1.0;
-    slot0.kD = 0; // A velocity error of 1 rps results in 0.5 V output
-
+    slot0.kD = 0.5; // A velocity error of 1 rps results in 0.5 V output
     m_GE_PID_kS = Shuffleboard.getTab("Hood").add("Hood_kS", slot0.kS).getEntry();
     m_GE_PID_kV = Shuffleboard.getTab("Hood").add("Hood_kV", slot0.kV).getEntry();
     m_GE_PID_kA = Shuffleboard.getTab("Hood").add("Hood_kA", slot0.kA).getEntry();
@@ -109,16 +82,16 @@ public class HoodOld extends SubsystemBase {
     m_GE_Timer = Shuffleboard.getTab("Hood").add("Hood_Timer", 0).getEntry();
 
     // setup software limits
-    SoftwareLimitSwitchConfigs swLimits = new SoftwareLimitSwitchConfigs();
-    swLimits.ForwardSoftLimitEnable = true;
-    swLimits.ForwardSoftLimitThreshold = Degrees.of(45).in(Degrees);
-    swLimits.ReverseSoftLimitEnable = true;
-    swLimits.ReverseSoftLimitThreshold = Degrees.of(15).in(Degrees);
-    fx_cfg.SoftwareLimitSwitch = swLimits;
+    // SoftwareLimitSwitchConfigs swLimits = new SoftwareLimitSwitchConfigs();
+    // swLimits.ForwardSoftLimitEnable = true;
+    // swLimits.ForwardSoftLimitThreshold = Degrees.of(45).in(Degrees);
+    // swLimits.ReverseSoftLimitEnable = true;
+    // swLimits.ReverseSoftLimitThreshold = Degrees.of(15).in(Degrees);
+    // fx_cfg.SoftwareLimitSwitch = swLimits;
 
     StatusCode status = StatusCode.StatusCodeNotInitialized;
     for (int i = 0; i < 5; ++i) {
-      status = m_LeftMotor.getConfigurator().apply(fx_cfg);
+      status = m_LeftMotor.getConfigurator().apply(cfg);
       if (status.isOK()) break;
     }
     if (!status.isOK()) {
@@ -129,10 +102,17 @@ public class HoodOld extends SubsystemBase {
   }
 
   private void setGoal(Angle angle) {
-    m_LeftMotor.setControl(m_mmReq.withPosition(angle.in(Rotations)).withSlot(0));
+    m_LeftMotor.setControl(m_mmReq.withPosition(angle.in(Rotations) / 360.0).withSlot(0));
     m_GE_Goal.setDouble(angle.in(Degrees));
     m_goal = angle;
   }
+  // private void setGoal(Angle angle) {
+  //   double a = angle.in(Degrees);
+  //   a = a / 360.0; // convert to rotations
+  //   m_LeftMotor.setControl(m_mmReq.withPosition(a).withSlot(0));
+  //   m_GE_Goal.setDouble(angle.in(Degrees));
+  //   m_goal = angle;
+  // }
 
   private Angle getError() {
     Angle goal = m_goal;
@@ -190,26 +170,16 @@ public class HoodOld extends SubsystemBase {
 
   }
 
-  public void coralMode() {
-    Slot0Configs slot0 = new Slot0Configs();
-    m_LeftMotor.getConfigurator().refresh(slot0);
-    m_GE_PID_kP.setDouble(50);
-    slot0.kP = 50;
-    m_LeftMotor.getConfigurator().apply(slot0);
-  }
-
-  public void algaeMode() {
-    Slot0Configs slot0 = new Slot0Configs();
-    m_LeftMotor.getConfigurator().refresh(slot0);
-    m_GE_PID_kP.setDouble(50);
-    slot0.kP = 50;
-    m_LeftMotor.getConfigurator().apply(slot0);
-  }
-
   public Command getZeroHoodAngleCmd() {
-    Command c = Commands.runOnce(() -> m_LeftMotor.setPosition(Degrees.of(0)));
-    c.setName("Hood.ZeroAngle");
-    // c.ignoringDisable(true);
+
+    Command c =
+        Commands.runOnce(
+                () -> {
+                  m_LeftMotor.setPosition(Degrees.of(Hood.HOOD_DEGREES_MIN));
+                  setGoal(Degrees.of(Hood.HOOD_DEGREES_MIN));
+                })
+            .ignoringDisable(true);
+    c.setName("Hood/ResetZero");
 
     return c;
   }

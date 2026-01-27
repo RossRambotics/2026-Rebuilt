@@ -72,6 +72,7 @@ public class Shooter extends SubsystemBase {
         .add(this.getSetTargetCmd("Red Hub", new Pose3d(12.0, 4.1, 1.83, new Rotation3d())));
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 20", Degrees.of(20.0)));
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 40", Degrees.of(40.0)));
+    Shuffleboard.getTab("Hood").add(m_hood.getZeroHoodAngleCmd());
   }
 
   /**

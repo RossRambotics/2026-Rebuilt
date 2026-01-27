@@ -1,0 +1,54 @@
+{
+  "NetworkTables": {
+    "transitory": {
+      "Shuffleboard": {
+        "Hood": {
+          "open": true
+        },
+        "open": true
+      }
+    },
+    "types": {
+      "/AdvantageKit/RealOutputs/Alerts": "Alerts",
+      "/AdvantageKit/RealOutputs/PathPlanner": "Alerts",
+      "/FMSInfo": "FMSInfo",
+      "/Shuffleboard/Hood/Hood.ZeroAngle": "Command",
+      "/Shuffleboard/Hood/Hood/Hood Angle 20": "Command",
+      "/Shuffleboard/Hood/Hood/Hood Angle 40": "Command",
+      "/Shuffleboard/Hood/Hood/ResetZero": "Command",
+      "/Shuffleboard/Shooter/Target/Blue Hub": "Command",
+      "/Shuffleboard/Shooter/Target/Red Hub": "Command",
+      "/SmartDashboard/Alerts": "Alerts",
+      "/SmartDashboard/Auto Choices": "String Chooser",
+      "/SmartDashboard/Mechanisms/Commands/Turret/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/TurretMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/TurretMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/TurretMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/PathPlanner": "Alerts"
+    },
+    "windows": {
+      "/Shuffleboard/Hood/Hood/Hood Angle 20": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/Shuffleboard/Hood/Hood/Hood Angle 40": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/Shuffleboard/Hood/Hood/ResetZero": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Info": {
+    "visible": true
+  },
+  "NetworkTables Settings": {
+    "mode": "Client (NT4)",
+    "serverTeam": "3201"
+  }
+}
