@@ -81,9 +81,10 @@ public class Shooter extends SubsystemBase {
 
     Shuffleboard.getTab("BottomFlyWheel").add(this.getFlyWheelRPMCmd("Bottom Flywheel 0 RPM", 0.0));
     Shuffleboard.getTab("BottomFlyWheel")
-        .add(this.getFlyWheelRPMCmd("Bottom Flywheel 10 RPM", 10.0));
+        .add(this.getFlyWheelRPMCmd("Bottom Flywheel 1000 RPM", 1000.0));
     Shuffleboard.getTab("BottomFlyWheel")
-        .add(this.getFlyWheelRPMCmd("Bottom Flywheel 100 RPM", 100.0));
+        .add(this.getFlyWheelRPMCmd("Bottom Flywheel 2000 RPM", 2000.0));
+    Shuffleboard.getTab("BottomFlyWheel").add(this.getFlyWheelRPMCmd("Dynamic"));
   }
 
   /**
@@ -149,6 +150,7 @@ public class Shooter extends SubsystemBase {
 
     boolean onTarget = Math.abs(a.in(Degrees)) < 1.0;
     Logger.recordOutput("Shooter/TurretOnTarget", onTarget);
+    Logger.recordOutput("Shooter/FlyWheelRPM", m_bottomFlyWheel.getVelocity().in(RPM));
 
     return a;
   }
@@ -223,7 +225,21 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command getFlyWheelRPMCmd(String name, double rpm) {
+    if (rpm == 0.0) {
+      Command c = m_bottomFlyWheel.set(0);
+      c.setName("BottomFlyWheel/" + name);
+      return c;
+    }
+
     Command c = m_bottomFlyWheel.setVelocity(RPM.of(rpm));
+    c.setName("BottomFlyWheel/" + name);
+
+    return c;
+  }
+
+  public Command getFlyWheelRPMCmd(String name) {
+
+    Command c = m_bottomFlyWheel.setVelocity();
     c.setName("BottomFlyWheel/" + name);
 
     return c;

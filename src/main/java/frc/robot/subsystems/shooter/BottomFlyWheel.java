@@ -5,15 +5,16 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.networktables.DoubleEntry;
@@ -54,36 +55,32 @@ public class BottomFlyWheel extends SubsystemBase {
 
   private DoubleEntry m_targetRPM = null;
 
+  // Vendor motor controller object
+  private TalonFX m_leftMotor = new TalonFX(35); // Use your actual CAN ID
+  private TalonFX m_rightMotor = new TalonFX(36); // Use your actual CAN ID
+
   private SmartMotorControllerConfig smcConfig =
       new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.CLOSED_LOOP)
           // Feedback Constants (PID Constants)
           .withClosedLoopController(
-              50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+              50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
           .withSimClosedLoopController(
-              50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
+              50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
           // Feedforward Constants
           .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
           .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
           // Telemetry name and verbosity level
-          .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
-          // Gearing from the motor rotor to final shaft.
-          // In this example GearBox.fromReductionStages(3,4) is the same as
-          // GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to your
-          // motor.
-          // You could also use .withGearing(12) which does the same thing.
-          .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+          .withTelemetry("BottomFlyWheelMotor", TelemetryVerbosity.HIGH)
+          .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
           // Motor properties to prevent over currenting.
           .withMotorInverted(false)
           .withIdleMode(MotorMode.COAST)
+          .withFollowers(new Pair<Object, Boolean>(m_rightMotor, true))
           .withStatorCurrentLimit(Amps.of(40));
 
-  // Vendor motor controller object
-  private TalonFX m_leftMotor = new TalonFX(35); // Use your actual CAN ID
-  private TalonFX m_rightMotor = new TalonFX(36); // Use your actual CAN ID
-
   private SmartMotorController falconSmartMotorController =
-      new TalonFXWrapper(m_leftMotor, DCMotor.getKrakenX60(1), smcConfig);
+      new TalonFXWrapper(m_leftMotor, DCMotor.getKrakenX60(2), smcConfig);
 
   private final FlyWheelConfig shooterConfig =
       new FlyWheelConfig(falconSmartMotorController)
@@ -94,7 +91,7 @@ public class BottomFlyWheel extends SubsystemBase {
           // Maximum speed of the shooter.
           .withUpperSoftLimit(RPM.of(1000))
           // Telemetry name and verbosity for the arm.
-          .withTelemetry("BottomShooterMech", TelemetryVerbosity.HIGH);
+          .withTelemetry("BottomFlyWheel", TelemetryVerbosity.HIGH);
 
   // Shooter Mechanism
   private FlyWheel shooter = new FlyWheel(shooterConfig);
