@@ -5,6 +5,7 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -37,6 +38,7 @@ public class Shooter extends SubsystemBase {
   private PIDController m_turretPIDController = new PIDController(0.0035, 0, 0);
 
   private final HoodOld m_hood = new HoodOld();
+  private final BottomFlyWheel m_bottomFlyWheel = new BottomFlyWheel();
 
   private boolean m_isTurretActive = true;
 
@@ -70,9 +72,18 @@ public class Shooter extends SubsystemBase {
         .add(this.getSetTargetCmd("Blue Hub", new Pose3d(4.5, 4.1, 1.83, new Rotation3d())));
     Shuffleboard.getTab("Shooter")
         .add(this.getSetTargetCmd("Red Hub", new Pose3d(12.0, 4.1, 1.83, new Rotation3d())));
+
+    Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 0", Degrees.of(0.0)));
+
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 20", Degrees.of(20.0)));
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 40", Degrees.of(40.0)));
     Shuffleboard.getTab("Hood").add(m_hood.getZeroHoodAngleCmd());
+
+    Shuffleboard.getTab("BottomFlyWheel").add(this.getFlyWheelRPMCmd("Bottom Flywheel 0 RPM", 0.0));
+    Shuffleboard.getTab("BottomFlyWheel")
+        .add(this.getFlyWheelRPMCmd("Bottom Flywheel 10 RPM", 10.0));
+    Shuffleboard.getTab("BottomFlyWheel")
+        .add(this.getFlyWheelRPMCmd("Bottom Flywheel 100 RPM", 100.0));
   }
 
   /**
@@ -207,6 +218,13 @@ public class Shooter extends SubsystemBase {
   public Command getHoodAngleTestCmd(String name, Angle a) {
     Command c = m_hood.getSetGoalCommand(a);
     c.setName("Hood/" + name);
+
+    return c;
+  }
+
+  public Command getFlyWheelRPMCmd(String name, double rpm) {
+    Command c = m_bottomFlyWheel.setVelocity(RPM.of(rpm));
+    c.setName("BottomFlyWheel/" + name);
 
     return c;
   }

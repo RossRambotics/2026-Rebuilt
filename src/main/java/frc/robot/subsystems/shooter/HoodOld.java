@@ -50,7 +50,7 @@ public class HoodOld extends SubsystemBase {
 
     /* Configure gear ratio */
     FeedbackConfigs fdb = cfg.Feedback;
-    fdb.SensorToMechanismRatio = 1; // 1 rotor rotations per mechanism rotation
+    fdb.SensorToMechanismRatio = 19; // 1 rotor rotations per mechanism rotation
 
     /* Configure Motion Magic */
     MotionMagicConfigs mm = cfg.MotionMagic;
@@ -62,18 +62,20 @@ public class HoodOld extends SubsystemBase {
         .withMotionMagicJerk(RotationsPerSecondPerSecond.per(Second).of(20));
 
     Slot0Configs slot0 = cfg.Slot0;
-    slot0.kS = 0.25; // Add 0.25 V output to overcome static friction
-    slot0.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
+    slot0.kS = 0.3; // Add 0.25 V output to overcome static friction
+    slot0.kV = 0.1; // A velocity target of 1 rps results in 0.12 V output
     slot0.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
     slot0.kP = 60; // A position error of 0.2 rotations results in 12 V output
-    slot0.kI = 0; // No output for integrated error
-    slot0.kD = 0.5; // A velocity error of 1 rps results in 0.5 V output
+    slot0.kI = 4.1; // No output for integrated error
+    slot0.kD = 0.0; // A velocity error of 1 rps results in 0.5 V output
+    slot0.kG = 0.0; // No gravity feedforward
+
     m_GE_PID_kS = Shuffleboard.getTab("Hood").add("Hood_kS", slot0.kS).getEntry();
     m_GE_PID_kV = Shuffleboard.getTab("Hood").add("Hood_kV", slot0.kV).getEntry();
     m_GE_PID_kA = Shuffleboard.getTab("Hood").add("Hood_kA", slot0.kA).getEntry();
     m_GE_PID_kP = Shuffleboard.getTab("Hood").add("Hood_kP", slot0.kP).getEntry();
     m_GE_PID_kI = Shuffleboard.getTab("Hood").add("Hood_kI", slot0.kI).getEntry();
-    m_GE_PID_kG = Shuffleboard.getTab("Hood").add("Hood_kG", slot0.kI).getEntry();
+    m_GE_PID_kG = Shuffleboard.getTab("Hood").add("Hood_kG", slot0.kG).getEntry();
     m_GE_PID_kD = Shuffleboard.getTab("Hood").add("Hood_kD", slot0.kD).getEntry();
     m_GE_bUpdatePID = Shuffleboard.getTab("Hood").add("Hood_UpdatePID", false).getEntry();
     m_GE_Position = Shuffleboard.getTab("Hood").add("Hood_Position", 0).getEntry();

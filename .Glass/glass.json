@@ -1,6 +1,24 @@
 {
   "NetworkTables": {
     "transitory": {
+      "Mechanisms": {
+        "BottomShooterMech": {
+          "ShooterMotor": {
+            "closedloop": {
+              "open": true,
+              "setpoint": {
+                "open": true
+              }
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "Shooter": {
+        "open": true
+      },
       "Shuffleboard": {
         "Hood": {
           "open": true
@@ -12,7 +30,11 @@
       "/AdvantageKit/RealOutputs/Alerts": "Alerts",
       "/AdvantageKit/RealOutputs/PathPlanner": "Alerts",
       "/FMSInfo": "FMSInfo",
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 0 RPM": "Command",
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 10 RPM": "Command",
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 100 RPM": "Command",
       "/Shuffleboard/Hood/Hood.ZeroAngle": "Command",
+      "/Shuffleboard/Hood/Hood/Hood Angle 0": "Command",
       "/Shuffleboard/Hood/Hood/Hood Angle 20": "Command",
       "/Shuffleboard/Hood/Hood/Hood Angle 40": "Command",
       "/Shuffleboard/Hood/Hood/ResetZero": "Command",
@@ -20,6 +42,10 @@
       "/Shuffleboard/Shooter/Target/Red Hub": "Command",
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Auto Choices": "String Chooser",
+      "/SmartDashboard/Mechanisms/Commands/BottomFlyWheel/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ShooterMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ShooterMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ShooterMotor/ZeroEncoder": "Command",
       "/SmartDashboard/Mechanisms/Commands/Turret/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/TurretMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/TurretMotor/Up": "Command",
@@ -27,6 +53,26 @@
       "/SmartDashboard/PathPlanner": "Alerts"
     },
     "windows": {
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 0 RPM": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 10 RPM": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 100 RPM": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/Shuffleboard/Hood/Hood/Hood Angle 0": {
+        "window": {
+          "visible": true
+        }
+      },
       "/Shuffleboard/Hood/Hood/Hood Angle 20": {
         "window": {
           "visible": true
