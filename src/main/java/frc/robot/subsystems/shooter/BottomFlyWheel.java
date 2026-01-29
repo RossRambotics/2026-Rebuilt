@@ -64,7 +64,7 @@ public class BottomFlyWheel extends SubsystemBase {
           .withControlMode(ControlMode.CLOSED_LOOP)
           // Feedback Constants (PID Constants)
           .withClosedLoopController(
-              50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
+              15, 0, 10, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
           .withSimClosedLoopController(
               50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
           // Feedforward Constants

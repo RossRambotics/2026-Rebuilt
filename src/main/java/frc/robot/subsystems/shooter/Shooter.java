@@ -85,6 +85,8 @@ public class Shooter extends SubsystemBase {
     Shuffleboard.getTab("BottomFlyWheel")
         .add(this.getFlyWheelRPMCmd("Bottom Flywheel 2000 RPM", 2000.0));
     Shuffleboard.getTab("BottomFlyWheel").add(this.getFlyWheelRPMCmd("Dynamic"));
+    Shuffleboard.getTab("BottomFlyWheel")
+        .add(this.getFlyWheelRPMCmd("Bottom Flywheel 3000 RPM", 3000.0));
   }
 
   /**

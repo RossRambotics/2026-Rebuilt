@@ -1,7 +1,26 @@
 {
   "NetworkTables": {
     "transitory": {
+      "AdvantageKit": {
+        "RealOutputs": {
+          "Shooter": {
+            "open": true
+          },
+          "open": true
+        }
+      },
       "Mechanisms": {
+        "BottomFlyWheel": {
+          "BottomFlyWheelMotor": {
+            "closedloop": {
+              "setpoint": {
+                "open": true
+              }
+            },
+            "open": true
+          },
+          "open": true
+        },
         "BottomShooterMech": {
           "ShooterMotor": {
             "closedloop": {
@@ -13,14 +32,33 @@
             "open": true
           },
           "open": true
-        },
-        "open": true
+        }
       },
       "Shooter": {
         "open": true
       },
       "Shuffleboard": {
         "Hood": {
+          "open": true
+        }
+      },
+      "Tuning": {
+        "BottomFlyWheel": {
+          "BottomFlyWheelMotor": {
+            "closedloop": {
+              "feedback": {
+                "open": true
+              },
+              "feedforward": {
+                "open": true
+              },
+              "motionprofile": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
           "open": true
         },
         "open": true
@@ -33,6 +71,10 @@
       "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 0 RPM": "Command",
       "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 10 RPM": "Command",
       "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 100 RPM": "Command",
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 1000 RPM": "Command",
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 2000 RPM": "Command",
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 3000 RPM": "Command",
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Dynamic": "Command",
       "/Shuffleboard/Hood/Hood.ZeroAngle": "Command",
       "/Shuffleboard/Hood/Hood/Hood Angle 0": "Command",
       "/Shuffleboard/Hood/Hood/Hood Angle 20": "Command",
@@ -43,6 +85,9 @@
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Auto Choices": "String Chooser",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheel/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/ZeroEncoder": "Command",
       "/SmartDashboard/Mechanisms/Commands/ShooterMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/ShooterMotor/Up": "Command",
       "/SmartDashboard/Mechanisms/Commands/ShooterMotor/ZeroEncoder": "Command",
@@ -58,12 +103,22 @@
           "visible": true
         }
       },
-      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 10 RPM": {
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 1000 RPM": {
         "window": {
           "visible": true
         }
       },
-      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 100 RPM": {
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 2000 RPM": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 3000 RPM": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Dynamic": {
         "window": {
           "visible": true
         }
@@ -96,5 +151,34 @@
   "NetworkTables Settings": {
     "mode": "Client (NT4)",
     "serverTeam": "3201"
+  },
+  "Plots": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 457,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/AdvantageKit/RealOutputs/Shooter/FlyWheelRPM"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    }
   }
 }
