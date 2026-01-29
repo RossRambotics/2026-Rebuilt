@@ -45,6 +45,8 @@ public class Shooter extends SubsystemBase {
   private String m_targetName = "Blue Hub";
 
   private Pose3d m_targetPose = new Pose3d(4.5, 4.1, 1.83, new Rotation3d());
+  private Angle m_turretTarget = Degrees.of(0);
+  private Angle m_lastTurretError = Degrees.of(0);
   private DoubleEntry m_TargetHoodAngleDegrees = null;
 
   /** Creates a new Shooter. */
@@ -57,14 +59,23 @@ public class Shooter extends SubsystemBase {
     // turretPIDController.enableContinuousInput(-180, 180);
     // turret.setAngle(() -> getTurretTargetAngle());
 
+    // m_turret.setDefaultCommand(
+    //     m_turret.setDutyCycle(
+    //         () -> {
+    //           if (m_isTurretActive) {
+    //             return m_turretPIDController.calculate(
+    //                 -getTurretTargetAngleError2().in(Degrees), 0);
+    //           }
+    //           return 0.0;
+    //         }));
+
     m_turret.setDefaultCommand(
-        m_turret.setDutyCycle(
+        m_turret.setAngle(
             () -> {
               if (m_isTurretActive) {
-                return m_turretPIDController.calculate(
-                    -getTurretTargetAngleError2().in(Degrees), 0);
+                return getTurretTargetAngle();
               }
-              return 0.0;
+              return Degrees.of(0);
             }));
 
     // Add Shuffleboard commands for targeting
@@ -115,6 +126,29 @@ public class Shooter extends SubsystemBase {
     return angleToTarget.minus(robotHeading);
   }
 
+  private Angle getTurretTargetAngle() {
+    Pose2d robotPose = RobotContainer.getInstance().getRobotPose2d();
+
+    // use the turrets location, but the robots heading
+    // this is because we need to adjust the turret based on its angle being robot relative.
+    Pose2d temp = getTurretPose3dFieldRelative().toPose2d();
+    Pose2d turretPose = new Pose2d(temp.getX(), temp.getY(), robotPose.getRotation());
+
+    Rotation2d angleToTarget = getAngleToTarget(turretPose, m_targetPose.toPose2d());
+
+    // clamp the turret target to the rotation available for the turret
+    double turretTarget = angleToTarget.getDegrees();
+    turretTarget =
+        MathUtil.clamp(turretTarget, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX);
+
+    m_turretTarget = Degrees.of(turretTarget);
+
+    double turretHeading = m_turret.getAngle().in(Degrees);
+    m_lastTurretError = Degrees.of(turretTarget - turretHeading);
+
+    return m_turretTarget;
+  }
+
   private Angle getTurretTargetAngleError2() {
     Pose2d robotPose = RobotContainer.getInstance().getRobotPose2d();
 
@@ -129,6 +163,7 @@ public class Shooter extends SubsystemBase {
     double turretTarget = angleToTarget.getDegrees();
     turretTarget =
         MathUtil.clamp(turretTarget, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX);
+    m_turretTarget = Degrees.of(turretTarget);
 
     double turretHeading = m_turret.getAngle().in(Degrees);
     double error = turretTarget - turretHeading;
@@ -144,15 +179,7 @@ public class Shooter extends SubsystemBase {
       a = Degrees.of(0);
     }
 
-    double robotHeading = robotPose.getRotation().getDegrees();
-    Logger.recordOutput("Shooter/TurretCurrentDegrees", m_turret.getAngle().in(Degrees));
-    Logger.recordOutput("Shooter/robotHeading", robotHeading);
-    Logger.recordOutput("Shooter/TurretTargetDegrees", turretTarget);
-    Logger.recordOutput("Shooter/TurretErrorDegrees", a.in(Degrees));
-
-    boolean onTarget = Math.abs(a.in(Degrees)) < 1.0;
-    Logger.recordOutput("Shooter/TurretOnTarget", onTarget);
-    Logger.recordOutput("Shooter/FlyWheelRPM", m_bottomFlyWheel.getVelocity().in(RPM));
+    m_lastTurretError = a;
 
     return a;
   }
@@ -172,6 +199,16 @@ public class Shooter extends SubsystemBase {
 
     updateTurretPose();
     updateTargetData();
+
+    double robotHeading = RobotContainer.getInstance().getRobotPose2d().getRotation().getDegrees();
+    Logger.recordOutput("Shooter/TurretCurrentDegrees", m_turret.getAngle().in(Degrees));
+    Logger.recordOutput("Shooter/robotHeading", robotHeading);
+    Logger.recordOutput("Shooter/TurretTargetDegrees", m_turretTarget);
+    Logger.recordOutput("Shooter/TurretErrorDegrees", m_lastTurretError.in(Degrees));
+
+    boolean onTarget = Math.abs(m_lastTurretError.in(Degrees)) < 1.0;
+    Logger.recordOutput("Shooter/TurretOnTarget", onTarget);
+    Logger.recordOutput("Shooter/FlyWheelRPM", m_bottomFlyWheel.getVelocity().in(RPM));
   }
 
   private void updateTargetData() {
