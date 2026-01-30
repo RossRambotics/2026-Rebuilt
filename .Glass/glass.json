@@ -142,6 +142,11 @@
         "window": {
           "visible": true
         }
+      },
+      "/SmartDashboard/Mechanisms/Commands/BottomFlyWheel/Live Tuning": {
+        "window": {
+          "visible": true
+        }
       }
     }
   },

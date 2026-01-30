@@ -64,12 +64,12 @@ public class BottomFlyWheel extends SubsystemBase {
           .withControlMode(ControlMode.CLOSED_LOOP)
           // Feedback Constants (PID Constants)
           .withClosedLoopController(
-              15, 0, 10, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
+              0, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
           .withSimClosedLoopController(
               50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
           // Feedforward Constants
-          .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
-          .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
+          .withFeedforward(new SimpleMotorFeedforward(0, .12, 0))
+          .withSimFeedforward(new SimpleMotorFeedforward(0, .52, .34))
           // Telemetry name and verbosity level
           .withTelemetry("BottomFlyWheelMotor", TelemetryVerbosity.HIGH)
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
