@@ -60,8 +60,7 @@
             "open": true
           },
           "open": true
-        },
-        "open": true
+        }
       }
     },
     "types": {
@@ -78,6 +77,7 @@
       "/Shuffleboard/Hood/Hood.ZeroAngle": "Command",
       "/Shuffleboard/Hood/Hood/Hood Angle 0": "Command",
       "/Shuffleboard/Hood/Hood/Hood Angle 20": "Command",
+      "/Shuffleboard/Hood/Hood/Hood Angle 30": "Command",
       "/Shuffleboard/Hood/Hood/Hood Angle 40": "Command",
       "/Shuffleboard/Hood/Hood/ResetZero": "Command",
       "/Shuffleboard/Shooter/Target/Blue Hub": "Command",
@@ -123,12 +123,12 @@
           "visible": true
         }
       },
-      "/Shuffleboard/Hood/Hood/Hood Angle 0": {
+      "/Shuffleboard/Hood/Hood/Hood Angle 20": {
         "window": {
           "visible": true
         }
       },
-      "/Shuffleboard/Hood/Hood/Hood Angle 20": {
+      "/Shuffleboard/Hood/Hood/Hood Angle 30": {
         "window": {
           "visible": true
         }

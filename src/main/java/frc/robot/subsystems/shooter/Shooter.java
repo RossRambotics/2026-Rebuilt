@@ -87,6 +87,7 @@ public class Shooter extends SubsystemBase {
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 0", Degrees.of(0.0)));
 
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 20", Degrees.of(20.0)));
+    Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 30", Degrees.of(30.0)));
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 40", Degrees.of(40.0)));
     Shuffleboard.getTab("Hood").add(m_hood.getZeroHoodAngleCmd());
 
