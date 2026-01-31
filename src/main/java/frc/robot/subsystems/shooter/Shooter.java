@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -206,10 +207,47 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/robotHeading", robotHeading);
     Logger.recordOutput("Shooter/TurretTargetDegrees", m_turretTarget);
     Logger.recordOutput("Shooter/TurretErrorDegrees", m_lastTurretError.in(Degrees));
+    Logger.recordOutput(
+        "Shooter/AimLine",
+        new Translation2d[] {
+          m_turrPose3dFR.toPose2d().getTranslation(),
+          m_targetPose.getTranslation().toTranslation2d()
+        });
+
+    Pose2d futureRobotPose2d =
+        predictRobotPose(
+            RobotContainer.getInstance().getRobotPose2d(),
+            RobotContainer.getInstance().getChassisSpeeds(),
+            0.25);
+    Logger.recordOutput("Shooter/FutureRobotPose2d", futureRobotPose2d);
 
     boolean onTarget = Math.abs(m_lastTurretError.in(Degrees)) < 1.0;
     Logger.recordOutput("Shooter/TurretOnTarget", onTarget);
     Logger.recordOutput("Shooter/FlyWheelRPM", m_bottomFlyWheel.getVelocity().in(RPM));
+  }
+
+  public Pose2d predictRobotPose(Pose2d start, ChassisSpeeds speeds, double totalTime) {
+    final double dt = 0.005;
+    int steps = (int) Math.ceil(totalTime / dt);
+
+    double x = start.getX();
+    double y = start.getY();
+    double theta = start.getRotation().getRadians();
+
+    for (int i = 0; i < steps; i++) {
+      double cos = Math.cos(theta);
+      double sin = Math.sin(theta);
+
+      double fieldVx = speeds.vxMetersPerSecond * cos - speeds.vyMetersPerSecond * sin;
+
+      double fieldVy = speeds.vxMetersPerSecond * sin + speeds.vyMetersPerSecond * cos;
+
+      x += fieldVx * dt;
+      y += fieldVy * dt;
+      theta += speeds.omegaRadiansPerSecond * dt;
+    }
+
+    return new Pose2d(x, y, new Rotation2d(theta));
   }
 
   private void updateTargetData() {
@@ -237,6 +275,7 @@ public class Shooter extends SubsystemBase {
     Pose3d turretPosed3d =
         new Pose3d(turretPose2d).plus(new Transform3d(0.0, 0.0, TURRET_Z_OFFSET, new Rotation3d()));
     Logger.recordOutput("Shooter/TurretPose", turretPosed3d);
+
     m_turrPose3dFR = turretPosed3d;
   }
 
