@@ -5,7 +5,10 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -32,7 +35,7 @@ public class Shooter extends SubsystemBase {
   // TODO update the location of the turret relative to the robot
   private final double TURRET_X_OFFSET = 0.25; // meters
   private final double TURRET_Y_OFFSET = -0.25; // meters
-  private final double TURRET_Z_OFFSET = 0.25; // meters
+  private final double TURRET_Z_OFFSET = 0.55; // meters
 
   private Pose3d m_turrPose3dFR = null; // Field Relative turret pose
 
@@ -221,12 +224,41 @@ public class Shooter extends SubsystemBase {
           m_targetPose.getTranslation().toTranslation2d()
         });
 
-    Pose2d futureRobotPose2d =
-        predictRobotPose(
+    // Shooter offset relative to robot center
+    Translation2d shooterOffsetRobot = new Translation2d(TURRET_X_OFFSET, TURRET_Y_OFFSET);
+    FiringSolution solution =
+        calculateFiringSolution(
             RobotContainer.getInstance().getRobotPose2d(),
             RobotContainer.getInstance().getChassisSpeeds(),
-            0.25);
-    Logger.recordOutput("Shooter/FutureRobotPose2d", futureRobotPose2d);
+            m_targetPose.toPose2d().getTranslation(),
+            shooterOffsetRobot);
+
+    ChassisSpeeds chassisSpeeds = RobotContainer.getInstance().getChassisSpeeds();
+    Logger.recordOutput("Shooter/ChassisSpeeds.vx", chassisSpeeds.vxMetersPerSecond);
+    Logger.recordOutput("Shooter/ChassisSpeeds.vy", chassisSpeeds.vyMetersPerSecond);
+    Logger.recordOutput("Shooter/ChassisSpeeds.omega", chassisSpeeds.omegaRadiansPerSecond);
+    Logger.recordOutput("Shooter/FutureRobotPose2d", solution.futurePose);
+    double predictedDistance =
+        RobotContainer.getInstance()
+            .getRobotPose2d()
+            .getTranslation()
+            .getDistance(solution.futurePose.getTranslation());
+    Logger.recordOutput("Shooter/FutureRobotPoseDistance", predictedDistance);
+    Logger.recordOutput("Shooter/TimeOfFlight", solution.tof);
+    Logger.recordOutput(
+        "Shooter/CalculatedHoodAngleDegrees", Radians.of(solution.hoodAngleRad).in(Degrees));
+    Logger.recordOutput("Shooter/CalculatedFlyWheelRPM", solution.flywheelRPM);
+    Logger.recordOutput(
+        "Shooter/CalculatedTurretAngleDegrees", Degrees.of(solution.turretAngleRad));
+
+    Translation2d[] aimRay =
+        buildAimRay(
+            solution.futurePose,
+            solution.turretAngleRad,
+            shooterOffsetRobot,
+            solution.distanceToTarget);
+
+    Logger.recordOutput("Shooter/CalculatedAimRay", aimRay);
 
     boolean onTarget = Math.abs(m_lastTurretError.in(Degrees)) < 1.0;
     Logger.recordOutput("Shooter/TurretOnTarget", onTarget);
@@ -235,7 +267,122 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/SpindexerRPM", m_spindexer.getVelocity().in(RPM));
   }
 
-  public Pose2d predictRobotPose(Pose2d start, ChassisSpeeds speeds, double totalTime) {
+  public FiringSolution calculateFiringSolution(
+      Pose2d currentPose,
+      ChassisSpeeds chassisSpeeds,
+      Translation2d targetFieldPos,
+      Translation2d shooterOffsetRobot) {
+    // --- Initial guess for TOF ---
+    double tof = 1.0; // seconds (good initial guess)
+
+    Pose2d futurePose;
+    Translation2d shooterFieldPos;
+    double distance;
+
+    // --- Iterate once or twice ---
+    for (int i = 0; i < 2; i++) {
+      futurePose = predictPoseLinear(currentPose, chassisSpeeds, tof);
+
+      shooterFieldPos =
+          futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
+
+      distance = shooterFieldPos.getDistance(targetFieldPos);
+
+      double hoodRad = Degrees.of(m_bottomFlyWheel.calculateAngle(distance)).in(Radians);
+      double rpm = m_bottomFlyWheel.calculateRPM(distance);
+
+      double exitVelocity = rpmToExitVelocity(rpm);
+
+      double heightDiff = m_targetPose.getZ() - TURRET_Z_OFFSET;
+
+      // convert hoodRad to angle above horizontal
+      hoodRad = Math.PI / 2 - hoodRad;
+      double tofVac =
+          (exitVelocity * Math.sin(hoodRad)
+                  + Math.sqrt(
+                      Math.pow(exitVelocity * Math.sin(hoodRad), 2) + 2 * 9.81 * heightDiff))
+              / 9.81;
+
+      tof = tofVac * 1.12; // drag correction
+    }
+
+    // --- Final future pose ---
+    futurePose = predictPoseLinear(currentPose, chassisSpeeds, tof);
+
+    shooterFieldPos =
+        futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
+
+    // --- LUT lookup ---
+    distance = shooterFieldPos.getDistance(targetFieldPos);
+    double hoodAngle = Degrees.of(m_bottomFlyWheel.calculateAngle(distance)).in(Radians);
+    double rpm = m_bottomFlyWheel.calculateRPM(distance);
+
+    // --- Velocity compensation for turret ---
+    Translation2d delta = targetFieldPos.minus(shooterFieldPos);
+
+    double turretAngle =
+        Math.atan2(delta.getY(), delta.getX()) - futurePose.getRotation().getRadians();
+
+    return new FiringSolution(turretAngle, hoodAngle, rpm, futurePose, tof, distance);
+  }
+
+  public record FiringSolution(
+      double turretAngleRad,
+      double hoodAngleRad,
+      double flywheelRPM,
+      Pose2d futurePose,
+      double tof,
+      double distanceToTarget) {}
+
+  /**
+   * Computes ball exit velocity for a dual-flywheel shooter with different wheel sizes.
+   *
+   * @param rpmTop Top wheel speed (rev/min)
+   * @param rpmBottom Bottom wheel speed (rev/min)
+   * @param rTopMeters Top wheel radius (meters)
+   * @param rBottomMeters Bottom wheel radius (meters)
+   * @param efficiencyK Empirical efficiency factor (0.8–1.0)
+   * @return Ball exit velocity (meters per second)
+   */
+  private static final double EFFICIENCY_K = 0.8;
+
+  private static final double R_TOP_METERS = Inches.of(1.0).in(Meters); // 2" diameter
+  private static final double R_BOTTOM_METERS = Inches.of(1.5).in(Meters); // 3" diameter
+  private static final double RPM_RATIO = 1.0; // same speed
+
+  public static double rpmToExitVelocity(double rpmBottom) {
+    double rpmTop = rpmBottom * RPM_RATIO;
+    double omegaTop = 2.0 * Math.PI * rpmTop / 60.0;
+    double omegaBottom = 2.0 * Math.PI * rpmBottom / 60.0;
+
+    double vTop = omegaTop * R_TOP_METERS;
+    double vBottom = omegaBottom * R_BOTTOM_METERS;
+
+    return EFFICIENCY_K * (vTop + vBottom) / 2.0;
+  }
+
+  public static Pose2d predictPoseLinear(
+      Pose2d start,
+      ChassisSpeeds speeds, // robot-relative
+      double dtSeconds) {
+    double theta = start.getRotation().getRadians();
+
+    double fieldVx =
+        speeds.vxMetersPerSecond * Math.cos(theta) - speeds.vyMetersPerSecond * Math.sin(theta);
+
+    double fieldVy =
+        speeds.vxMetersPerSecond * Math.sin(theta) + speeds.vyMetersPerSecond * Math.cos(theta);
+
+    Translation2d newTranslation =
+        start.getTranslation().plus(new Translation2d(fieldVx * dtSeconds, fieldVy * dtSeconds));
+
+    Rotation2d newRotation =
+        start.getRotation().plus(new Rotation2d(speeds.omegaRadiansPerSecond * dtSeconds));
+
+    return new Pose2d(newTranslation, newRotation);
+  }
+
+  public Pose2d predictRobotPoseCurve(Pose2d start, ChassisSpeeds speeds, double totalTime) {
     final double dt = 0.005;
     int steps = (int) Math.ceil(totalTime / dt);
 
@@ -257,6 +404,31 @@ public class Shooter extends SubsystemBase {
     }
 
     return new Pose2d(x, y, new Rotation2d(theta));
+  }
+
+  public static Translation2d[] buildAimRay(
+      Pose2d futureRobotPose, // field-relative pose (meters, radians)
+      double turretAngleRad, // robot-relative turret angle (radians)
+      Translation2d shooterOffsetRobot, // robot-relative turret position (meters)
+      double distanceMeters // ray length (meters)
+      ) {
+    // Turret position in field frame
+    Translation2d turretFieldPos =
+        futureRobotPose
+            .getTranslation()
+            .plus(shooterOffsetRobot.rotateBy(futureRobotPose.getRotation()));
+
+    // Turret pointing direction in field frame
+    double turretFieldAngleRad = futureRobotPose.getRotation().getRadians() + turretAngleRad;
+
+    // Ray endpoint
+    Translation2d rayEnd =
+        turretFieldPos.plus(
+            new Translation2d(
+                distanceMeters * Math.cos(turretFieldAngleRad),
+                distanceMeters * Math.sin(turretFieldAngleRad)));
+
+    return new Translation2d[] {turretFieldPos, rayEnd};
   }
 
   private void updateTargetData() {

@@ -148,14 +148,14 @@ public class BottomFlyWheel extends SubsystemBase {
     m_interpolatedAngle = table.getDoubleTopic("CalculatedAngle").getEntry(0.0);
 
     // Populate Angle Table (Distance -> Degrees)
-    m_angleTable.put(1.0, 45.0);
-    m_angleTable.put(3.0, 35.0);
-    m_angleTable.put(10.0, 25.0);
+    m_angleTable.put(1.0, 15.0);
+    m_angleTable.put(3.0, 30.0);
+    m_angleTable.put(10.0, 45.0);
 
     // Populate RPM Table (Distance -> RPM)
-    m_rpmTable.put(1.0, 500.0);
-    m_rpmTable.put(3.0, 1000.0);
-    m_rpmTable.put(10.0, 1600.0);
+    m_rpmTable.put(1.0, 1500.0);
+    m_rpmTable.put(3.0, 2200.0);
+    m_rpmTable.put(10.0, 3000.0);
     // --- Interpolation Code END ---
   }
   /**
@@ -183,7 +183,7 @@ public class BottomFlyWheel extends SubsystemBase {
   }
 
   /** Helper function to calculate RPM from Distance using Linear Interpolation. */
-  private double calculateRPM(double distance) {
+  public double calculateRPM(double distance) {
     // 1. Check for exact match
     if (m_rpmTable.containsKey(distance)) return m_rpmTable.get(distance);
 
@@ -205,7 +205,7 @@ public class BottomFlyWheel extends SubsystemBase {
   }
 
   /** Helper function to calculate Hood Angle from Distance. */
-  private double calculateAngle(double distance) {
+  public double calculateAngle(double distance) {
     // 1. Check for exact match
     if (m_angleTable.containsKey(distance)) return m_angleTable.get(distance);
 
