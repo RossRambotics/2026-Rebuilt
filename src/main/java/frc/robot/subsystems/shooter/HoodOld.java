@@ -7,12 +7,16 @@ package frc.robot.subsystems.shooter;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -62,13 +66,14 @@ public class HoodOld extends SubsystemBase {
         .withMotionMagicJerk(RotationsPerSecondPerSecond.per(Second).of(20));
 
     Slot0Configs slot0 = cfg.Slot0;
-    slot0.kS = 0.3; // Add 0.25 V output to overcome static friction
+    slot0.kS = 0.25; // Add 0.25 V output to overcome static friction
     slot0.kV = 0.1; // A velocity target of 1 rps results in 0.12 V output
     slot0.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
-    slot0.kP = 60; // A position error of 0.2 rotations results in 12 V output
-    slot0.kI = 4.1; // No output for integrated error
+    slot0.kP = 80; // A position error of 0.2 rotations results in 12 V output
+    slot0.kI = 0; // No output for integrated error
     slot0.kD = 0.0; // A velocity error of 1 rps results in 0.5 V output
-    slot0.kG = 0.0; // No gravity feedforward
+    slot0.kG = 0.45; // No gravity feedforward
+    slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
     m_GE_PID_kS = Shuffleboard.getTab("Hood").add("Hood_kS", slot0.kS).getEntry();
     m_GE_PID_kV = Shuffleboard.getTab("Hood").add("Hood_kV", slot0.kV).getEntry();
@@ -83,6 +88,13 @@ public class HoodOld extends SubsystemBase {
     m_GE_Goal = Shuffleboard.getTab("Hood").add("Hood_Goal", 0).getEntry();
     m_GE_Timer = Shuffleboard.getTab("Hood").add("Hood_Timer", 0).getEntry();
 
+    // enable brake mode
+    cfg.MotorOutput = new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake);
+
+    CurrentLimitsConfigs statorCurrentLimit = new CurrentLimitsConfigs();
+    statorCurrentLimit.StatorCurrentLimitEnable = true;
+    statorCurrentLimit.StatorCurrentLimit = 20; // Current limit in amps
+    cfg.CurrentLimits = statorCurrentLimit;
     // setup software limits
     // SoftwareLimitSwitchConfigs swLimits = new SoftwareLimitSwitchConfigs();
     // swLimits.ForwardSoftLimitEnable = true;

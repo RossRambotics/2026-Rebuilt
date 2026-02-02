@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.Spindexer;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -40,6 +41,10 @@ public class Shooter extends SubsystemBase {
 
   private final HoodOld m_hood = new HoodOld();
   private final BottomFlyWheel m_bottomFlyWheel = new BottomFlyWheel();
+
+  private final Kicker m_kicker = new Kicker();
+
+  private final Spindexer m_spindexer = new Spindexer();
 
   private boolean m_isTurretActive = true;
 
@@ -100,6 +105,8 @@ public class Shooter extends SubsystemBase {
     Shuffleboard.getTab("BottomFlyWheel").add(this.getFlyWheelRPMCmd("Dynamic"));
     Shuffleboard.getTab("BottomFlyWheel")
         .add(this.getFlyWheelRPMCmd("Bottom Flywheel 3000 RPM", 3000.0));
+    Shuffleboard.getTab("Kicker").add(this.getKickerRPMCmd("Kicker Dynamic"));
+    Shuffleboard.getTab("Spindexer").add(this.getSpindexerRPMCmd("Spindexer Dynamic"));
   }
 
   /**
@@ -224,6 +231,8 @@ public class Shooter extends SubsystemBase {
     boolean onTarget = Math.abs(m_lastTurretError.in(Degrees)) < 1.0;
     Logger.recordOutput("Shooter/TurretOnTarget", onTarget);
     Logger.recordOutput("Shooter/FlyWheelRPM", m_bottomFlyWheel.getVelocity().in(RPM));
+    Logger.recordOutput("Shooter/KickerRPM", m_kicker.getVelocity().in(RPM));
+    Logger.recordOutput("Shooter/SpindexerRPM", m_spindexer.getVelocity().in(RPM));
   }
 
   public Pose2d predictRobotPose(Pose2d start, ChassisSpeeds speeds, double totalTime) {
@@ -320,6 +329,22 @@ public class Shooter extends SubsystemBase {
 
     Command c = m_bottomFlyWheel.setVelocity();
     c.setName("BottomFlyWheel/" + name);
+
+    return c;
+  }
+
+  public Command getKickerRPMCmd(String name) {
+
+    Command c = m_kicker.setVelocity();
+    c.setName("Kicker/" + name);
+
+    return c;
+  }
+
+  public Command getSpindexerRPMCmd(String name) {
+
+    Command c = m_spindexer.setVelocity();
+    c.setName("Spindexer/" + name);
 
     return c;
   }

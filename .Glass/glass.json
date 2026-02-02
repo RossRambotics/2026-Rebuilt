@@ -40,7 +40,8 @@
       "Shuffleboard": {
         "Hood": {
           "open": true
-        }
+        },
+        "open": true
       },
       "Tuning": {
         "BottomFlyWheel": {
@@ -80,17 +81,27 @@
       "/Shuffleboard/Hood/Hood/Hood Angle 30": "Command",
       "/Shuffleboard/Hood/Hood/Hood Angle 40": "Command",
       "/Shuffleboard/Hood/Hood/ResetZero": "Command",
+      "/Shuffleboard/Kicker/Kicker/Kicker Dynamic": "Command",
       "/Shuffleboard/Shooter/Target/Blue Hub": "Command",
       "/Shuffleboard/Shooter/Target/Red Hub": "Command",
+      "/Shuffleboard/Spindexer/Spindexer/Spindexer Dynamic": "Command",
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Auto Choices": "String Chooser",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheel/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/Up": "Command",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Kicker/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Kicker/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Kicker/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Kicker/ZeroEncoder": "Command",
       "/SmartDashboard/Mechanisms/Commands/ShooterMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/ShooterMotor/Up": "Command",
       "/SmartDashboard/Mechanisms/Commands/ShooterMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Spindexer/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Spindexer/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Spindexer/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Spindexer/ZeroEncoder": "Command",
       "/SmartDashboard/Mechanisms/Commands/Turret/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/TurretMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/TurretMotor/Up": "Command",
@@ -139,6 +150,16 @@
         }
       },
       "/Shuffleboard/Hood/Hood/ResetZero": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/Shuffleboard/Kicker/Kicker/Kicker Dynamic": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/Shuffleboard/Spindexer/Spindexer/Spindexer Dynamic": {
         "window": {
           "visible": true
         }
