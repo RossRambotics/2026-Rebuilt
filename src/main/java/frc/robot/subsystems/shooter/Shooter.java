@@ -62,6 +62,7 @@ public class Shooter extends SubsystemBase {
   private DoubleEntry m_TargetHoodAngleDegrees = null;
   private Angle m_lastHoodAngle = Degrees.of(15);
   private AngularVelocity m_lastFlyWheelRPM = RPM.of(0);
+  private FiringSolution m_lastFiringSolution = null;
 
   /** Creates a new Shooter. */
   public Shooter() {
@@ -238,6 +239,8 @@ public class Shooter extends SubsystemBase {
             m_targetPose.toPose2d().getTranslation(),
             shooterOffsetRobot);
 
+    m_lastFiringSolution = solution;
+
     ChassisSpeeds chassisSpeeds = RobotContainer.getInstance().getChassisSpeeds();
     Logger.recordOutput("Shooter/ChassisSpeeds.vx", chassisSpeeds.vxMetersPerSecond);
     Logger.recordOutput("Shooter/ChassisSpeeds.vy", chassisSpeeds.vyMetersPerSecond);
@@ -256,7 +259,7 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/CalculatedFlyWheelRPM", solution.flywheelRPM);
     m_lastFlyWheelRPM = RPM.of(solution.flywheelRPM);
     Logger.recordOutput(
-        "Shooter/CalculatedTurretAngleDegrees", Degrees.of(solution.turretAngleRad));
+        "Shooter/CalculatedTurretAngleDegrees", Radians.of(solution.turretAngleRad).in(Degrees));
 
     Translation2d[] aimRay =
         buildAimRay(
@@ -310,7 +313,7 @@ public class Shooter extends SubsystemBase {
                       Math.pow(exitVelocity * Math.sin(hoodRad), 2) + 2 * 9.81 * heightDiff))
               / 9.81;
 
-      tof = tofVac * 1.12; // drag correction
+      tof = tofVac * 1.12 * 0.6; // drag correction
     }
 
     // --- Final future pose ---
@@ -521,20 +524,72 @@ public class Shooter extends SubsystemBase {
   public void launchFuelSim() {
     Pose3d turretPoseFR = m_turrPose3dFR; // turret pose field relative
     double hoodAngleRad =
-        Math.PI / 2 - m_lastHoodAngle.in(Radians); // switch the angle to be above horizontal
-    double vel = rpmToExitVelocity(m_lastFlyWheelRPM.in(RPM));
-    double yawRad = turretPoseFR.getRotation().getZ();
-    Logger.recordOutput("Shooter/LaunchFuelYawDeg", Radians.of(yawRad).in(Degrees));
+        Math.PI / 2 - m_lastFiringSolution.hoodAngleRad; // switch the angle to be above horizontal
+    double vel = rpmToExitVelocity(m_lastFiringSolution.flywheelRPM);
+    double yawRad = m_lastFiringSolution.turretAngleRad;
+
+    // Logger.recordOutput("Shooter/LaunchFuelYawDeg", Radians.of(yawRad).in(Degrees));
 
     Translation3d initialPosition = turretPoseFR.getTranslation();
     FuelSim.getInstance().spawnFuel(initialPosition, launchVel(vel, hoodAngleRad, yawRad));
     // launchVel(vel, 0, Degrees.of(-45).in(Radians)));
   }
 
-  private Translation3d launchVel(double vel, double hoodAngleRad, double turretAngleRad) {
+  private Translation3d launchVelShooterOnly(
+      double vel, double hoodAngleRad, double turretAngleRad) {
     double vx = vel * Math.cos(hoodAngleRad) * Math.cos(turretAngleRad);
     double vy = vel * Math.cos(hoodAngleRad) * Math.sin(turretAngleRad);
     double vz = vel * Math.sin(hoodAngleRad);
+    return new Translation3d(vx, vy, vz);
+  }
+
+  /**
+   * Computes the initial field-relative velocity of a launched fuel game piece.
+   *
+   * <p>The resulting velocity includes:
+   *
+   * <ul>
+   *   <li>The velocity imparted by the shooter, based on exit speed, hood angle, and turret yaw
+   *       (all field-relative).
+   *   <li>The current translational velocity of the robot, converted to field-relative coordinates
+   *       and added to the shot.
+   * </ul>
+   *
+   * <p>Coordinate conventions:
+   *
+   * <ul>
+   *   <li>X/Y are field-relative (WPILib standard: +X forward, +Y left).
+   *   <li>Z is vertical and is affected only by the hood angle.
+   *   <li>{@code turretYawRad} is a field-relative yaw angle.
+   * </ul>
+   *
+   * <p>Robot angular velocity (omega) is intentionally ignored; only linear chassis velocity is
+   * applied to the fuel at launch.
+   *
+   * @param vel_ms Shooter exit velocity in meters per second
+   * @param hoodAngleRad Hood angle in radians, measured above horizontal
+   * @param turretYawRad Turret yaw angle in radians, field-relative
+   * @return Field-relative velocity vector of the fuel at launch
+   */
+  private Translation3d launchVel(double vel_ms, double hoodAngleRad, double turretYawRad) {
+    // Shooter imparted, field relative velocity
+    double horizontal = vel_ms * Math.cos(hoodAngleRad);
+    double vx = horizontal * Math.cos(turretYawRad);
+    double vy = horizontal * Math.sin(turretYawRad);
+    double vz = vel_ms * Math.sin(hoodAngleRad);
+
+    // Robot field velocity
+    ChassisSpeeds speeds = RobotContainer.getInstance().getChassisSpeeds();
+    double theta = RobotContainer.getInstance().getRobotPose2d().getRotation().getRadians();
+    double robotVxField =
+        speeds.vxMetersPerSecond * Math.cos(theta) - speeds.vyMetersPerSecond * Math.sin(theta);
+    double robotVyField =
+        speeds.vxMetersPerSecond * Math.sin(theta) + speeds.vyMetersPerSecond * Math.cos(theta);
+
+    // Add robot motion
+    vx += robotVxField;
+    vy += robotVyField;
+
     return new Translation3d(vx, vy, vz);
   }
 }

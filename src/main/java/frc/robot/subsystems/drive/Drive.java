@@ -294,6 +294,26 @@ public class Drive extends SubsystemBase {
     return kinematics.toChassisSpeeds(getModuleStates());
   }
 
+  /**
+   * Returns the measured chassis speeds expressed in the field frame.
+   *
+   * <p>Robot-frame speeds (vx forward, vy left) are rotated by the robot's current heading to
+   * produce field-frame velocities.
+   *
+   * @return field-relative chassis speeds
+   */
+  public ChassisSpeeds getFieldSpeeds() {
+    ChassisSpeeds robotSpeeds = getChassisSpeeds();
+    Rotation2d r = getRotation();
+
+    double fieldVx =
+        robotSpeeds.vxMetersPerSecond * r.getCos() - robotSpeeds.vyMetersPerSecond * r.getSin();
+    double fieldVy =
+        robotSpeeds.vxMetersPerSecond * r.getSin() + robotSpeeds.vyMetersPerSecond * r.getCos();
+
+    return new ChassisSpeeds(fieldVx, fieldVy, robotSpeeds.omegaRadiansPerSecond);
+  }
+
   /** Returns the position of each module in radians. */
   public double[] getWheelRadiusCharacterizationPositions() {
     double[] values = new double[4];
