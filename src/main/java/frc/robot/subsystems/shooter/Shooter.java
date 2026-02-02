@@ -30,8 +30,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
-import frc.robot.util.FuelSim;
 import frc.robot.subsystems.Spindexer;
+import frc.robot.util.FuelSim;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
