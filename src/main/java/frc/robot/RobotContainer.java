@@ -7,14 +7,18 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -31,6 +35,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.util.FuelSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -52,11 +57,13 @@ public class RobotContainer {
 
   private final Kicker m_kicker = new Kicker();
 
+  private Shooter m_shooter = null;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     instance = this;
 
-    Shooter m_shooter = new Shooter();
+    m_shooter = new Shooter();
 
     switch (Constants.currentMode) {
       case REAL:
@@ -145,6 +152,11 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+
+    // Configure FuelSim for sim
+    if (Constants.currentMode == Constants.Mode.SIM) {
+      configureFuelSim();
+    }
   }
 
   /**
@@ -164,15 +176,18 @@ public class RobotContainer {
             // () -> -controller.getRightX()
             // () -> -controller.getRawAxis(2)));
             () -> -controller.getRawAxis(4)));
-    // Lock to 0° when A button is held
-    controller
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> Rotation2d.kZero));
+
+    // // Lock to 0° when A button is held
+    // controller
+    //     .a()
+    //     .whileTrue(
+    //         DriveCommands.joystickDriveAtAngle(
+    //             drive,
+    //             () -> -controller.getLeftY(),
+    //             () -> -controller.getLeftX(),
+    //             () -> Rotation2d.kZero));
+
+    controller.a().whileTrue(Commands.runOnce(() -> m_shooter.launchFuelSim()));
 
     // Robot centric drive when B button is held
     controller
@@ -222,5 +237,72 @@ public class RobotContainer {
 
   public static RobotContainer getInstance() {
     return instance;
+  }
+
+  /** Immutable robot dimensions for FuelSim / simulation */
+  public record Dimensions(
+      Distance fullLength, // meters, front-to-back
+      Distance fullWidth, // meters, side-to-side
+      Distance bumperHeight, // meters
+      Distance intakeDepth // meters, how far the intake extends past frame
+      ) {
+
+    /** Convenience factory for your 26.75 in square robot with 1 intake at back */
+    public static Dimensions createRobot() {
+      return new Dimensions(
+          Inches.of(26.75), // fullLength
+          Inches.of(26.75), // fullWidth
+          Inches.of(10.0), // bumperHeight
+          Inches.of(7.0) // intakeDepth
+          );
+    }
+  }
+
+  private void configureFuelSim() {
+    FuelSim instance = FuelSim.getInstance();
+    Dimensions dimensions = Dimensions.createRobot();
+
+    // Start with no fuel
+    instance.clearFuel();
+
+    // Register the robot with FuelSim
+    instance.registerRobot(
+        dimensions.fullWidth.in(Meters),
+        dimensions.fullLength.in(Meters),
+        dimensions.bumperHeight.in(Meters),
+        drive::getPose,
+        drive::getChassisSpeeds);
+
+    // Register a single back intake
+    instance.registerIntake(
+        -dimensions.fullLength.div(2).in(Meters), // xMin (rear of robot)
+        dimensions.fullLength.div(2).in(Meters), // xMax (front of robot)
+        -dimensions.fullWidth.div(2).in(Meters), // yMin (back edge)
+        -dimensions.fullWidth.div(2).plus(Inches.of(7)).in(Meters), // yMax (intake depth)
+        () -> true, // only one intake check
+        () -> {}) // callback when fuel is collected
+    ;
+
+    // Start the simulation
+    instance.start();
+
+    // Dashboard reset button
+    SmartDashboard.putData(
+        Commands.runOnce(
+                () -> {
+                  FuelSim.getInstance().clearFuel();
+                  FuelSim.getInstance().spawnStartingFuel();
+                })
+            .withName("Reset Fuel")
+            .ignoringDisable(true));
+
+    // Dashboard clear fuel button
+    SmartDashboard.putData(
+        Commands.runOnce(
+                () -> {
+                  FuelSim.getInstance().clearFuel();
+                })
+            .withName("Clear Fuel")
+            .ignoringDisable(true));
   }
 }

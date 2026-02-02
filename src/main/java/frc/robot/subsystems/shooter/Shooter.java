@@ -18,16 +18,19 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
+import frc.robot.util.FuelSim;
 import frc.robot.subsystems.Spindexer;
 import org.littletonrobotics.junction.Logger;
 
@@ -57,6 +60,8 @@ public class Shooter extends SubsystemBase {
   private Angle m_turretTarget = Degrees.of(0);
   private Angle m_lastTurretError = Degrees.of(0);
   private DoubleEntry m_TargetHoodAngleDegrees = null;
+  private Angle m_lastHoodAngle = Degrees.of(15);
+  private AngularVelocity m_lastFlyWheelRPM = RPM.of(0);
 
   /** Creates a new Shooter. */
   public Shooter() {
@@ -247,7 +252,9 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/TimeOfFlight", solution.tof);
     Logger.recordOutput(
         "Shooter/CalculatedHoodAngleDegrees", Radians.of(solution.hoodAngleRad).in(Degrees));
+    m_lastHoodAngle = Radians.of(solution.hoodAngleRad);
     Logger.recordOutput("Shooter/CalculatedFlyWheelRPM", solution.flywheelRPM);
+    m_lastFlyWheelRPM = RPM.of(solution.flywheelRPM);
     Logger.recordOutput(
         "Shooter/CalculatedTurretAngleDegrees", Degrees.of(solution.turretAngleRad));
 
@@ -334,17 +341,7 @@ public class Shooter extends SubsystemBase {
       double tof,
       double distanceToTarget) {}
 
-  /**
-   * Computes ball exit velocity for a dual-flywheel shooter with different wheel sizes.
-   *
-   * @param rpmTop Top wheel speed (rev/min)
-   * @param rpmBottom Bottom wheel speed (rev/min)
-   * @param rTopMeters Top wheel radius (meters)
-   * @param rBottomMeters Bottom wheel radius (meters)
-   * @param efficiencyK Empirical efficiency factor (0.8–1.0)
-   * @return Ball exit velocity (meters per second)
-   */
-  private static final double EFFICIENCY_K = 0.8;
+  private static final double EFFICIENCY_K = 0.95; // efficiency factor
 
   private static final double R_TOP_METERS = Inches.of(1.0).in(Meters); // 2" diameter
   private static final double R_BOTTOM_METERS = Inches.of(1.5).in(Meters); // 3" diameter
@@ -519,5 +516,25 @@ public class Shooter extends SubsystemBase {
     c.setName("Spindexer/" + name);
 
     return c;
+  }
+
+  public void launchFuelSim() {
+    Pose3d turretPoseFR = m_turrPose3dFR; // turret pose field relative
+    double hoodAngleRad =
+        Math.PI / 2 - m_lastHoodAngle.in(Radians); // switch the angle to be above horizontal
+    double vel = rpmToExitVelocity(m_lastFlyWheelRPM.in(RPM));
+    double yawRad = turretPoseFR.getRotation().getZ();
+    Logger.recordOutput("Shooter/LaunchFuelYawDeg", Radians.of(yawRad).in(Degrees));
+
+    Translation3d initialPosition = turretPoseFR.getTranslation();
+    FuelSim.getInstance().spawnFuel(initialPosition, launchVel(vel, hoodAngleRad, yawRad));
+    // launchVel(vel, 0, Degrees.of(-45).in(Radians)));
+  }
+
+  private Translation3d launchVel(double vel, double hoodAngleRad, double turretAngleRad) {
+    double vx = vel * Math.cos(hoodAngleRad) * Math.cos(turretAngleRad);
+    double vy = vel * Math.cos(hoodAngleRad) * Math.sin(turretAngleRad);
+    double vz = vel * Math.sin(hoodAngleRad);
+    return new Translation3d(vx, vy, vz);
   }
 }
