@@ -271,7 +271,7 @@ public class RobotContainer {
         dimensions.fullLength.in(Meters),
         dimensions.bumperHeight.in(Meters),
         drive::getPose,
-        drive::getChassisSpeeds);
+        drive::getFieldSpeeds);
 
     // Register a single back intake
     instance.registerIntake(
