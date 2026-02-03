@@ -526,9 +526,10 @@ public class Shooter extends SubsystemBase {
     double hoodAngleRad =
         Math.PI / 2 - m_lastFiringSolution.hoodAngleRad; // switch the angle to be above horizontal
     double vel = rpmToExitVelocity(m_lastFiringSolution.flywheelRPM);
-    double yawRad = m_lastFiringSolution.turretAngleRad;
+    double yawRad = turretPoseFR.getRotation().getZ();
+    // double yawRad = m_lastFiringSolution.turretAngleRad;
 
-    // Logger.recordOutput("Shooter/LaunchFuelYawDeg", Radians.of(yawRad).in(Degrees));
+    Logger.recordOutput("Shooter/LaunchFuelYawDeg", Radians.of(yawRad).in(Degrees));
 
     Translation3d initialPosition = turretPoseFR.getTranslation();
     FuelSim.getInstance().spawnFuel(initialPosition, launchVel(vel, hoodAngleRad, yawRad));
