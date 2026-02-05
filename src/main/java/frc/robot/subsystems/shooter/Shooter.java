@@ -84,14 +84,12 @@ public class Shooter extends SubsystemBase {
     //           return 0.0;
     //         }));
 
-    m_turret.setDefaultCommand(
-        m_turret.setAngle(
-            () -> {
-              if (m_isTurretActive) {
-                return getTurretTargetAngle();
-              }
-              return Degrees.of(0);
-            }));
+    // Set default command to aim turret at target (normal targeting)
+    m_turret.setDefaultCommand(getNormalTargetingCommand());
+
+    // Add Shuffleboard commands to switch between targeting modes
+    Shuffleboard.getTab("Shooter").add(getEnableNormalTargetingModeCmd());
+    Shuffleboard.getTab("Shooter").add(getEnablePredictiveTargetingModeCmd());
 
     // Add Shuffleboard commands for targeting
     Shuffleboard.getTab("Shooter")
@@ -142,6 +140,21 @@ public class Shooter extends SubsystemBase {
 
     // Angle from robot's heading to target
     return angleToTarget.minus(robotHeading);
+  }
+
+  private Angle getTurrentTargetAnglePredicted() {
+    if (m_lastFiringSolution == null) {
+      return getTurretTargetAngle();
+    }
+
+    Angle a = Radians.of(m_lastFiringSolution.turretAngleRad);
+    a =
+        Degrees.of(
+            MathUtil.clamp(a.in(Degrees), Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX));
+
+    // TODO need to add a flag to if clamped, so that we known there is no turret based solution
+
+    return a;
   }
 
   private Angle getTurretTargetAngle() {
@@ -200,6 +213,54 @@ public class Shooter extends SubsystemBase {
     m_lastTurretError = a;
 
     return a;
+  }
+
+  /**
+   * Command factory: returns a command that aims the turret using the current location (no
+   * prediction).
+   */
+  public Command getNormalTargetingCommand() {
+    return m_turret.setAngle(
+        () -> {
+          if (m_isTurretActive) {
+            return getTurretTargetAngle();
+          }
+          return Degrees.of(0);
+        });
+  }
+
+  /**
+   * Command factory: returns a command that aims the turret using the predictive firing solution.
+   */
+  public Command getPredictiveTargetingCommand() {
+    return m_turret.setAngle(
+        () -> {
+          if (m_isTurretActive) {
+            return getTurrentTargetAnglePredicted();
+          }
+          return Degrees.of(0);
+        });
+  }
+
+  /** Returns a Shuffleboard/instant command that sets the turret default to normal targeting. */
+  public Command getEnableNormalTargetingModeCmd() {
+    Command c =
+        Commands.runOnce(() -> m_turret.setDefaultCommand(getNormalTargetingCommand()), m_turret)
+            .ignoringDisable(true);
+    c.setName("NormalTargeting");
+    return c;
+  }
+
+  /**
+   * Returns a Shuffleboard/instant command that sets the turret default to predictive targeting.
+   */
+  public Command getEnablePredictiveTargetingModeCmd() {
+    Command c =
+        Commands.runOnce(
+                () -> m_turret.setDefaultCommand(getPredictiveTargetingCommand()), m_turret)
+            .ignoringDisable(true);
+    c.setName("PredictiveTargeting");
+    return c;
   }
 
   /**

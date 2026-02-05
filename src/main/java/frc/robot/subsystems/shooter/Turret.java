@@ -40,7 +40,7 @@ public class Turret extends SubsystemBase {
           .withClosedLoopController(
               4, 0, 0, DegreesPerSecond.of(360), DegreesPerSecondPerSecond.of(900))
           .withSimClosedLoopController(
-              50, 0, 0, DegreesPerSecond.of(360), DegreesPerSecondPerSecond.of(900))
+              25, 0, 0, DegreesPerSecond.of(360), DegreesPerSecondPerSecond.of(900))
           // Configure Motor and Mechanism properties
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
           .withIdleMode(MotorMode.BRAKE)
