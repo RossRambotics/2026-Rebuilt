@@ -63,7 +63,8 @@ public class Shooter extends SubsystemBase {
   // Last calculated turret values / telemetry
   private Angle m_turretTarget = Degrees.of(0);
   private Angle m_lastTurretError = Degrees.of(0);
-  private DoubleEntry m_TargetHoodAngleDegrees = null; // Shuffleboard entry
+  // Shuffleboard entry: target hood angle in degrees
+  private DoubleEntry m_targetHoodAngleDegEntry = null; // Shuffleboard entry (Deg)
   // Last hood angle and flywheel RPM are tracked in telemetry via Logger; remove redundant fields
   private FiringSolution m_lastFiringSolution = null;
 
@@ -71,8 +72,8 @@ public class Shooter extends SubsystemBase {
   public Shooter() {
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable table = inst.getTable("Shooter");
-    m_TargetHoodAngleDegrees = table.getDoubleTopic("TargetHoodAngleDegrees").getEntry(0.0);
-    m_TargetHoodAngleDegrees.set(Hood.HOOD_DEGREES_MIN);
+    m_targetHoodAngleDegEntry = table.getDoubleTopic("TargetHoodAngleDeg").getEntry(0.0);
+    m_targetHoodAngleDegEntry.set(Hood.HOOD_DEGREES_MIN);
 
     // Set default command to aim turret at target (normal targeting)
     m_turret.setDefaultCommand(getNormalTargetingCommand());
@@ -196,14 +197,14 @@ public class Shooter extends SubsystemBase {
     Rotation2d angleToTarget = getAngleToTarget(turretPose, m_targetPose.toPose2d());
 
     // clamp the turret target to the rotation available for the turret
-    double turretTarget = angleToTarget.getDegrees();
-    turretTarget =
-        MathUtil.clamp(turretTarget, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX);
+    double turretTargetDeg = angleToTarget.getDegrees();
+    turretTargetDeg =
+        MathUtil.clamp(turretTargetDeg, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX);
 
-    m_turretTarget = Degrees.of(turretTarget);
+    m_turretTarget = Degrees.of(turretTargetDeg);
 
-    double turretHeading = m_turret.getAngle().in(Degrees);
-    m_lastTurretError = Degrees.of(turretTarget - turretHeading);
+    double turretHeadingDeg = m_turret.getAngle().in(Degrees);
+    m_lastTurretError = Degrees.of(turretTargetDeg - turretHeadingDeg);
 
     return m_turretTarget;
   }
@@ -301,57 +302,59 @@ public class Shooter extends SubsystemBase {
       Translation2d targetFieldPos,
       Translation2d shooterOffsetRobot) {
     // --- Initial guess for TOF ---
-    double tof = 1.0; // seconds (good initial guess)
+    double tofSec = 1.0; // seconds (good initial guess)
 
     Pose2d futurePose;
     Translation2d shooterFieldPos;
-    double distance;
+    double distanceMeters;
 
     // --- Iterate once or twice ---
     for (int i = 0; i < 2; i++) {
-      futurePose = predictPoseLinear(currentPose, chassisSpeeds, tof);
+      futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
 
       shooterFieldPos =
           futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
 
-      distance = shooterFieldPos.getDistance(targetFieldPos);
+      distanceMeters = shooterFieldPos.getDistance(targetFieldPos);
 
-      double hoodRad = Degrees.of(m_bottomFlyWheel.calculateAngle(distance)).in(Radians);
-      double rpm = m_bottomFlyWheel.calculateRPM(distance);
+      double hoodRad = Degrees.of(m_bottomFlyWheel.calculateAngle(distanceMeters)).in(Radians);
+      double flywheelRPM = m_bottomFlyWheel.calculateRPM(distanceMeters);
 
-      double exitVelocity = rpmToExitVelocity(rpm);
+      double exitVelocityMps = rpmToExitVelocity(flywheelRPM);
 
-      double heightDiff = m_targetPose.getZ() - TURRET_Z_OFFSET;
+      double heightDiffMeters = m_targetPose.getZ() - TURRET_Z_OFFSET;
 
       // convert hoodRad to angle above horizontal
       hoodRad = Math.PI / 2 - hoodRad;
-      double tofVac =
-          (exitVelocity * Math.sin(hoodRad)
+      double tofVacSec =
+          (exitVelocityMps * Math.sin(hoodRad)
                   + Math.sqrt(
-                      Math.pow(exitVelocity * Math.sin(hoodRad), 2) + 2 * 9.81 * heightDiff))
+                      Math.pow(exitVelocityMps * Math.sin(hoodRad), 2)
+                          + 2 * 9.81 * heightDiffMeters))
               / 9.81;
 
-      tof = tofVac * 1.12 * 0.6; // drag correction
+      tofSec = tofVacSec * 1.12 * 0.6; // drag correction
     }
 
     // --- Final future pose ---
-    futurePose = predictPoseLinear(currentPose, chassisSpeeds, tof);
+    futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
 
     shooterFieldPos =
         futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
 
     // --- LUT lookup ---
-    distance = shooterFieldPos.getDistance(targetFieldPos);
-    double hoodAngle = Degrees.of(m_bottomFlyWheel.calculateAngle(distance)).in(Radians);
-    double rpm = m_bottomFlyWheel.calculateRPM(distance);
+    distanceMeters = shooterFieldPos.getDistance(targetFieldPos);
+    double hoodAngleRad = Degrees.of(m_bottomFlyWheel.calculateAngle(distanceMeters)).in(Radians);
+    double flywheelRPM = m_bottomFlyWheel.calculateRPM(distanceMeters);
 
     // --- Velocity compensation for turret ---
     Translation2d delta = targetFieldPos.minus(shooterFieldPos);
 
-    double turretAngle =
+    double turretAngleRad =
         Math.atan2(delta.getY(), delta.getX()) - futurePose.getRotation().getRadians();
 
-    return new FiringSolution(turretAngle, hoodAngle, rpm, futurePose, tof, distance);
+    return new FiringSolution(
+        turretAngleRad, hoodAngleRad, flywheelRPM, futurePose, tofSec, distanceMeters);
   }
 
   public record FiringSolution(
@@ -359,8 +362,8 @@ public class Shooter extends SubsystemBase {
       double hoodAngleRad,
       double flywheelRPM,
       Pose2d futurePose,
-      double tof,
-      double distanceToTarget) {}
+      double tofSec,
+      double distanceToTargetMeters) {}
 
   private static final double EFFICIENCY_K = 0.95; // efficiency factor
 
@@ -485,49 +488,51 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput("Shooter/TurretPose", m_turrPose3dFR);
     }
 
-    double robotHeading = RobotContainer.getInstance().getRobotPose2d().getRotation().getDegrees();
-    Logger.recordOutput("Shooter/robotHeading", robotHeading);
+    double robotHeadingDeg =
+        RobotContainer.getInstance().getRobotPose2d().getRotation().getDegrees();
+    Logger.recordOutput("Shooter/robotHeadingFieldDeg", robotHeadingDeg);
 
-    Logger.recordOutput("Shooter/TurretCurrentDegrees", m_turret.getAngle().in(Degrees));
-    Logger.recordOutput("Shooter/TurretTargetDegrees", m_turretTarget);
-    Logger.recordOutput("Shooter/TurretErrorDegrees", m_lastTurretError.in(Degrees));
+    Logger.recordOutput("Shooter/TurretCurrentDegRobot", m_turret.getAngle().in(Degrees));
+    Logger.recordOutput("Shooter/TurretTargetDegRobot", m_turretTarget.in(Degrees));
+    Logger.recordOutput("Shooter/TurretErrorDeg", m_lastTurretError.in(Degrees));
 
     // Firing solution telemetry
     if (m_lastFiringSolution != null) {
       FiringSolution solution = m_lastFiringSolution;
       Logger.recordOutput("Shooter/FutureRobotPose2d", solution.futurePose);
-      double predictedDistance =
+      double predictedDistanceMeters =
           RobotContainer.getInstance()
               .getRobotPose2d()
               .getTranslation()
               .getDistance(solution.futurePose.getTranslation());
-      Logger.recordOutput("Shooter/FutureRobotPoseDistance", predictedDistance);
-      Logger.recordOutput("Shooter/TimeOfFlight", solution.tof);
+      Logger.recordOutput("Shooter/FutureRobotPoseDistanceMeters", predictedDistanceMeters);
+      Logger.recordOutput("Shooter/TimeOfFlightSec", solution.tofSec);
       Logger.recordOutput(
-          "Shooter/CalculatedHoodAngleDegrees", Radians.of(solution.hoodAngleRad).in(Degrees));
+          "Shooter/CalculatedHoodAngleDeg", Radians.of(solution.hoodAngleRad).in(Degrees));
       Logger.recordOutput("Shooter/CalculatedFlyWheelRPM", solution.flywheelRPM);
       Logger.recordOutput(
-          "Shooter/CalculatedTurretAngleDegrees", Radians.of(solution.turretAngleRad).in(Degrees));
+          "Shooter/CalculatedTurretAngleDeg", Radians.of(solution.turretAngleRad).in(Degrees));
 
       Translation2d[] aimRay =
           buildAimRay(
               solution.futurePose,
               solution.turretAngleRad,
               new Translation2d(TURRET_X_OFFSET, TURRET_Y_OFFSET),
-              solution.distanceToTarget);
+              solution.distanceToTargetMeters);
       Logger.recordOutput("Shooter/CalculatedAimRay", aimRay);
     }
 
     // Chassis speeds and sensors
     ChassisSpeeds chassisSpeeds = RobotContainer.getInstance().getChassisSpeeds();
-    Logger.recordOutput("Shooter/ChassisSpeeds.vx", chassisSpeeds.vxMetersPerSecond);
-    Logger.recordOutput("Shooter/ChassisSpeeds.vy", chassisSpeeds.vyMetersPerSecond);
-    Logger.recordOutput("Shooter/ChassisSpeeds.omega", chassisSpeeds.omegaRadiansPerSecond);
+    Logger.recordOutput("Shooter/ChassisSpeeds.vxMps", chassisSpeeds.vxMetersPerSecond);
+    Logger.recordOutput("Shooter/ChassisSpeeds.vyMps", chassisSpeeds.vyMetersPerSecond);
+    Logger.recordOutput(
+        "Shooter/ChassisSpeeds.omegaRadPerSec", chassisSpeeds.omegaRadiansPerSecond);
 
     // On-target and motor readings
     boolean onTarget = Math.abs(m_lastTurretError.in(Degrees)) < 1.0;
     Logger.recordOutput("Shooter/TurretOnTarget", onTarget);
-    Logger.recordOutput("Shooter/FlyWheelRPM", m_bottomFlyWheel.getVelocity().in(RPM));
+    Logger.recordOutput("Shooter/BottomFlyWheelRPM", m_bottomFlyWheel.getVelocity().in(RPM));
     Logger.recordOutput("Shooter/KickerRPM", m_kicker.getVelocity().in(RPM));
     Logger.recordOutput("Shooter/SpindexerRPM", m_spindexer.getVelocity().in(RPM));
   }
@@ -596,7 +601,7 @@ public class Shooter extends SubsystemBase {
     double yawRad = turretPoseFR.getRotation().getZ();
     // double yawRad = m_lastFiringSolution.turretAngleRad;
 
-    Logger.recordOutput("Shooter/LaunchFuelYawDeg", Radians.of(yawRad).in(Degrees));
+    Logger.recordOutput("Shooter/LaunchFuelYawFieldDeg", Radians.of(yawRad).in(Degrees));
 
     Translation3d initialPosition = turretPoseFR.getTranslation();
     FuelSim.getInstance().spawnFuel(initialPosition, launchVel(vel, hoodAngleRad, yawRad));
