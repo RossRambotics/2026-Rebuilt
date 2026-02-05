@@ -34,11 +34,13 @@ import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   // TODO update the location of the turret relative to the robot
-  private final double TURRET_X_OFFSET = 0.25; // meters
-  private final double TURRET_Y_OFFSET = -0.25; // meters
-  private final double TURRET_Z_OFFSET = 0.55; // meters
+  // Turret offsets from robot center (meters)
+  private final double TURRET_X_OFFSET_M = 0.25; // meters
+  private final double TURRET_Y_OFFSET_M = -0.25; // meters
+  private final double TURRET_Z_OFFSET_M = 0.55; // meters
 
-  private Pose3d m_turrPose3dFR = null; // Field Relative turret pose
+  // Turret pose in field-relative coordinates (Pose3d)
+  private Pose3d m_turretPoseField3d = null;
 
   // Turret subsystem (controls yaw of the shooter)
   private final Turret m_turret = new Turret();
@@ -58,11 +60,12 @@ public class Shooter extends SubsystemBase {
   private String m_targetName = "Blue Hub";
 
   // Current target pose (field-relative)
-  private Pose3d m_targetPose = new Pose3d(4.5, 4.1, 1.83, new Rotation3d());
+  // Target pose in field-relative coordinates (Pose3d)
+  private Pose3d m_targetPoseField3d = new Pose3d(4.5, 4.1, 1.83, new Rotation3d());
 
   // Last calculated turret values / telemetry
-  private Angle m_turretTarget = Degrees.of(0);
-  private Angle m_lastTurretError = Degrees.of(0);
+  private Angle m_turretTargetRobotAngle = Degrees.of(0);
+  private Angle m_lastTurretErrorRobotAngle = Degrees.of(0);
   // Shuffleboard entry: target hood angle in degrees
   private DoubleEntry m_targetHoodAngleDegEntry = null; // Shuffleboard entry (Deg)
   // Last hood angle and flywheel RPM are tracked in telemetry via Logger; remove redundant fields
@@ -151,7 +154,7 @@ public class Shooter extends SubsystemBase {
    * @param targetPose The target pose in field-relative coordinates.
    */
   public void setTargetPose(String name, Pose3d targetPose) {
-    m_targetPose = targetPose;
+    m_targetPoseField3d = targetPose;
     setTargetName(name);
   }
 
@@ -194,19 +197,19 @@ public class Shooter extends SubsystemBase {
     Pose2d temp = getTurretPose3dFieldRelative().toPose2d();
     Pose2d turretPose = new Pose2d(temp.getX(), temp.getY(), robotPose.getRotation());
 
-    Rotation2d angleToTarget = getAngleToTarget(turretPose, m_targetPose.toPose2d());
+  Rotation2d angleToTarget = getAngleToTarget(turretPose, m_targetPoseField3d.toPose2d());
 
     // clamp the turret target to the rotation available for the turret
     double turretTargetDeg = angleToTarget.getDegrees();
     turretTargetDeg =
         MathUtil.clamp(turretTargetDeg, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX);
 
-    m_turretTarget = Degrees.of(turretTargetDeg);
+    m_turretTargetRobotAngle = Degrees.of(turretTargetDeg);
 
     double turretHeadingDeg = m_turret.getAngle().in(Degrees);
-    m_lastTurretError = Degrees.of(turretTargetDeg - turretHeadingDeg);
+    m_lastTurretErrorRobotAngle = Degrees.of(turretTargetDeg - turretHeadingDeg);
 
-    return m_turretTarget;
+    return m_turretTargetRobotAngle;
   }
 
   /**
@@ -263,7 +266,7 @@ public class Shooter extends SubsystemBase {
    * @return Pose3d of the turret in field-relative coordinates
    */
   public Pose3d getTurretPose3dFieldRelative() {
-    return m_turrPose3dFR;
+  return m_turretPoseField3d;
   }
 
   @Override
@@ -284,12 +287,12 @@ public class Shooter extends SubsystemBase {
    */
   private void updateFiringSolution() {
     // Shooter offset relative to robot center
-    Translation2d shooterOffsetRobot = new Translation2d(TURRET_X_OFFSET, TURRET_Y_OFFSET);
+  Translation2d shooterOffsetRobot = new Translation2d(TURRET_X_OFFSET_M, TURRET_Y_OFFSET_M);
     FiringSolution solution =
         calculateFiringSolution(
             RobotContainer.getInstance().getRobotPose2d(),
             RobotContainer.getInstance().getChassisSpeeds(),
-            m_targetPose.toPose2d().getTranslation(),
+            m_targetPoseField3d.toPose2d().getTranslation(),
             shooterOffsetRobot);
 
     // store computed solution for consumers; telemetry will be published in updateTelemetry()
@@ -322,7 +325,7 @@ public class Shooter extends SubsystemBase {
 
       double exitVelocityMps = rpmToExitVelocity(flywheelRPM);
 
-      double heightDiffMeters = m_targetPose.getZ() - TURRET_Z_OFFSET;
+  double heightDiffMeters = m_targetPoseField3d.getZ() - TURRET_Z_OFFSET_M;
 
       // convert hoodRad to angle above horizontal
       hoodRad = Math.PI / 2 - hoodRad;
@@ -462,8 +465,8 @@ public class Shooter extends SubsystemBase {
     Pose2d robotPose2d = RobotContainer.getInstance().getRobotPose2d();
     Pose2d turretPose2d =
         new Pose2d(
-            robotPose2d.getTranslation().getX() + TURRET_X_OFFSET,
-            robotPose2d.getTranslation().getY() + TURRET_Y_OFFSET,
+            robotPose2d.getTranslation().getX() + TURRET_X_OFFSET_M,
+            robotPose2d.getTranslation().getY() + TURRET_Y_OFFSET_M,
             Rotation2d.fromDegrees(m_turret.getAngle().in(Degrees)));
     turretPose2d =
         turretPose2d.rotateAround(
@@ -471,9 +474,9 @@ public class Shooter extends SubsystemBase {
                 robotPose2d.getTranslation().getX(), robotPose2d.getTranslation().getY()),
             robotPose2d.getRotation()); // turret offset
     Pose3d turretPosed3d =
-        new Pose3d(turretPose2d).plus(new Transform3d(0.0, 0.0, TURRET_Z_OFFSET, new Rotation3d()));
+  new Pose3d(turretPose2d).plus(new Transform3d(0.0, 0.0, TURRET_Z_OFFSET_M, new Rotation3d()));
 
-    m_turrPose3dFR = turretPosed3d;
+  m_turretPoseField3d = turretPosed3d;
   }
 
   private void setTargetName(String name) {
@@ -484,8 +487,8 @@ public class Shooter extends SubsystemBase {
   /** Centralized telemetry publish. Called once at the end of periodic(). */
   private void updateTelemetry() {
     // Basic turret and robot heading
-    if (m_turrPose3dFR != null) {
-      Logger.recordOutput("Shooter/TurretPose", m_turrPose3dFR);
+    if (m_turretPoseField3d != null) {
+      Logger.recordOutput("Shooter/TurretPoseField3d", m_turretPoseField3d);
     }
 
     double robotHeadingDeg =
@@ -493,8 +496,8 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/robotHeadingFieldDeg", robotHeadingDeg);
 
     Logger.recordOutput("Shooter/TurretCurrentDegRobot", m_turret.getAngle().in(Degrees));
-    Logger.recordOutput("Shooter/TurretTargetDegRobot", m_turretTarget.in(Degrees));
-    Logger.recordOutput("Shooter/TurretErrorDeg", m_lastTurretError.in(Degrees));
+    Logger.recordOutput("Shooter/TurretTargetDegRobot", m_turretTargetRobotAngle.in(Degrees));
+    Logger.recordOutput("Shooter/TurretErrorDeg", m_lastTurretErrorRobotAngle.in(Degrees));
 
     // Firing solution telemetry
     if (m_lastFiringSolution != null) {
@@ -517,7 +520,7 @@ public class Shooter extends SubsystemBase {
           buildAimRay(
               solution.futurePose,
               solution.turretAngleRad,
-              new Translation2d(TURRET_X_OFFSET, TURRET_Y_OFFSET),
+              new Translation2d(TURRET_X_OFFSET_M, TURRET_Y_OFFSET_M),
               solution.distanceToTargetMeters);
       Logger.recordOutput("Shooter/CalculatedAimRay", aimRay);
     }
@@ -530,7 +533,7 @@ public class Shooter extends SubsystemBase {
         "Shooter/ChassisSpeeds.omegaRadPerSec", chassisSpeeds.omegaRadiansPerSecond);
 
     // On-target and motor readings
-    boolean onTarget = Math.abs(m_lastTurretError.in(Degrees)) < 1.0;
+    boolean onTarget = Math.abs(m_lastTurretErrorRobotAngle.in(Degrees)) < 1.0;
     Logger.recordOutput("Shooter/TurretOnTarget", onTarget);
     Logger.recordOutput("Shooter/BottomFlyWheelRPM", m_bottomFlyWheel.getVelocity().in(RPM));
     Logger.recordOutput("Shooter/KickerRPM", m_kicker.getVelocity().in(RPM));
@@ -594,7 +597,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void launchFuelSim() {
-    Pose3d turretPoseFR = m_turrPose3dFR; // turret pose field relative
+  Pose3d turretPoseFR = m_turretPoseField3d; // turret pose field relative
     double hoodAngleRad =
         Math.PI / 2 - m_lastFiringSolution.hoodAngleRad; // switch the angle to be above horizontal
     double vel = rpmToExitVelocity(m_lastFiringSolution.flywheelRPM);
