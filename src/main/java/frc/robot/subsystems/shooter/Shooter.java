@@ -120,14 +120,15 @@ public class Shooter extends SubsystemBase {
     //         this.getSetTargetCmd(
     //             "Blue Neutral Target Right", new Pose3d(0.85, 6.5, 0.0, new Rotation3d())));
 
-    // Shuffleboard.getTab("Shooter")
-    //     .add(
-    //         this.getSetTargetCmd(
-    //             "Blue Opposition Target Left", new Pose3d(2.0, 2.0, 0.0, new Rotation3d())));
-    // Shuffleboard.getTab("Shooter")
-    //     .add(
-    //         this.getSetTargetCmd(
-    //             "Blue Opposition Target Right", new Pose3d(2.0, 6.0, 0.0, new Rotation3d())));
+                Shuffleboard.getTab("Shooter")
+        .add(
+            this.getSetTargetCmd(
+                "Blue Opposition Target Left", new Pose3d(2.0, 2.0, 0.0, new Rotation3d())));
+    Shuffleboard.getTab("Shooter")
+        .add(
+            this.getSetTargetCmd(
+                "Blue Opposition Target Right", new Pose3d(2.0, 6.0, 0.0, new Rotation3d())));
+
 
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 0", Degrees.of(0.0)));
 
