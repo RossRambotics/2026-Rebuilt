@@ -11,7 +11,6 @@ import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,7 +23,6 @@ import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -42,26 +40,31 @@ public class Shooter extends SubsystemBase {
 
   private Pose3d m_turrPose3dFR = null; // Field Relative turret pose
 
+  // Turret subsystem (controls yaw of the shooter)
   private final Turret m_turret = new Turret();
-  private PIDController m_turretPIDController = new PIDController(0.0035, 0, 0);
 
+  // Hood and flywheel subsystems
   private final HoodOld m_hood = new HoodOld();
   private final BottomFlyWheel m_bottomFlyWheel = new BottomFlyWheel();
 
+  // Kicker and spindexer (intake/feeds)
   private final Kicker m_kicker = new Kicker();
-
   private final Spindexer m_spindexer = new Spindexer();
 
+  // Whether turret auto-targeting is active
   private boolean m_isTurretActive = true;
 
+  // Human-readable name of current target
   private String m_targetName = "Blue Hub";
 
+  // Current target pose (field-relative)
   private Pose3d m_targetPose = new Pose3d(4.5, 4.1, 1.83, new Rotation3d());
+
+  // Last calculated turret values / telemetry
   private Angle m_turretTarget = Degrees.of(0);
   private Angle m_lastTurretError = Degrees.of(0);
-  private DoubleEntry m_TargetHoodAngleDegrees = null;
-  private Angle m_lastHoodAngle = Degrees.of(15);
-  private AngularVelocity m_lastFlyWheelRPM = RPM.of(0);
+  private DoubleEntry m_TargetHoodAngleDegrees = null; // Shuffleboard entry
+  // Last hood angle and flywheel RPM are tracked in telemetry via Logger; remove redundant fields
   private FiringSolution m_lastFiringSolution = null;
 
   /** Creates a new Shooter. */
@@ -71,19 +74,6 @@ public class Shooter extends SubsystemBase {
     m_TargetHoodAngleDegrees = table.getDoubleTopic("TargetHoodAngleDegrees").getEntry(0.0);
     m_TargetHoodAngleDegrees.set(Hood.HOOD_DEGREES_MIN);
 
-    // turretPIDController.enableContinuousInput(-180, 180);
-    // turret.setAngle(() -> getTurretTargetAngle());
-
-    // m_turret.setDefaultCommand(
-    //     m_turret.setDutyCycle(
-    //         () -> {
-    //           if (m_isTurretActive) {
-    //             return m_turretPIDController.calculate(
-    //                 -getTurretTargetAngleError2().in(Degrees), 0);
-    //           }
-    //           return 0.0;
-    //         }));
-
     // Set default command to aim turret at target (normal targeting)
     m_turret.setDefaultCommand(getNormalTargetingCommand());
 
@@ -91,7 +81,7 @@ public class Shooter extends SubsystemBase {
     Shuffleboard.getTab("Shooter").add(getEnableNormalTargetingModeCmd());
     Shuffleboard.getTab("Shooter").add(getEnablePredictiveTargetingModeCmd());
 
-    //Shuffleboard commands for targeting (BLUE ALLIANCE)
+    // Shuffleboard commands for targeting (BLUE ALLIANCE)
     Shuffleboard.getTab("Shooter")
         .add(this.getSetTargetCmd("Blue Hub", new Pose3d(4.5, 4.1, 1.83, new Rotation3d())));
 
@@ -104,7 +94,7 @@ public class Shooter extends SubsystemBase {
             this.getSetTargetCmd(
                 "Blue Neutral Target Right", new Pose3d(0.85, 6.5, 0.0, new Rotation3d())));
 
-                Shuffleboard.getTab("Shooter")
+    Shuffleboard.getTab("Shooter")
         .add(
             this.getSetTargetCmd(
                 "Blue Opposition Target Left", new Pose3d(2.0, 2.0, 0.0, new Rotation3d())));
@@ -112,33 +102,30 @@ public class Shooter extends SubsystemBase {
         .add(
             this.getSetTargetCmd(
                 "Blue Opposition Target Right", new Pose3d(2.0, 6.0, 0.0, new Rotation3d())));
-    Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 0", Degrees.of(0.0)));
 
-//Shuffleboard commands for targeting (RED ALLIANCE)
+    // Shuffleboard commands for targeting (RED ALLIANCE)
     Shuffleboard.getTab("Shooter")
         .add(this.getSetTargetCmd("Red Hub", new Pose3d(12.0, 4.1, 1.83, new Rotation3d())));
 
-    Shuffleboard.getTab("Shooter")
-        .add(
-            this.getSetTargetCmd(
-                "Blue Neutral Target Left", new Pose3d(0.85, 1.5, 0.0, new Rotation3d())));
-    Shuffleboard.getTab("Shooter")
-        .add(
-            this.getSetTargetCmd(
-                "Blue Neutral Target Right", new Pose3d(0.85, 6.5, 0.0, new Rotation3d())));
+    // Shuffleboard.getTab("Shooter")
+    //     .add(
+    //         this.getSetTargetCmd(
+    //             "Blue Neutral Target Left", new Pose3d(0.85, 1.5, 0.0, new Rotation3d())));
+    // Shuffleboard.getTab("Shooter")
+    //     .add(
+    //         this.getSetTargetCmd(
+    //             "Blue Neutral Target Right", new Pose3d(0.85, 6.5, 0.0, new Rotation3d())));
 
-                Shuffleboard.getTab("Shooter")
-        .add(
-            this.getSetTargetCmd(
-                "Blue Opposition Target Left", new Pose3d(2.0, 2.0, 0.0, new Rotation3d())));
-    Shuffleboard.getTab("Shooter")
-        .add(
-            this.getSetTargetCmd(
-                "Blue Opposition Target Right", new Pose3d(2.0, 6.0, 0.0, new Rotation3d())));
-
+    // Shuffleboard.getTab("Shooter")
+    //     .add(
+    //         this.getSetTargetCmd(
+    //             "Blue Opposition Target Left", new Pose3d(2.0, 2.0, 0.0, new Rotation3d())));
+    // Shuffleboard.getTab("Shooter")
+    //     .add(
+    //         this.getSetTargetCmd(
+    //             "Blue Opposition Target Right", new Pose3d(2.0, 6.0, 0.0, new Rotation3d())));
 
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 0", Degrees.of(0.0)));
-
 
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 20", Degrees.of(20.0)));
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 30", Degrees.of(30.0)));
@@ -221,41 +208,6 @@ public class Shooter extends SubsystemBase {
     return m_turretTarget;
   }
 
-  private Angle getTurretTargetAngleError2() {
-    Pose2d robotPose = RobotContainer.getInstance().getRobotPose2d();
-
-    // use the turrets location, but the robots heading
-    // this is because we need to adjust the turret based on its angle being robot relative.
-    Pose2d temp = getTurretPose3dFieldRelative().toPose2d();
-    Pose2d turretPose = new Pose2d(temp.getX(), temp.getY(), robotPose.getRotation());
-
-    Rotation2d angleToTarget = getAngleToTarget(turretPose, m_targetPose.toPose2d());
-
-    // clamp the turret target to the rotation available for the turret
-    double turretTarget = angleToTarget.getDegrees();
-    turretTarget =
-        MathUtil.clamp(turretTarget, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX);
-    m_turretTarget = Degrees.of(turretTarget);
-
-    double turretHeading = m_turret.getAngle().in(Degrees);
-    double error = turretTarget - turretHeading;
-
-    // clamp error to prevent extreme values
-    error = MathUtil.clamp(error, -20, 20);
-
-    Angle a = Degrees.of(error);
-
-    if (turretHeading > Turret.TURRET_DEGREES_MAX && error > 0) {
-      a = Degrees.of(0);
-    } else if (turretHeading < Turret.TURRET_DEGREES_MIN && error < 0) {
-      a = Degrees.of(0);
-    }
-
-    m_lastTurretError = a;
-
-    return a;
-  }
-
   /**
    * Command factory: returns a command that aims the turret using the current location (no
    * prediction).
@@ -318,20 +270,18 @@ public class Shooter extends SubsystemBase {
     // This method will be called once per scheduler run
 
     updateTurretPose();
+    // Update firing solution and telemetry (compute early so commands/targeting can use it)
+    updateFiringSolution();
+    // Updates target data (kept lightweight) and then publish telemetry last
     updateTargetData();
+    updateTelemetry();
+  }
 
-    double robotHeading = RobotContainer.getInstance().getRobotPose2d().getRotation().getDegrees();
-    Logger.recordOutput("Shooter/TurretCurrentDegrees", m_turret.getAngle().in(Degrees));
-    Logger.recordOutput("Shooter/robotHeading", robotHeading);
-    Logger.recordOutput("Shooter/TurretTargetDegrees", m_turretTarget);
-    Logger.recordOutput("Shooter/TurretErrorDegrees", m_lastTurretError.in(Degrees));
-    Logger.recordOutput(
-        "Shooter/AimLine",
-        new Translation2d[] {
-          m_turrPose3dFR.toPose2d().getTranslation(),
-          m_targetPose.getTranslation().toTranslation2d()
-        });
-
+  /**
+   * Compute the firing solution (time-of-flight, turret & hood angles, rpm) and publish telemetry.
+   * Kept outside of periodic to make the periodic loop cleaner.
+   */
+  private void updateFiringSolution() {
     // Shooter offset relative to robot center
     Translation2d shooterOffsetRobot = new Translation2d(TURRET_X_OFFSET, TURRET_Y_OFFSET);
     FiringSolution solution =
@@ -341,42 +291,8 @@ public class Shooter extends SubsystemBase {
             m_targetPose.toPose2d().getTranslation(),
             shooterOffsetRobot);
 
+    // store computed solution for consumers; telemetry will be published in updateTelemetry()
     m_lastFiringSolution = solution;
-
-    ChassisSpeeds chassisSpeeds = RobotContainer.getInstance().getChassisSpeeds();
-    Logger.recordOutput("Shooter/ChassisSpeeds.vx", chassisSpeeds.vxMetersPerSecond);
-    Logger.recordOutput("Shooter/ChassisSpeeds.vy", chassisSpeeds.vyMetersPerSecond);
-    Logger.recordOutput("Shooter/ChassisSpeeds.omega", chassisSpeeds.omegaRadiansPerSecond);
-    Logger.recordOutput("Shooter/FutureRobotPose2d", solution.futurePose);
-    double predictedDistance =
-        RobotContainer.getInstance()
-            .getRobotPose2d()
-            .getTranslation()
-            .getDistance(solution.futurePose.getTranslation());
-    Logger.recordOutput("Shooter/FutureRobotPoseDistance", predictedDistance);
-    Logger.recordOutput("Shooter/TimeOfFlight", solution.tof);
-    Logger.recordOutput(
-        "Shooter/CalculatedHoodAngleDegrees", Radians.of(solution.hoodAngleRad).in(Degrees));
-    m_lastHoodAngle = Radians.of(solution.hoodAngleRad);
-    Logger.recordOutput("Shooter/CalculatedFlyWheelRPM", solution.flywheelRPM);
-    m_lastFlyWheelRPM = RPM.of(solution.flywheelRPM);
-    Logger.recordOutput(
-        "Shooter/CalculatedTurretAngleDegrees", Radians.of(solution.turretAngleRad).in(Degrees));
-
-    Translation2d[] aimRay =
-        buildAimRay(
-            solution.futurePose,
-            solution.turretAngleRad,
-            shooterOffsetRobot,
-            solution.distanceToTarget);
-
-    Logger.recordOutput("Shooter/CalculatedAimRay", aimRay);
-
-    boolean onTarget = Math.abs(m_lastTurretError.in(Degrees)) < 1.0;
-    Logger.recordOutput("Shooter/TurretOnTarget", onTarget);
-    Logger.recordOutput("Shooter/FlyWheelRPM", m_bottomFlyWheel.getVelocity().in(RPM));
-    Logger.recordOutput("Shooter/KickerRPM", m_kicker.getVelocity().in(RPM));
-    Logger.recordOutput("Shooter/SpindexerRPM", m_spindexer.getVelocity().in(RPM));
   }
 
   public FiringSolution calculateFiringSolution(
@@ -534,12 +450,8 @@ public class Shooter extends SubsystemBase {
   }
 
   private void updateTargetData() {
-    // Updates target data for logging
-    Pose2d robotPose2d = getTurretPose3dFieldRelative().toPose2d();
-    Translation2d toTarget =
-        m_targetPose.toPose2d().getTranslation().minus(robotPose2d.getTranslation());
-    double distanceToTarget = toTarget.getNorm();
-    Logger.recordOutput("Shooter/DistanceToTarget", distanceToTarget);
+    // Kept lightweight: currently no per-loop side effects needed here. Telemetry is published in
+    // updateTelemetry() which runs last in the loop.
   }
 
   private void updateTurretPose() {
@@ -557,7 +469,6 @@ public class Shooter extends SubsystemBase {
             robotPose2d.getRotation()); // turret offset
     Pose3d turretPosed3d =
         new Pose3d(turretPose2d).plus(new Transform3d(0.0, 0.0, TURRET_Z_OFFSET, new Rotation3d()));
-    Logger.recordOutput("Shooter/TurretPose", turretPosed3d);
 
     m_turrPose3dFR = turretPosed3d;
   }
@@ -565,6 +476,60 @@ public class Shooter extends SubsystemBase {
   private void setTargetName(String name) {
     m_targetName = name;
     Logger.recordOutput("Shooter/TargetName", m_targetName);
+  }
+
+  /** Centralized telemetry publish. Called once at the end of periodic(). */
+  private void updateTelemetry() {
+    // Basic turret and robot heading
+    if (m_turrPose3dFR != null) {
+      Logger.recordOutput("Shooter/TurretPose", m_turrPose3dFR);
+    }
+
+    double robotHeading = RobotContainer.getInstance().getRobotPose2d().getRotation().getDegrees();
+    Logger.recordOutput("Shooter/robotHeading", robotHeading);
+
+    Logger.recordOutput("Shooter/TurretCurrentDegrees", m_turret.getAngle().in(Degrees));
+    Logger.recordOutput("Shooter/TurretTargetDegrees", m_turretTarget);
+    Logger.recordOutput("Shooter/TurretErrorDegrees", m_lastTurretError.in(Degrees));
+
+    // Firing solution telemetry
+    if (m_lastFiringSolution != null) {
+      FiringSolution solution = m_lastFiringSolution;
+      Logger.recordOutput("Shooter/FutureRobotPose2d", solution.futurePose);
+      double predictedDistance =
+          RobotContainer.getInstance()
+              .getRobotPose2d()
+              .getTranslation()
+              .getDistance(solution.futurePose.getTranslation());
+      Logger.recordOutput("Shooter/FutureRobotPoseDistance", predictedDistance);
+      Logger.recordOutput("Shooter/TimeOfFlight", solution.tof);
+      Logger.recordOutput(
+          "Shooter/CalculatedHoodAngleDegrees", Radians.of(solution.hoodAngleRad).in(Degrees));
+      Logger.recordOutput("Shooter/CalculatedFlyWheelRPM", solution.flywheelRPM);
+      Logger.recordOutput(
+          "Shooter/CalculatedTurretAngleDegrees", Radians.of(solution.turretAngleRad).in(Degrees));
+
+      Translation2d[] aimRay =
+          buildAimRay(
+              solution.futurePose,
+              solution.turretAngleRad,
+              new Translation2d(TURRET_X_OFFSET, TURRET_Y_OFFSET),
+              solution.distanceToTarget);
+      Logger.recordOutput("Shooter/CalculatedAimRay", aimRay);
+    }
+
+    // Chassis speeds and sensors
+    ChassisSpeeds chassisSpeeds = RobotContainer.getInstance().getChassisSpeeds();
+    Logger.recordOutput("Shooter/ChassisSpeeds.vx", chassisSpeeds.vxMetersPerSecond);
+    Logger.recordOutput("Shooter/ChassisSpeeds.vy", chassisSpeeds.vyMetersPerSecond);
+    Logger.recordOutput("Shooter/ChassisSpeeds.omega", chassisSpeeds.omegaRadiansPerSecond);
+
+    // On-target and motor readings
+    boolean onTarget = Math.abs(m_lastTurretError.in(Degrees)) < 1.0;
+    Logger.recordOutput("Shooter/TurretOnTarget", onTarget);
+    Logger.recordOutput("Shooter/FlyWheelRPM", m_bottomFlyWheel.getVelocity().in(RPM));
+    Logger.recordOutput("Shooter/KickerRPM", m_kicker.getVelocity().in(RPM));
+    Logger.recordOutput("Shooter/SpindexerRPM", m_spindexer.getVelocity().in(RPM));
   }
 
   public Command getSetTargetCmd(String name, Pose3d target) {
@@ -638,13 +603,7 @@ public class Shooter extends SubsystemBase {
     // launchVel(vel, 0, Degrees.of(-45).in(Radians)));
   }
 
-  private Translation3d launchVelShooterOnly(
-      double vel, double hoodAngleRad, double turretAngleRad) {
-    double vx = vel * Math.cos(hoodAngleRad) * Math.cos(turretAngleRad);
-    double vy = vel * Math.cos(hoodAngleRad) * Math.sin(turretAngleRad);
-    double vz = vel * Math.sin(hoodAngleRad);
-    return new Translation3d(vx, vy, vz);
-  }
+  // NOTE: lightweight helper removed; keep 'launchVel' which includes robot velocity.
 
   /**
    * Computes the initial field-relative velocity of a launched fuel game piece.
