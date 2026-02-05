@@ -91,13 +91,54 @@ public class Shooter extends SubsystemBase {
     Shuffleboard.getTab("Shooter").add(getEnableNormalTargetingModeCmd());
     Shuffleboard.getTab("Shooter").add(getEnablePredictiveTargetingModeCmd());
 
-    // Add Shuffleboard commands for targeting
+    //Shuffleboard commands for targeting (BLUE ALLIANCE)
     Shuffleboard.getTab("Shooter")
         .add(this.getSetTargetCmd("Blue Hub", new Pose3d(4.5, 4.1, 1.83, new Rotation3d())));
+
+    Shuffleboard.getTab("Shooter")
+        .add(
+            this.getSetTargetCmd(
+                "Blue Neutral Target Left", new Pose3d(0.85, 1.5, 0.0, new Rotation3d())));
+    Shuffleboard.getTab("Shooter")
+        .add(
+            this.getSetTargetCmd(
+                "Blue Neutral Target Right", new Pose3d(0.85, 6.5, 0.0, new Rotation3d())));
+
+                Shuffleboard.getTab("Shooter")
+        .add(
+            this.getSetTargetCmd(
+                "Blue Opposition Target Left", new Pose3d(2.0, 2.0, 0.0, new Rotation3d())));
+    Shuffleboard.getTab("Shooter")
+        .add(
+            this.getSetTargetCmd(
+                "Blue Opposition Target Right", new Pose3d(2.0, 6.0, 0.0, new Rotation3d())));
+    Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 0", Degrees.of(0.0)));
+
+//Shuffleboard commands for targeting (RED ALLIANCE)
     Shuffleboard.getTab("Shooter")
         .add(this.getSetTargetCmd("Red Hub", new Pose3d(12.0, 4.1, 1.83, new Rotation3d())));
 
+    Shuffleboard.getTab("Shooter")
+        .add(
+            this.getSetTargetCmd(
+                "Blue Neutral Target Left", new Pose3d(0.85, 1.5, 0.0, new Rotation3d())));
+    Shuffleboard.getTab("Shooter")
+        .add(
+            this.getSetTargetCmd(
+                "Blue Neutral Target Right", new Pose3d(0.85, 6.5, 0.0, new Rotation3d())));
+
+                Shuffleboard.getTab("Shooter")
+        .add(
+            this.getSetTargetCmd(
+                "Blue Opposition Target Left", new Pose3d(2.0, 2.0, 0.0, new Rotation3d())));
+    Shuffleboard.getTab("Shooter")
+        .add(
+            this.getSetTargetCmd(
+                "Blue Opposition Target Right", new Pose3d(2.0, 6.0, 0.0, new Rotation3d())));
+
+
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 0", Degrees.of(0.0)));
+
 
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 20", Degrees.of(20.0)));
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 30", Degrees.of(30.0)));
