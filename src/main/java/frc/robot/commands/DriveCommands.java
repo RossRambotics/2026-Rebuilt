@@ -43,6 +43,8 @@ public class DriveCommands {
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
   private static double m_prevTimestamp = Timer.getFPGATimestamp();
   private static Translation2d m_prevLinearVel = new Translation2d(0.0, 0.0);
+  private static double m_prevAngularTimestamp = Timer.getFPGATimestamp();
+  private static double m_prevAngularVel = 0.0;
 
   private DriveCommands() {}
 
@@ -86,6 +88,51 @@ public class DriveCommands {
   }
 
   /**
+   * Convert a joystick rotational axis into a limited rotational velocity (rad/s).
+   *
+   * <p>Processing steps:
+   *
+   * <ol>
+   *   <li>Apply a deadband to the raw input using {@code DEADBAND}.
+   *   <li>Square the input for finer low-speed control while preserving sign.
+   *   <li>Scale the shaped input by the runtime angular rate limit from {@code
+   *       RobotContainer.getInstance().m_speedNanny.getAngularRateLimit()} to obtain a commanded
+   *       angular velocity in rad/s.
+   *   <li>Apply dynamic slew limiting using the angular acceleration limit from {@code
+   *       RobotContainer.getInstance().m_speedNanny.getAngularAccelerationLimit()}.
+   * </ol>
+   *
+   * @param omegaInput raw rotational joystick axis in [-1, 1]
+   * @return commanded angular velocity in rad/s
+   */
+  private static double getRotationalVelocityFromJoysticks(double omegaInput) {
+    // --- Time delta (separate timestamp from linear) ---
+    double now = Timer.getFPGATimestamp();
+    double dt = now - m_prevAngularTimestamp;
+    m_prevAngularTimestamp = now;
+
+    // Deadband + shaping (square for precision)
+    double omega = MathUtil.applyDeadband(omegaInput, DEADBAND);
+    omega = Math.copySign(omega * omega, omega);
+
+    // Scale to rad/s using SpeedNanny's runtime angular rate limit (assumed rad/s)
+    double angularRateLimit = RobotContainer.getInstance().m_speedNanny.getAngularRateLimit();
+    double desiredOmega = omega * angularRateLimit;
+
+    // Slew limiting (angular acceleration limit is in rad/s^2)
+    double maxDelta = RobotContainer.getInstance().m_speedNanny.getAngularAccelerationLimit() * dt;
+    double delta = desiredOmega - m_prevAngularVel;
+    if (Math.abs(delta) > maxDelta) {
+      delta = Math.copySign(maxDelta, delta);
+    }
+
+    double limitedOmega = m_prevAngularVel + delta;
+    m_prevAngularVel = limitedOmega;
+
+    return limitedOmega;
+  }
+
+  /**
    * Field relative drive command using two joysticks (controlling linear and angular velocities).
    */
   public static Command joystickDrive(
@@ -99,11 +146,8 @@ public class DriveCommands {
           Translation2d linearVelocity =
               getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
-          // Apply rotation deadband
-          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
-
-          // Square rotation value for more precise control
-          omega = Math.copySign(omega * omega, omega);
+          // Compute rotational velocity (rad/s) using SpeedNanny limits
+          double omega = getRotationalVelocityFromJoysticks(omegaSupplier.getAsDouble());
 
           // Convert to field relative speeds & send command. getLinearVelocityFromJoysticks
           // now returns meters/sec directly, so use values as-is.
@@ -326,11 +370,8 @@ public class DriveCommands {
           Translation2d linearVelocity =
               getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
-          // Apply rotation deadband
-          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
-
-          // Square rotation value for more precise control
-          omega = Math.copySign(omega * omega, omega);
+          // Compute rotational velocity (rad/s) using SpeedNanny limits
+          double omega = getRotationalVelocityFromJoysticks(omegaSupplier.getAsDouble());
 
           // Convert to robot-centric speeds & send command. getLinearVelocityFromJoysticks
           // returns meters/sec directly, so use values as-is.
