@@ -1,8 +1,6 @@
 package frc.robot.subsystems.shooter;
 
-/**
- * Constants for the Hood subsystem shared across implementations.
- */
+/** Constants for the Hood subsystem shared across implementations. */
 public final class HoodConstants {
   private HoodConstants() {}
 

@@ -75,8 +75,8 @@ public class Shooter extends SubsystemBase {
   public Shooter() {
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable table = inst.getTable("Shooter");
-  m_targetHoodAngleDegEntry = table.getDoubleTopic("TargetHoodAngleDeg").getEntry(0.0);
-  m_targetHoodAngleDegEntry.set(HoodConstants.HOOD_DEGREES_MIN);
+    m_targetHoodAngleDegEntry = table.getDoubleTopic("TargetHoodAngleDeg").getEntry(0.0);
+    m_targetHoodAngleDegEntry.set(HoodConstants.HOOD_DEGREES_MIN);
 
     // Set default command to aim turret at target (normal targeting)
     m_turret.setDefaultCommand(getNormalTargetingCommand());

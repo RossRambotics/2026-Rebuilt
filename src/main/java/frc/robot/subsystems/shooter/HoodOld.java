@@ -112,8 +112,8 @@ public class HoodOld extends SubsystemBase {
       System.out.println("Could not configure device. Error: " + status.toString());
     }
 
-  m_LeftMotor.setPosition(Degrees.of(HoodConstants.HOOD_DEGREES_MIN));
-  setGoal(Degrees.of(HoodConstants.HOOD_DEGREES_MIN));
+    m_LeftMotor.setPosition(Degrees.of(HoodConstants.HOOD_DEGREES_MIN));
+    setGoal(Degrees.of(HoodConstants.HOOD_DEGREES_MIN));
   }
 
   private void setGoal(Angle angle) {
