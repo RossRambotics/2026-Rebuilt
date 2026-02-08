@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -40,21 +41,48 @@ public class DriveCommands {
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
+  private static double m_prevTimestamp = Timer.getFPGATimestamp();
+  private static Translation2d m_prevLinearVel = new Translation2d(0.0, 0.0);
 
   private DriveCommands() {}
 
   private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
-    // Apply deadband
+
+    // --- Time delta ---
+    double now = Timer.getFPGATimestamp();
+    double dt = now - m_prevTimestamp;
+    m_prevTimestamp = now;
+
+    // --- Joystick shaping (unchanged) ---
     double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND);
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
-    // Square magnitude for more precise control
-    linearMagnitude = linearMagnitude * linearMagnitude;
+    linearMagnitude *= linearMagnitude; // square for precision
 
-    // Return new linear velocity
-    return new Pose2d(Translation2d.kZero, linearDirection)
-        .transformBy(new Transform2d(linearMagnitude, 0.0, Rotation2d.kZero))
-        .getTranslation();
+    // Scale magnitude into meters/sec using SpeedNanny's runtime speed limit
+    double speedLimit = RobotContainer.getInstance().m_speedNanny.getSpeedLimit();
+    double linearMagnitudeMps = linearMagnitude * speedLimit;
+
+    Translation2d desiredVel =
+        new Pose2d(Translation2d.kZero, linearDirection)
+            .transformBy(new Transform2d(linearMagnitudeMps, 0.0, Rotation2d.kZero))
+            .getTranslation();
+
+    // --- Dynamic slew limiting ---
+    Translation2d delta = desiredVel.minus(m_prevLinearVel);
+    double deltaMag = delta.getNorm();
+
+    // Acceleration limit is in meters/sec^2, so multiplying by dt yields meters/sec
+    double maxDelta = RobotContainer.getInstance().m_speedNanny.getAccelerationLimit() * dt;
+
+    if (deltaMag > maxDelta) {
+      delta = delta.times(maxDelta / deltaMag);
+    }
+
+    Translation2d limitedVel = m_prevLinearVel.plus(delta);
+    m_prevLinearVel = limitedVel;
+
+    return limitedVel;
   }
 
   /**
@@ -77,11 +105,12 @@ public class DriveCommands {
           // Square rotation value for more precise control
           omega = Math.copySign(omega * omega, omega);
 
-          // Convert to field relative speeds & send command
+          // Convert to field relative speeds & send command. getLinearVelocityFromJoysticks
+          // now returns meters/sec directly, so use values as-is.
           ChassisSpeeds speeds =
               new ChassisSpeeds(
-                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                  linearVelocity.getX(),
+                  linearVelocity.getY(),
                   omega * drive.getMaxAngularSpeedRadPerSec());
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
@@ -128,12 +157,10 @@ public class DriveCommands {
                   angleController.calculate(
                       drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
 
-              // Convert to field relative speeds & send command
+              // Convert to field relative speeds & send command. getLinearVelocityFromJoysticks
+              // returns meters/sec directly, so use values as-is.
               ChassisSpeeds speeds =
-                  new ChassisSpeeds(
-                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-                      omega);
+                  new ChassisSpeeds(linearVelocity.getX(), linearVelocity.getY(), omega);
               boolean isFlipped =
                   DriverStation.getAlliance().isPresent()
                       && DriverStation.getAlliance().get() == Alliance.Red;
@@ -305,15 +332,13 @@ public class DriveCommands {
           // Square rotation value for more precise control
           omega = Math.copySign(omega * omega, omega);
 
-          // Convert to field relative speeds & send command
+          // Convert to robot-centric speeds & send command. getLinearVelocityFromJoysticks
+          // returns meters/sec directly, so use values as-is.
           ChassisSpeeds speeds =
               new ChassisSpeeds(
-                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                  linearVelocity.getX(),
+                  linearVelocity.getY(),
                   omega * drive.getMaxAngularSpeedRadPerSec());
-          boolean isFlipped =
-              DriverStation.getAlliance().isPresent()
-                  && DriverStation.getAlliance().get() == Alliance.Red;
           drive.runVelocity(speeds);
         },
         drive);

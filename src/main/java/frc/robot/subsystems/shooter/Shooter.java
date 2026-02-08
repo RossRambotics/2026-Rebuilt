@@ -70,6 +70,7 @@ public class Shooter extends SubsystemBase {
   private DoubleEntry m_targetHoodAngleDegEntry = null; // Shuffleboard entry (Deg)
   // Last hood angle and flywheel RPM are tracked in telemetry via Logger; remove redundant fields
   private FiringSolution m_lastFiringSolution = null;
+  private boolean m_isShooting = false;
 
   /** Creates a new Shooter. */
   public Shooter() {
@@ -709,5 +710,9 @@ public class Shooter extends SubsystemBase {
     vy += robotVyField;
 
     return new Translation3d(vx, vy, vz);
+  }
+
+  public boolean isShooting() {
+    return m_isShooting;
   }
 }
