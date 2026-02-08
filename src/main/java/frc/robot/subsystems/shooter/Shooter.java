@@ -72,6 +72,17 @@ public class Shooter extends SubsystemBase {
   private FiringSolution m_lastFiringSolution = null;
   private boolean m_isShooting = false;
 
+  // Readiness thresholds (allowable error)
+  private static final double TURRET_ANGLE_TOLERANCE_DEG = 2.0; // degrees
+  private static final double HOOD_ANGLE_TOLERANCE_DEG = 2.0; // degrees
+  private static final double BOTTOM_FLYWHEEL_RPM_TOLERANCE = 100.0; // RPM
+
+  // Readiness flags
+  private boolean m_isShooterReady = false;
+  private boolean m_isTurretReady = false;
+  private boolean m_isBottomFlyWheelReady = false;
+  private boolean m_isHoodReady = false;
+
   /** Creates a new Shooter. */
   public Shooter() {
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
@@ -212,7 +223,6 @@ public class Shooter extends SubsystemBase {
 
     return m_turretTargetRobotAngle;
   }
-
   /**
    * Command factory: returns a command that aims the turret using the current location (no
    * prediction).
@@ -279,6 +289,9 @@ public class Shooter extends SubsystemBase {
     updateFiringSolution();
     // Updates target data (kept lightweight) and then publish telemetry last
     updateTargetData();
+    // Update readiness flags (moved to its own method for clarity)
+    updateReadiness();
+
     updateTelemetry();
   }
 
@@ -340,11 +353,28 @@ public class Shooter extends SubsystemBase {
     // --- Turret angle (robot-relative) ---
     Translation2d delta = targetFieldPos.minus(shooterFieldPos);
 
-    double turretAngleRad =
+    double rawTurretAngleRad =
         Math.atan2(delta.getY(), delta.getX()) - futurePose.getRotation().getRadians();
 
+    double rawTurretAngleDeg = Math.toDegrees(rawTurretAngleRad);
+
+    boolean turretFeasible =
+        rawTurretAngleDeg >= Turret.TURRET_DEGREES_MIN
+            && rawTurretAngleDeg <= Turret.TURRET_DEGREES_MAX;
+
+    double turretAngleRad =
+        Math.toRadians(
+            MathUtil.clamp(
+                rawTurretAngleDeg, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX));
+
     return new FiringSolution(
-        turretAngleRad, hoodAngleRad, flywheelRPM, futurePose, tofSec, distanceMeters);
+        turretAngleRad,
+        hoodAngleRad,
+        flywheelRPM,
+        futurePose,
+        tofSec,
+        distanceMeters,
+        turretFeasible);
   }
 
   public FiringSolution calculateFiringSolution(
@@ -401,11 +431,28 @@ public class Shooter extends SubsystemBase {
     // --- Velocity compensation for turret ---
     Translation2d delta = targetFieldPos.minus(shooterFieldPos);
 
-    double turretAngleRad =
+    double rawTurretAngleRad =
         Math.atan2(delta.getY(), delta.getX()) - futurePose.getRotation().getRadians();
 
+    double rawTurretAngleDeg = Math.toDegrees(rawTurretAngleRad);
+
+    boolean turretFeasible =
+        rawTurretAngleDeg >= Turret.TURRET_DEGREES_MIN
+            && rawTurretAngleDeg <= Turret.TURRET_DEGREES_MAX;
+
+    double turretAngleRad =
+        Math.toRadians(
+            MathUtil.clamp(
+                rawTurretAngleDeg, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX));
+
     return new FiringSolution(
-        turretAngleRad, hoodAngleRad, flywheelRPM, futurePose, tofSec, distanceMeters);
+        turretAngleRad,
+        hoodAngleRad,
+        flywheelRPM,
+        futurePose,
+        tofSec,
+        distanceMeters,
+        turretFeasible);
   }
 
   public record FiringSolution(
@@ -414,7 +461,8 @@ public class Shooter extends SubsystemBase {
       double flywheelRPM,
       Pose2d futurePose,
       double tofSec,
-      double distanceToTargetMeters) {}
+      double distanceToTargetMeters,
+      boolean isTurretFeasible) {}
 
   private static final double EFFICIENCY_K = 0.95; // efficiency factor
 
@@ -508,6 +556,38 @@ public class Shooter extends SubsystemBase {
     // updateTelemetry() which runs last in the loop.
   }
 
+  /**
+   * Update readiness flags (turret, hood, bottom flywheel, overall shooter) based on the latest
+   * firing solution and current subsystem sensor readings.
+   */
+  private void updateReadiness() {
+    if (m_lastFiringSolution != null) {
+      // Turret ready when the turret error is within tolerance
+      m_isTurretReady =
+          m_lastFiringSolution.isTurretFeasible()
+              && Math.abs(m_lastTurretErrorRobotAngle.in(Degrees)) < TURRET_ANGLE_TOLERANCE_DEG;
+
+      // Bottom flywheel readiness: compare current RPM to target RPM
+      double currentBottomRpm = m_bottomFlyWheel.getVelocity().in(RPM);
+      double targetBottomRpm = m_lastFiringSolution.flywheelRPM;
+      m_isBottomFlyWheelReady =
+          Math.abs(currentBottomRpm - targetBottomRpm) < BOTTOM_FLYWHEEL_RPM_TOLERANCE;
+
+      // Hood readiness: compare current hood angle to target hood angle (degrees)
+      double currentHoodDeg = m_hood.getAngle().in(Degrees);
+      double targetHoodDeg = Radians.of(m_lastFiringSolution.hoodAngleRad).in(Degrees);
+      m_isHoodReady = Math.abs(currentHoodDeg - targetHoodDeg) < HOOD_ANGLE_TOLERANCE_DEG;
+
+      // Shooter as-a-whole is ready when turret, hood, and bottom flywheel are ready
+      m_isShooterReady = m_isTurretReady && m_isHoodReady && m_isBottomFlyWheelReady;
+    } else {
+      m_isTurretReady = false;
+      m_isBottomFlyWheelReady = false;
+      m_isHoodReady = false;
+      m_isShooterReady = false;
+    }
+  }
+
   private void updateTurretPose() {
     // Updates the turret pose in field relative coordinates
     Pose2d robotPose2d = RobotContainer.getInstance().getRobotPose2d();
@@ -582,11 +662,14 @@ public class Shooter extends SubsystemBase {
         "Shooter/ChassisSpeeds.omegaRadPerSec", chassisSpeeds.omegaRadiansPerSecond);
 
     // On-target and motor readings
-    boolean onTarget = Math.abs(m_lastTurretErrorRobotAngle.in(Degrees)) < 1.0;
-    Logger.recordOutput("Shooter/TurretOnTarget", onTarget);
     Logger.recordOutput("Shooter/BottomFlyWheelRPM", m_bottomFlyWheel.getVelocity().in(RPM));
     Logger.recordOutput("Shooter/KickerRPM", m_kicker.getVelocity().in(RPM));
     Logger.recordOutput("Shooter/SpindexerRPM", m_spindexer.getVelocity().in(RPM));
+    // Readiness indicators
+    Logger.recordOutput("Shooter/IsTurretReady", m_isTurretReady);
+    Logger.recordOutput("Shooter/IsBottomFlyWheelReady", m_isBottomFlyWheelReady);
+    Logger.recordOutput("Shooter/IsShooterReady", m_isShooterReady);
+    Logger.recordOutput("Shooter/IsHoodReady", m_isHoodReady);
   }
 
   public Command getSetTargetCmd(String name, Pose3d target) {

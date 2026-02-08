@@ -231,4 +231,12 @@ public class HoodOld extends SubsystemBase {
   public boolean isStationary() {
     return Math.abs(m_LeftMotor.getVelocity().getValue().in(RotationsPerSecond)) < 0.002;
   }
+
+  /**
+   * Returns the current hood angle as reported by the TalonFX position sensor. Provided to allow
+   * external subsystems to query the hood position for readiness checks.
+   */
+  public Angle getAngle() {
+    return m_LeftMotor.getPosition().getValue();
+  }
 }
