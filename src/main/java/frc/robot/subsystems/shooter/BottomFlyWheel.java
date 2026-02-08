@@ -173,12 +173,13 @@ public class BottomFlyWheel extends SubsystemBase {
     // --- Interpolation Code END ---
     // Populate ToF Table (Distance -> Time-of-Flight in seconds)
     // These are sample values; tune with real ballistics data.
-    m_tofTable.put(1.0, 0.30);
-    m_tofTable.put(2.0, 0.45);
-    m_tofTable.put(3.0, 0.60);
-    m_tofTable.put(4.0, 0.80);
-    m_tofTable.put(5.0, 1.00);
-    m_tofTable.put(6.0, 1.20);
+    double tune = 0.2;
+    m_tofTable.put(1.0, 0.885 + tune);
+    m_tofTable.put(2.0, 1.028 + tune);
+    m_tofTable.put(3.0, 1.099 + tune);
+    m_tofTable.put(4.0, 1.135 + tune);
+    m_tofTable.put(5.0, 1.326 + tune);
+    m_tofTable.put(6.0, 1.394 + tune);
   }
   /**
    * Example command factory method.

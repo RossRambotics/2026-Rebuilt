@@ -79,7 +79,7 @@ public class Shooter extends SubsystemBase {
     m_targetHoodAngleDegEntry.set(HoodConstants.HOOD_DEGREES_MIN);
 
     // Set default command to aim turret at target (normal targeting)
-    m_turret.setDefaultCommand(getNormalTargetingCommand());
+    m_turret.setDefaultCommand(getPredictiveTargetingCommand());
 
     // Add Shuffleboard commands to switch between targeting modes
     Shuffleboard.getTab("Shooter").add(getEnableNormalTargetingModeCmd());
@@ -289,7 +289,7 @@ public class Shooter extends SubsystemBase {
     // Shooter offset relative to robot center
     Translation2d shooterOffsetRobot = new Translation2d(TURRET_X_OFFSET_M, TURRET_Y_OFFSET_M);
     FiringSolution solution =
-        calculateFiringSolution(
+        calculateFiringSolutionLUT(
             RobotContainer.getInstance().getRobotPose2d(),
             RobotContainer.getInstance().getChassisSpeeds(),
             m_targetPoseField3d.toPose2d().getTranslation(),
@@ -297,6 +297,53 @@ public class Shooter extends SubsystemBase {
 
     // store computed solution for consumers; telemetry will be published in updateTelemetry()
     m_lastFiringSolution = solution;
+  }
+
+  public FiringSolution calculateFiringSolutionLUT(
+      Pose2d currentPose,
+      ChassisSpeeds chassisSpeeds,
+      Translation2d targetFieldPos,
+      Translation2d shooterOffsetRobot) {
+
+    // --- Initial guess for TOF ---
+    double tofSec = 1.0;
+
+    Pose2d futurePose;
+    Translation2d shooterFieldPos;
+    double distanceMeters;
+
+    // --- Iterate once or twice ---
+    for (int i = 0; i < 2; i++) {
+      futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
+
+      shooterFieldPos =
+          futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
+
+      distanceMeters = shooterFieldPos.getDistance(targetFieldPos);
+
+      // LUT-based TOF instead of physics
+      tofSec = m_bottomFlyWheel.calculateToF(distanceMeters);
+    }
+
+    // --- Final future pose ---
+    futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
+
+    shooterFieldPos =
+        futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
+
+    // --- LUT lookup ---
+    distanceMeters = shooterFieldPos.getDistance(targetFieldPos);
+    double hoodAngleRad = Degrees.of(m_bottomFlyWheel.calculateAngle(distanceMeters)).in(Radians);
+    double flywheelRPM = m_bottomFlyWheel.calculateRPM(distanceMeters);
+
+    // --- Turret angle (robot-relative) ---
+    Translation2d delta = targetFieldPos.minus(shooterFieldPos);
+
+    double turretAngleRad =
+        Math.atan2(delta.getY(), delta.getX()) - futurePose.getRotation().getRadians();
+
+    return new FiringSolution(
+        turretAngleRad, hoodAngleRad, flywheelRPM, futurePose, tofSec, distanceMeters);
   }
 
   public FiringSolution calculateFiringSolution(
