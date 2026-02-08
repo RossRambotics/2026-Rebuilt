@@ -44,6 +44,7 @@ public class BottomFlyWheel extends SubsystemBase {
   // 2. NetworkTable Entries for debugging/dashboard
   private DoubleEntry m_inputDistance; // We read this from the dashboard (or camera)
   private DoubleEntry m_interpolatedRPM; // We write the result here
+  private DoubleEntry m_interpolatedToF; // Calculated time-of-flight (seconds)
   // --- Interpolation Code END ---
   // --- Hood Angle Code START ---
   // 1. The Angle Interpolation Table
@@ -51,6 +52,10 @@ public class BottomFlyWheel extends SubsystemBase {
 
   // 2. NetworkTable Entry for the calculated angle
   private DoubleEntry m_interpolatedAngle;
+  // --- Time-of-Flight Table ---
+  private final TreeMap<Double, Double> m_tofTable = new TreeMap<>();
+  // 2b. NetworkTable Entry for the calculated time-of-flight
+  // (declared above as m_interpolatedToF)
   // --- Hood Angle Code END ---
 
   private DoubleEntry m_targetRPM = null;
@@ -146,6 +151,9 @@ public class BottomFlyWheel extends SubsystemBase {
 
     m_interpolatedRPM = table.getDoubleTopic("CalculatedRPM").getEntry(0.0);
     m_interpolatedAngle = table.getDoubleTopic("CalculatedAngle").getEntry(0.0);
+    m_interpolatedToF = table.getDoubleTopic("CalculatedToF").getEntry(0.0);
+
+    m_interpolatedToF.set(0.0);
 
     // Populate Angle Table (Distance -> Degrees)
     m_angleTable.put(1.0, 15.0);
@@ -163,6 +171,14 @@ public class BottomFlyWheel extends SubsystemBase {
     m_rpmTable.put(5.0, 3000.0);
     m_rpmTable.put(6.0, 3200.0);
     // --- Interpolation Code END ---
+    // Populate ToF Table (Distance -> Time-of-Flight in seconds)
+    // These are sample values; tune with real ballistics data.
+    m_tofTable.put(1.0, 0.30);
+    m_tofTable.put(2.0, 0.45);
+    m_tofTable.put(3.0, 0.60);
+    m_tofTable.put(4.0, 0.80);
+    m_tofTable.put(5.0, 1.00);
+    m_tofTable.put(6.0, 1.20);
   }
   /**
    * Example command factory method.
@@ -244,11 +260,35 @@ public class BottomFlyWheel extends SubsystemBase {
     // 3. Calculate RPM and Angle
     double calculatedRpm = calculateRPM(currentDist);
     double calculatedAngle = calculateAngle(currentDist);
+    double calculatedTof = calculateToF(currentDist);
 
     // 4. Push to Dashboard so you can see it
     m_interpolatedRPM.set(calculatedRpm);
     m_interpolatedAngle.set(calculatedAngle);
+    m_interpolatedToF.set(calculatedTof);
     // --- Interpolation Code END ---
+  }
+
+  /** Helper function to calculate Time-of-Flight from Distance using Linear Interpolation. */
+  public double calculateToF(double distance) {
+    // 1. Check for exact match
+    if (m_tofTable.containsKey(distance)) return m_tofTable.get(distance);
+
+    // 2. Find neighbors
+    Map.Entry<Double, Double> floor = m_tofTable.floorEntry(distance);
+    Map.Entry<Double, Double> ceiling = m_tofTable.ceilingEntry(distance);
+
+    // 3. Handle out of bounds (Clamping to min/max)
+    if (floor == null) return ceiling.getValue(); // Lower than min distance
+    if (ceiling == null) return floor.getValue(); // Higher than max distance
+
+    // 4. Interpolate
+    double x1 = floor.getKey();
+    double y1 = floor.getValue();
+    double x2 = ceiling.getKey();
+    double y2 = ceiling.getValue();
+
+    return y1 + (distance - x1) * (y2 - y1) / (x2 - x1);
   }
 
   @Override
