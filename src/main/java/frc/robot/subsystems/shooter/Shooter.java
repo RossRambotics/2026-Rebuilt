@@ -75,8 +75,8 @@ public class Shooter extends SubsystemBase {
   public Shooter() {
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable table = inst.getTable("Shooter");
-    m_targetHoodAngleDegEntry = table.getDoubleTopic("TargetHoodAngleDeg").getEntry(0.0);
-    m_targetHoodAngleDegEntry.set(Hood.HOOD_DEGREES_MIN);
+  m_targetHoodAngleDegEntry = table.getDoubleTopic("TargetHoodAngleDeg").getEntry(0.0);
+  m_targetHoodAngleDegEntry.set(HoodConstants.HOOD_DEGREES_MIN);
 
     // Set default command to aim turret at target (normal targeting)
     m_turret.setDefaultCommand(getNormalTargetingCommand());
@@ -120,15 +120,14 @@ public class Shooter extends SubsystemBase {
     //         this.getSetTargetCmd(
     //             "Blue Neutral Target Right", new Pose3d(0.85, 6.5, 0.0, new Rotation3d())));
 
-                Shuffleboard.getTab("Shooter")
-        .add(
-            this.getSetTargetCmd(
-                "Blue Opposition Target Left", new Pose3d(2.0, 2.0, 0.0, new Rotation3d())));
-    Shuffleboard.getTab("Shooter")
-        .add(
-            this.getSetTargetCmd(
-                "Blue Opposition Target Right", new Pose3d(2.0, 6.0, 0.0, new Rotation3d())));
-
+    // Shuffleboard.getTab("Shooter")
+    //     .add(
+    //         this.getSetTargetCmd(
+    //             "Blue Opposition Target Left", new Pose3d(2.0, 2.0, 0.0, new Rotation3d())));
+    // Shuffleboard.getTab("Shooter")
+    //     .add(
+    //         this.getSetTargetCmd(
+    //             "Blue Opposition Target Right", new Pose3d(2.0, 6.0, 0.0, new Rotation3d())));
 
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 0", Degrees.of(0.0)));
 
@@ -198,7 +197,7 @@ public class Shooter extends SubsystemBase {
     Pose2d temp = getTurretPose3dFieldRelative().toPose2d();
     Pose2d turretPose = new Pose2d(temp.getX(), temp.getY(), robotPose.getRotation());
 
-  Rotation2d angleToTarget = getAngleToTarget(turretPose, m_targetPoseField3d.toPose2d());
+    Rotation2d angleToTarget = getAngleToTarget(turretPose, m_targetPoseField3d.toPose2d());
 
     // clamp the turret target to the rotation available for the turret
     double turretTargetDeg = angleToTarget.getDegrees();
@@ -267,7 +266,7 @@ public class Shooter extends SubsystemBase {
    * @return Pose3d of the turret in field-relative coordinates
    */
   public Pose3d getTurretPose3dFieldRelative() {
-  return m_turretPoseField3d;
+    return m_turretPoseField3d;
   }
 
   @Override
@@ -288,7 +287,7 @@ public class Shooter extends SubsystemBase {
    */
   private void updateFiringSolution() {
     // Shooter offset relative to robot center
-  Translation2d shooterOffsetRobot = new Translation2d(TURRET_X_OFFSET_M, TURRET_Y_OFFSET_M);
+    Translation2d shooterOffsetRobot = new Translation2d(TURRET_X_OFFSET_M, TURRET_Y_OFFSET_M);
     FiringSolution solution =
         calculateFiringSolution(
             RobotContainer.getInstance().getRobotPose2d(),
@@ -326,7 +325,7 @@ public class Shooter extends SubsystemBase {
 
       double exitVelocityMps = rpmToExitVelocity(flywheelRPM);
 
-  double heightDiffMeters = m_targetPoseField3d.getZ() - TURRET_Z_OFFSET_M;
+      double heightDiffMeters = m_targetPoseField3d.getZ() - TURRET_Z_OFFSET_M;
 
       // convert hoodRad to angle above horizontal
       hoodRad = Math.PI / 2 - hoodRad;
@@ -475,9 +474,10 @@ public class Shooter extends SubsystemBase {
                 robotPose2d.getTranslation().getX(), robotPose2d.getTranslation().getY()),
             robotPose2d.getRotation()); // turret offset
     Pose3d turretPosed3d =
-  new Pose3d(turretPose2d).plus(new Transform3d(0.0, 0.0, TURRET_Z_OFFSET_M, new Rotation3d()));
+        new Pose3d(turretPose2d)
+            .plus(new Transform3d(0.0, 0.0, TURRET_Z_OFFSET_M, new Rotation3d()));
 
-  m_turretPoseField3d = turretPosed3d;
+    m_turretPoseField3d = turretPosed3d;
   }
 
   private void setTargetName(String name) {
@@ -598,7 +598,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void launchFuelSim() {
-  Pose3d turretPoseFR = m_turretPoseField3d; // turret pose field relative
+    Pose3d turretPoseFR = m_turretPoseField3d; // turret pose field relative
     double hoodAngleRad =
         Math.PI / 2 - m_lastFiringSolution.hoodAngleRad; // switch the angle to be above horizontal
     double vel = rpmToExitVelocity(m_lastFiringSolution.flywheelRPM);

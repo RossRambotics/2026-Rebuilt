@@ -30,8 +30,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class Hood extends SubsystemBase {
-  public static final int HOOD_DEGREES_MIN = 15;
-  public static final int HOOD_DEGREES_MAX = 45;
 
   private final TalonFX hoodMotor = new TalonFX(24);
   private final SmartMotorControllerConfig motorConfig =
@@ -54,17 +52,17 @@ public class Hood extends SubsystemBase {
       new MechanismPositionConfig().withMovementPlane(Plane.XY);
   private final ArmConfig hoodConfig =
       new ArmConfig(hoodSMC)
-          .withStartingPosition(Degrees.of(Hood.HOOD_DEGREES_MIN)) // Starting position of the Pivot
+          .withStartingPosition(Degrees.of(HoodConstants.HOOD_DEGREES_MIN)) // Starting position of the Pivot
           // .withWrapping(Rotations.of(-0.5), Rotations.of(0.5))
           // .withWrapping(Degrees.of(-180), Degrees.of(180)) // Wrapping enabled bc the pivot can
           // spin
           // infinitely
           .withHardLimit(
-              Degrees.of(HOOD_DEGREES_MIN),
-              Degrees.of(HOOD_DEGREES_MAX)) // Hard limit bc wiring prevents infinite
+              Degrees.of(HoodConstants.HOOD_DEGREES_MIN),
+              Degrees.of(HoodConstants.HOOD_DEGREES_MAX)) // Hard limit bc wiring prevents infinite
           .withSoftLimits(
-              Degrees.of(HOOD_DEGREES_MIN),
-              Degrees.of(HOOD_DEGREES_MAX)) // Soft limits to prevent mechanical interference when
+              Degrees.of(HoodConstants.HOOD_DEGREES_MIN),
+              Degrees.of(HoodConstants.HOOD_DEGREES_MAX)) // Soft limits to prevent mechanical interference when
           // spinning
           .withTelemetry("HoodMech", TelemetryVerbosity.HIGH) // Telemetry
           .withLength(Meters.of(0.25))
