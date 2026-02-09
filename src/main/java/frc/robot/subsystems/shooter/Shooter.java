@@ -24,6 +24,7 @@ import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -81,10 +82,12 @@ public class Shooter extends SubsystemBase {
   private static final double TURRET_READY_DEBOUNCE_SEC = 0.10; // 100 ms
   private static final double HOOD_READY_DEBOUNCE_SEC = 0.10; // 100 ms
   private static final double BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC = 0.10; // 100 ms
+  private static final double AUTO_SHOOT_INTERVAL_SEC = 0.5; // 2 balls per second
 
   // Readiness flags
   private boolean m_isShooterReady = false;
   private boolean m_isTurretReady = false;
+  private boolean m_isSpeedReady = false;
   private boolean m_isBottomFlyWheelReady = false;
   private final Debouncer m_bottomFlywheelReadyDebouncer =
       new Debouncer(BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC); // 100 ms continuous stability
@@ -614,12 +617,13 @@ public class Shooter extends SubsystemBase {
       boolean rawHoodReady = Math.abs(currentHoodDeg - targetHoodDeg) < HOOD_ANGLE_TOLERANCE_DEG;
       m_isHoodReady = m_hoodReadyDebouncer.calculate(rawHoodReady);
 
-      // Shooter as-a-whole is ready when turret, hood, and bottom flywheel are ready
-      m_isShooterReady = m_isTurretReady && m_isHoodReady && m_isBottomFlyWheelReady;
+      // Speed readiness: robot translational speed must be under SpeedNanny's current limit
+      m_isSpeedReady = RobotContainer.getInstance().m_speedNanny.isUnderSpeedLimit();
+
+      // Shooter as-a-whole is ready when turret, hood, bottom flywheel, and speed are ready
+      m_isShooterReady =
+          m_isTurretReady && m_isHoodReady && m_isBottomFlyWheelReady && m_isSpeedReady;
     } else {
-      m_isTurretReady = false;
-      m_isBottomFlyWheelReady = false;
-      m_isHoodReady = false;
       m_isShooterReady = false;
     }
   }
@@ -706,6 +710,7 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/IsBottomFlyWheelReady", m_isBottomFlyWheelReady);
     Logger.recordOutput("Shooter/IsShooterReady", m_isShooterReady);
     Logger.recordOutput("Shooter/IsHoodReady", m_isHoodReady);
+    Logger.recordOutput("Shooter/IsSpeedReady", m_isSpeedReady);
   }
 
   public Command getSetTargetCmd(String name, Pose3d target) {
@@ -829,6 +834,25 @@ public class Shooter extends SubsystemBase {
     vy += robotVyField;
 
     return new Translation3d(vx, vy, vz);
+  }
+
+  public Command getAutoShootCmd() {
+    final double[] lastLaunchTimeSec = {0.0};
+    Command c =
+        Commands.run(
+                () -> {
+                  if (m_isShooterReady) {
+                    double nowSec = Timer.getFPGATimestamp();
+                    if (nowSec - lastLaunchTimeSec[0] >= AUTO_SHOOT_INTERVAL_SEC) {
+                      launchFuelSim();
+                      lastLaunchTimeSec[0] = nowSec;
+                    }
+                  }
+                })
+            .beforeStarting(() -> m_isShooting = true)
+            .finallyDo(() -> m_isShooting = false);
+    c.setName("AutoShoot");
+    return c;
   }
 
   public boolean isShooting() {

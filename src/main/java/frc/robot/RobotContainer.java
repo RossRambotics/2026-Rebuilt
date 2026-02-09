@@ -190,23 +190,24 @@ public class RobotContainer {
     //             () -> Rotation2d.kZero));
 
     controller.a().whileTrue(Commands.runOnce(() -> m_shooter.launchFuelSim()));
+    controller.b().whileTrue(m_shooter.getAutoShootCmd());
 
     // Robot centric drive when B button is held
-    controller
-        .b()
-        .whileTrue(
-            DriveCommands.joystickDriveRobotCentric(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                // () -> -controller.getRightX()));
-                // () -> -controller.getRawAxis(2)));
-                () -> -controller.getRawAxis(4)));
+    // controller
+    //     .b()
+    //     .whileTrue(
+    //         DriveCommands.joystickDriveRobotCentric(
+    //             drive,
+    //             () -> -controller.getLeftY(),
+    //             () -> -controller.getLeftX(),
+    //             // () -> -controller.getRightX()));
+    //             // () -> -controller.getRawAxis(2)));
+    //             () -> -controller.getRawAxis(4)));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when B button is pressed
+    // Reset gyro to 0° when Back button is pressed
     controller
         .back()
         .onTrue(

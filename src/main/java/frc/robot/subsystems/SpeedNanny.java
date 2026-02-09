@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.generated.TunerConstants;
@@ -40,6 +41,7 @@ public class SpeedNanny extends SubsystemBase {
 
     // TODO add a function to determine if robot is shooting
     if (RobotContainer.getInstance().m_shooter.isShooting()) {
+      m_speedLimit = m_kMaxSpeed * 0.5; // Reduce max speed to make it easier to aim while shooting
       m_angularRateLimit = m_kMaxAngularRate * 0.25;
       m_accelerationLimit = 1.5; // Reduce acceleration to make it easier to aim while shooting
       m_angularAccelLimit =
@@ -61,5 +63,12 @@ public class SpeedNanny extends SubsystemBase {
 
   public double getAngularAccelerationLimit() {
     return m_angularAccelLimit;
+  }
+
+  /** Returns true if the robot's translational speed is at or below the current speed limit. */
+  public boolean isUnderSpeedLimit() {
+    ChassisSpeeds speeds = RobotContainer.getInstance().getChassisSpeeds();
+    double robotSpeedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+    return robotSpeedMps <= m_speedLimit;
   }
 }
