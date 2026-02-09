@@ -198,7 +198,7 @@ public class Shooter extends SubsystemBase {
     return angleToTarget.minus(robotHeading);
   }
 
-  private Angle getTurrentTargetAnglePredicted() {
+  private Angle getTurretTargetAnglePredicted() {
     if (m_lastFiringSolution == null) {
       return getTurretTargetAngle();
     }
@@ -254,7 +254,7 @@ public class Shooter extends SubsystemBase {
     return m_turret.setAngle(
         () -> {
           if (m_isTurretActive) {
-            return getTurrentTargetAnglePredicted();
+            return getTurretTargetAnglePredicted();
           }
           return Degrees.of(0);
         });
