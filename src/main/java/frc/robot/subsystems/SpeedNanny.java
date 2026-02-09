@@ -65,10 +65,14 @@ public class SpeedNanny extends SubsystemBase {
     return m_angularAccelLimit;
   }
 
-  /** Returns true if the robot's translational speed is at or below the current speed limit. */
+  /**
+   * Returns true if the robot's translational speed and angular rate are at or below their current
+   * limits.
+   */
   public boolean isUnderSpeedLimit() {
     ChassisSpeeds speeds = RobotContainer.getInstance().getChassisSpeeds();
     double robotSpeedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-    return robotSpeedMps <= m_speedLimit;
+    double robotAngularRateRadPerSec = Math.abs(speeds.omegaRadiansPerSecond);
+    return robotSpeedMps <= m_speedLimit && robotAngularRateRadPerSec <= m_angularRateLimit;
   }
 }
