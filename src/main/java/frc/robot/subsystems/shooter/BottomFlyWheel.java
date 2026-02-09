@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 import yams.gearing.*;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
@@ -120,6 +121,10 @@ public class BottomFlyWheel extends SubsystemBase {
     return shooter.setSpeed(speed);
   }
 
+  public Command setVelocity(Supplier<AngularVelocity> speedSupplier) {
+    return shooter.setSpeed(speedSupplier);
+  }
+
   public Command setVelocity() {
     return shooter.setSpeed(() -> RPM.of(m_targetRPM.getAsDouble()));
   }
@@ -160,8 +165,8 @@ public class BottomFlyWheel extends SubsystemBase {
     m_angleTable.put(2.0, 16.3);
     m_angleTable.put(3.0, 17.3);
     m_angleTable.put(4.0, 20.8);
-    m_angleTable.put(5.0, 17.6);
-    m_angleTable.put(6.0, 19.0);
+    m_angleTable.put(5.0, 22.0);
+    m_angleTable.put(6.0, 24.0);
 
     // Populate RPM Table (Distance -> RPM)
     m_rpmTable.put(1.0, 1800.0);

@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -46,7 +47,7 @@ public class Shooter extends SubsystemBase {
   private final Turret m_turret = new Turret();
 
   // Hood and flywheel subsystems
-  private final HoodOld m_hood = new HoodOld();
+  private final Hood m_hood = new Hood();
   private final BottomFlyWheel m_bottomFlyWheel = new BottomFlyWheel();
 
   // Kicker and spindexer (intake/feeds)
@@ -75,12 +76,21 @@ public class Shooter extends SubsystemBase {
   // Readiness thresholds (allowable error)
   private static final double TURRET_ANGLE_TOLERANCE_DEG = 2.0; // degrees
   private static final double HOOD_ANGLE_TOLERANCE_DEG = 2.0; // degrees
-  private static final double BOTTOM_FLYWHEEL_RPM_TOLERANCE = 100.0; // RPM
+  private static final double BOTTOM_FLYWHEEL_RPM_TOLERANCE = 150.0; // RPM
+  // Debounce durations for readiness signals (seconds)
+  private static final double TURRET_READY_DEBOUNCE_SEC = 0.10; // 100 ms
+  private static final double HOOD_READY_DEBOUNCE_SEC = 0.10; // 100 ms
+  private static final double BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC = 0.10; // 100 ms
 
   // Readiness flags
   private boolean m_isShooterReady = false;
   private boolean m_isTurretReady = false;
   private boolean m_isBottomFlyWheelReady = false;
+  private final Debouncer m_bottomFlywheelReadyDebouncer =
+      new Debouncer(BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC); // 100 ms continuous stability
+  // Debouncers for turret and hood readiness
+  private final Debouncer m_turretReadyDebouncer = new Debouncer(TURRET_READY_DEBOUNCE_SEC);
+  private final Debouncer m_hoodReadyDebouncer = new Debouncer(HOOD_READY_DEBOUNCE_SEC);
   private boolean m_isHoodReady = false;
 
   /** Creates a new Shooter. */
@@ -92,6 +102,8 @@ public class Shooter extends SubsystemBase {
 
     // Set default command to aim turret at target (normal targeting)
     m_turret.setDefaultCommand(getPredictiveTargetingCommand());
+    m_bottomFlyWheel.setDefaultCommand(getDynamicFlywheelCommand());
+    m_hood.setDefaultCommand(getDynamicHoodCommand());
 
     // Add Shuffleboard commands to switch between targeting modes
     Shuffleboard.getTab("Shooter").add(getEnableNormalTargetingModeCmd());
@@ -196,8 +208,6 @@ public class Shooter extends SubsystemBase {
         Degrees.of(
             MathUtil.clamp(a.in(Degrees), Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX));
 
-    // TODO need to add a flag to if clamped, so that we known there is no turret based solution
-
     return a;
   }
 
@@ -247,6 +257,29 @@ public class Shooter extends SubsystemBase {
             return getTurrentTargetAnglePredicted();
           }
           return Degrees.of(0);
+        });
+  }
+
+  private Command getDynamicHoodCommand() {
+    Command c =
+        m_hood.setAngle(
+            () -> {
+              if (m_lastFiringSolution != null && m_isTurretActive) {
+                return Radians.of(m_lastFiringSolution.hoodAngleRad);
+              }
+              return Degrees.of(0);
+            });
+    c.addRequirements(m_hood);
+    return c;
+  }
+
+  private Command getDynamicFlywheelCommand() {
+    return m_bottomFlyWheel.setVelocity(
+        () -> {
+          if (m_lastFiringSolution != null && m_isTurretActive) {
+            return RPM.of(m_lastFiringSolution.flywheelRPM);
+          }
+          return RPM.of(2000);
         });
   }
 
@@ -562,21 +595,24 @@ public class Shooter extends SubsystemBase {
    */
   private void updateReadiness() {
     if (m_lastFiringSolution != null) {
-      // Turret ready when the turret error is within tolerance
-      m_isTurretReady =
+      // Turret ready when the turret error is within tolerance (debounced)
+      boolean rawTurretReady =
           m_lastFiringSolution.isTurretFeasible()
               && Math.abs(m_lastTurretErrorRobotAngle.in(Degrees)) < TURRET_ANGLE_TOLERANCE_DEG;
+      m_isTurretReady = m_turretReadyDebouncer.calculate(rawTurretReady);
 
       // Bottom flywheel readiness: compare current RPM to target RPM
       double currentBottomRpm = m_bottomFlyWheel.getVelocity().in(RPM);
       double targetBottomRpm = m_lastFiringSolution.flywheelRPM;
-      m_isBottomFlyWheelReady =
+      boolean rawBottomReady =
           Math.abs(currentBottomRpm - targetBottomRpm) < BOTTOM_FLYWHEEL_RPM_TOLERANCE;
+      m_isBottomFlyWheelReady = m_bottomFlywheelReadyDebouncer.calculate(rawBottomReady);
 
-      // Hood readiness: compare current hood angle to target hood angle (degrees)
+      // Hood readiness: compare current hood angle to target hood angle (degrees, debounced)
       double currentHoodDeg = m_hood.getAngle().in(Degrees);
       double targetHoodDeg = Radians.of(m_lastFiringSolution.hoodAngleRad).in(Degrees);
-      m_isHoodReady = Math.abs(currentHoodDeg - targetHoodDeg) < HOOD_ANGLE_TOLERANCE_DEG;
+      boolean rawHoodReady = Math.abs(currentHoodDeg - targetHoodDeg) < HOOD_ANGLE_TOLERANCE_DEG;
+      m_isHoodReady = m_hoodReadyDebouncer.calculate(rawHoodReady);
 
       // Shooter as-a-whole is ready when turret, hood, and bottom flywheel are ready
       m_isShooterReady = m_isTurretReady && m_isHoodReady && m_isBottomFlyWheelReady;
@@ -685,7 +721,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command getHoodAngleTestCmd(String name, Angle a) {
-    Command c = m_hood.getSetGoalCommand(a);
+    Command c = m_hood.setAngle(a);
     c.setName("Hood/" + name);
 
     return c;

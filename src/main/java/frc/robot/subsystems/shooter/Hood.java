@@ -11,17 +11,17 @@ import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.ArmConfig;
-import yams.mechanisms.config.MechanismPositionConfig;
-import yams.mechanisms.config.MechanismPositionConfig.Plane;
 import yams.mechanisms.positional.Arm;
 import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
@@ -36,10 +36,16 @@ public class Hood extends SubsystemBase {
   private final SmartMotorControllerConfig motorConfig =
       new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.CLOSED_LOOP)
+          // .withClosedLoopController(
+          //     80, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(180))
+          // .withSimClosedLoopController(
+          //     80, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(180))
+          // .withFeedforward(new ArmFeedforward(0.25, 0.45, 0.1))
           .withClosedLoopController(
-              8, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(180))
+              0, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(180))
           .withSimClosedLoopController(
-              25, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(180))
+              50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(180))
+          .withFeedforward(new ArmFeedforward(0.25, 0.45, 0.1, 0.01))
           // Configure Motor and Mechanism properties
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(19)))
           .withIdleMode(MotorMode.BRAKE)
@@ -50,8 +56,6 @@ public class Hood extends SubsystemBase {
           .withStatorCurrentLimit(Amps.of(40));
   private final SmartMotorController hoodSMC =
       new TalonFXWrapper(hoodMotor, DCMotor.getKrakenX44(1), motorConfig);
-  private final MechanismPositionConfig mechConfig =
-      new MechanismPositionConfig().withMovementPlane(Plane.XY);
   private final ArmConfig hoodConfig =
       new ArmConfig(hoodSMC)
           .withStartingPosition(
@@ -65,10 +69,9 @@ public class Hood extends SubsystemBase {
                   HoodConstants
                       .HOOD_DEGREES_MAX)) // Soft limits to prevent mechanical interference when
           // spinning
-          .withMechanismPositionConfig(mechConfig)
           .withTelemetry("HoodMech", TelemetryVerbosity.HIGH) // Telemetry
           .withLength(Meters.of(0.25))
-          .withMass(Pounds.of(1.0)); // MOI Calculation
+          .withMass(Pounds.of(5.0)); // MOI Calculation
 
   private final Arm hood = new Arm(hoodConfig);
 
@@ -128,6 +131,11 @@ public class Hood extends SubsystemBase {
   @Override
   public void periodic() {
     hood.updateTelemetry();
+
+    Logger.recordOutput(
+        "Shooter/HoodTargetAngleDegrees",
+        this.hood.getMechanismSetpoint().map(a -> a.in(Degrees)).orElse(Double.NaN));
+    Logger.recordOutput("Shooter/HoodCurrentDegrees", this.hood.getAngle().in(Degrees));
   }
 
   @Override
