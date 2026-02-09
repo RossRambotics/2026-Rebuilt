@@ -12,12 +12,15 @@ import frc.robot.RobotContainer;
 import frc.robot.generated.TunerConstants;
 
 public class SpeedNanny extends SubsystemBase {
+  private static final double SPEED_EPSILON_MPS = 0.01;
+  private static final double ANGULAR_RATE_EPSILON_RAD_PER_SEC = 0.01;
+
   private final double m_kMaxAcceleration = 15.0;
   private final double m_kMaxSpeed =
       TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired
   // top speed
   private double m_kMaxAngularRate =
-      RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
+      RotationsPerSecond.of(0.50).in(RadiansPerSecond); // 3/4 of a rotation per second
   // max angular velocity
   private double m_kMaxAngularAcceleration =
       RotationsPerSecondPerSecond.of(1.5).in(RadiansPerSecondPerSecond); // rad/s^2
@@ -39,10 +42,11 @@ public class SpeedNanny extends SubsystemBase {
     m_angularAccelLimit = m_kMaxAngularAcceleration;
     m_accelerationLimit = m_kMaxAcceleration;
 
-    // TODO add a function to determine if robot is shooting
     if (RobotContainer.getInstance().m_shooter.isShooting()) {
       m_speedLimit = m_kMaxSpeed * 0.5; // Reduce max speed to make it easier to aim while shooting
-      m_angularRateLimit = m_kMaxAngularRate * 0.25;
+      m_angularRateLimit =
+          m_kMaxAngularRate
+              * 0.1; // Reduce max angular rate to make it easier to aim while shooting
       m_accelerationLimit = 1.5; // Reduce acceleration to make it easier to aim while shooting
       m_angularAccelLimit =
           1.5; // Reduce angular acceleration to make it easier to aim while shooting
@@ -73,6 +77,7 @@ public class SpeedNanny extends SubsystemBase {
     ChassisSpeeds speeds = RobotContainer.getInstance().getChassisSpeeds();
     double robotSpeedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
     double robotAngularRateRadPerSec = Math.abs(speeds.omegaRadiansPerSecond);
-    return robotSpeedMps <= m_speedLimit && robotAngularRateRadPerSec <= m_angularRateLimit;
+    return robotSpeedMps <= m_speedLimit + SPEED_EPSILON_MPS
+        && robotAngularRateRadPerSec <= m_angularRateLimit + ANGULAR_RATE_EPSILON_RAD_PER_SEC;
   }
 }
