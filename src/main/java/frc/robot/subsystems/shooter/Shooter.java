@@ -390,7 +390,7 @@ public class Shooter extends SubsystemBase {
     Translation2d delta = targetFieldPos.minus(shooterFieldPos);
 
     double rawTurretAngleRad =
-        Math.atan2(delta.getY(), delta.getX()) - futurePose.getRotation().getRadians();
+        Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians();
 
     double rawTurretAngleDeg = Math.toDegrees(rawTurretAngleRad);
 
@@ -468,7 +468,7 @@ public class Shooter extends SubsystemBase {
     Translation2d delta = targetFieldPos.minus(shooterFieldPos);
 
     double rawTurretAngleRad =
-        Math.atan2(delta.getY(), delta.getX()) - futurePose.getRotation().getRadians();
+        Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians();
 
     double rawTurretAngleDeg = Math.toDegrees(rawTurretAngleRad);
 

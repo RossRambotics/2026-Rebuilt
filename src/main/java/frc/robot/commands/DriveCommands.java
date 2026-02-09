@@ -152,10 +152,7 @@ public class DriveCommands {
           // Convert to field relative speeds & send command. getLinearVelocityFromJoysticks
           // now returns meters/sec directly, so use values as-is.
           ChassisSpeeds speeds =
-              new ChassisSpeeds(
-                  linearVelocity.getX(),
-                  linearVelocity.getY(),
-                  omega * drive.getMaxAngularSpeedRadPerSec());
+              new ChassisSpeeds(linearVelocity.getX(), linearVelocity.getY(), omega);
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
                   && DriverStation.getAlliance().get() == Alliance.Red;
@@ -376,10 +373,7 @@ public class DriveCommands {
           // Convert to robot-centric speeds & send command. getLinearVelocityFromJoysticks
           // returns meters/sec directly, so use values as-is.
           ChassisSpeeds speeds =
-              new ChassisSpeeds(
-                  linearVelocity.getX(),
-                  linearVelocity.getY(),
-                  omega * drive.getMaxAngularSpeedRadPerSec());
+              new ChassisSpeeds(linearVelocity.getX(), linearVelocity.getY(), omega);
           drive.runVelocity(speeds);
         },
         drive);
