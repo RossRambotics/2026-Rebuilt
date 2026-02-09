@@ -37,15 +37,16 @@ public class Hood extends SubsystemBase {
       new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.CLOSED_LOOP)
           // .withClosedLoopController(
-          //     80, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(180))
+          //     80, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(720))
           // .withSimClosedLoopController(
-          //     80, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(180))
+          //     80, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(720))
           // .withFeedforward(new ArmFeedforward(0.25, 0.45, 0.1))
           .withClosedLoopController(
-              0, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(180))
+              50, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(720))
           .withSimClosedLoopController(
-              50, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(180))
-          .withFeedforward(new ArmFeedforward(0.25, 0.45, 0.1, 0.01))
+              50, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(720))
+          .withFeedforward(
+              new ArmFeedforward(0.25, 0.45, 0.1 / (2 * Math.PI), 0.01 / (2 * Math.PI)))
           // Configure Motor and Mechanism properties
           .withGearing(new MechanismGearing(GearBox.fromReductionStages(19)))
           .withIdleMode(MotorMode.BRAKE)
@@ -53,7 +54,7 @@ public class Hood extends SubsystemBase {
           // Setup Telemetry
           .withTelemetry("HoodMotor", TelemetryVerbosity.HIGH)
           // Power Optimization
-          .withStatorCurrentLimit(Amps.of(40));
+          .withStatorCurrentLimit(Amps.of(20));
   private final SmartMotorController hoodSMC =
       new TalonFXWrapper(hoodMotor, DCMotor.getKrakenX44(1), motorConfig);
   private final ArmConfig hoodConfig =
@@ -122,6 +123,7 @@ public class Hood extends SubsystemBase {
                   // Set the vendor motor controller's sensor position like HoodOld
                   // so the YAMS Arm reads the correct encoder value on startup.
                   hoodMotor.setPosition(Degrees.of(HoodConstants.HOOD_DEGREES_MIN));
+                  hood.setAngle(Degrees.of(HoodConstants.HOOD_DEGREES_MIN)).schedule();
                 })
             .ignoringDisable(true);
     c.setName("Hood/ResetZero");
