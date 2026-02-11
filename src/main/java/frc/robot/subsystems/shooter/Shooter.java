@@ -45,15 +45,15 @@ public class Shooter extends SubsystemBase {
   private Pose3d m_turretPoseField3d = null;
 
   // Turret subsystem (controls yaw of the shooter)
-  private final Turret m_turret = new Turret();
+  private final Turret m_turret;
 
   // Hood and flywheel subsystems
-  private final Hood m_hood = new Hood();
-  private final BottomFlyWheel m_bottomFlyWheel = new BottomFlyWheel();
+  private final Hood m_hood;
+  private final BottomFlyWheel m_bottomFlyWheel;
 
   // Kicker and spindexer (intake/feeds)
-  private final Kicker m_kicker = new Kicker();
-  private final Spindexer m_spindexer = new Spindexer();
+  private final Kicker m_kicker;
+  private final Spindexer m_spindexer;
 
   // Whether turret auto-targeting is active
   private boolean m_isTurretActive = true;
@@ -97,7 +97,13 @@ public class Shooter extends SubsystemBase {
   private boolean m_isHoodReady = false;
 
   /** Creates a new Shooter. */
-  public Shooter() {
+  public Shooter(boolean isReal) {
+    m_turret = new Turret(isReal);
+    m_hood = new Hood(isReal);
+    m_bottomFlyWheel = new BottomFlyWheel(isReal);
+    m_kicker = new Kicker(isReal);
+    m_spindexer = new Spindexer(isReal);
+
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable table = inst.getTable("Shooter");
     m_targetHoodAngleDegEntry = table.getDoubleTopic("TargetHoodAngleDeg").getEntry(0.0);

@@ -30,7 +30,6 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
-import frc.robot.subsystems.shooter.Kicker;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
@@ -56,7 +55,6 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private final Kicker m_kicker = new Kicker();
   public SpeedNanny m_speedNanny = new SpeedNanny();
 
   public Shooter m_shooter = null;
@@ -65,7 +63,7 @@ public class RobotContainer {
   public RobotContainer() {
     instance = this;
 
-    m_shooter = new Shooter();
+    m_shooter = new Shooter(false);
 
     switch (Constants.currentMode) {
       case REAL:

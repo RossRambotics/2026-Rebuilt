@@ -22,14 +22,15 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 import yams.gearing.*;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
-import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
@@ -37,6 +38,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class BottomFlyWheel extends SubsystemBase {
+
+  private final boolean m_isReal;
 
   // --- Interpolation Code START ---
   // 1. The Interpolation Table
@@ -61,46 +64,9 @@ public class BottomFlyWheel extends SubsystemBase {
 
   private DoubleEntry m_targetRPM = null;
 
-  // Vendor motor controller object
-  private TalonFX m_leftMotor = new TalonFX(35); // Use your actual CAN ID
-  private TalonFX m_rightMotor = new TalonFX(36); // Use your actual CAN ID
-
-  private SmartMotorControllerConfig smcConfig =
-      new SmartMotorControllerConfig(this)
-          .withControlMode(ControlMode.CLOSED_LOOP)
-          // Feedback Constants (PID Constants)
-          .withClosedLoopController(
-              0, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
-          .withSimClosedLoopController(
-              50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
-          // Feedforward Constants
-          .withFeedforward(new SimpleMotorFeedforward(0, .12, 0))
-          .withSimFeedforward(new SimpleMotorFeedforward(0, .52, .34))
-          // Telemetry name and verbosity level
-          .withTelemetry("BottomFlyWheelMotor", TelemetryVerbosity.HIGH)
-          .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
-          // Motor properties to prevent over currenting.
-          .withMotorInverted(false)
-          .withIdleMode(MotorMode.COAST)
-          .withFollowers(new Pair<Object, Boolean>(m_rightMotor, true))
-          .withStatorCurrentLimit(Amps.of(40));
-
-  private SmartMotorController falconSmartMotorController =
-      new TalonFXWrapper(m_leftMotor, DCMotor.getKrakenX60(2), smcConfig);
-
-  private final FlyWheelConfig shooterConfig =
-      new FlyWheelConfig(falconSmartMotorController)
-          // Diameter of the flywheel.
-          .withDiameter(Inches.of(4))
-          // Mass of the flywheel.
-          .withMass(Pounds.of(1))
-          // Maximum speed of the shooter.
-          .withUpperSoftLimit(RPM.of(1000))
-          // Telemetry name and verbosity for the arm.
-          .withTelemetry("BottomFlyWheel", TelemetryVerbosity.HIGH);
-
-  // Shooter Mechanism
-  private FlyWheel shooter = new FlyWheel(shooterConfig);
+  // Shooter Mechanism (null when stubbed)
+  private FlyWheel shooter;
+  private AngularVelocity m_stubbedVelocity = RPM.of(0);
 
   /**
    * Gets the current velocity of the shooter.
@@ -108,7 +74,8 @@ public class BottomFlyWheel extends SubsystemBase {
    * @return Shooter velocity.
    */
   public AngularVelocity getVelocity() {
-    return shooter.getSpeed();
+    if (shooter != null) return shooter.getSpeed();
+    return m_stubbedVelocity;
   }
 
   /**
@@ -118,15 +85,18 @@ public class BottomFlyWheel extends SubsystemBase {
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command setVelocity(AngularVelocity speed) {
-    return shooter.setSpeed(speed);
+    if (shooter != null) return shooter.setSpeed(speed);
+    return Commands.run(() -> m_stubbedVelocity = speed, this);
   }
 
   public Command setVelocity(Supplier<AngularVelocity> speedSupplier) {
-    return shooter.setSpeed(speedSupplier);
+    if (shooter != null) return shooter.setSpeed(speedSupplier);
+    return Commands.run(() -> m_stubbedVelocity = speedSupplier.get(), this);
   }
 
   public Command setVelocity() {
-    return shooter.setSpeed(() -> RPM.of(m_targetRPM.getAsDouble()));
+    if (shooter != null) return shooter.setSpeed(() -> RPM.of(m_targetRPM.getAsDouble()));
+    return Commands.run(() -> m_stubbedVelocity = RPM.of(m_targetRPM.getAsDouble()), this);
   }
 
   /**
@@ -136,12 +106,57 @@ public class BottomFlyWheel extends SubsystemBase {
    * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
    */
   public Command set(double dutyCycle) {
-    return shooter.set(dutyCycle);
+    if (shooter != null) return shooter.set(dutyCycle);
+    return Commands.run(() -> {}, this);
   }
 
   /** Creates a new BottomSubsystem. */
-  public BottomFlyWheel() {
-    m_rightMotor.setControl(new Follower(m_leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
+  public BottomFlyWheel(boolean isReal) {
+    m_isReal = isReal;
+
+    if (m_isReal) {
+      // Vendor motor controller objects
+      TalonFX leftMotor = new TalonFX(35); // Use your actual CAN ID
+      TalonFX rightMotor = new TalonFX(36); // Use your actual CAN ID
+
+      SmartMotorControllerConfig smcConfig =
+          new SmartMotorControllerConfig(this)
+              .withControlMode(ControlMode.CLOSED_LOOP)
+              // Feedback Constants (PID Constants)
+              .withClosedLoopController(
+                  0, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
+              .withSimClosedLoopController(
+                  50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
+              // Feedforward Constants
+              .withFeedforward(new SimpleMotorFeedforward(0, .12, 0))
+              .withSimFeedforward(new SimpleMotorFeedforward(0, .52, .34))
+              // Telemetry name and verbosity level
+              .withTelemetry("BottomFlyWheelMotor", TelemetryVerbosity.HIGH)
+              .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
+              // Motor properties to prevent over currenting.
+              .withMotorInverted(false)
+              .withIdleMode(MotorMode.COAST)
+              .withFollowers(new Pair<Object, Boolean>(rightMotor, true))
+              .withStatorCurrentLimit(Amps.of(40));
+
+      var falconSmartMotorController =
+          new TalonFXWrapper(leftMotor, DCMotor.getKrakenX60(2), smcConfig);
+
+      FlyWheelConfig shooterConfig =
+          new FlyWheelConfig(falconSmartMotorController)
+              // Diameter of the flywheel.
+              .withDiameter(Inches.of(4))
+              // Mass of the flywheel.
+              .withMass(Pounds.of(1))
+              // Maximum speed of the shooter.
+              .withUpperSoftLimit(RPM.of(1000))
+              // Telemetry name and verbosity for the arm.
+              .withTelemetry("BottomFlyWheel", TelemetryVerbosity.HIGH);
+
+      shooter = new FlyWheel(shooterConfig);
+
+      rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Opposed));
+    }
 
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable table = inst.getTable("Shooter");
@@ -186,6 +201,7 @@ public class BottomFlyWheel extends SubsystemBase {
     m_tofTable.put(5.0, 1.326 + tune);
     m_tofTable.put(6.0, 1.394 + tune);
   }
+
   /**
    * Example command factory method.
    *
@@ -256,8 +272,12 @@ public class BottomFlyWheel extends SubsystemBase {
 
   @Override
   public void periodic() {
+    Logger.recordOutput("BottomFlyWheel/IsStubbed", !m_isReal);
+
     // 1. Update Telemetry
-    shooter.updateTelemetry();
+    if (shooter != null) {
+      shooter.updateTelemetry();
+    }
 
     // --- Interpolation Code START ---
     // 2. Get the current distance
@@ -300,6 +320,8 @@ public class BottomFlyWheel extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
-    shooter.simIterate();
+    if (shooter != null) {
+      shooter.simIterate();
+    }
   }
 }

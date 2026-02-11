@@ -19,12 +19,13 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
-import yams.motorcontrollers.SmartMotorController;
 import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
@@ -33,85 +34,90 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class Kicker extends SubsystemBase {
 
-  // --- CONFIGURATION ---
-  private SmartMotorControllerConfig smcConfig =
-      new SmartMotorControllerConfig(this)
-          .withControlMode(ControlMode.CLOSED_LOOP)
-          // Feedback Constants (PID Constants)
-          .withClosedLoopController(
-              0, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
-          .withSimClosedLoopController(
-              50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
-          // Feedforward Constants
-          .withFeedforward(new SimpleMotorFeedforward(0, .12, 0))
-          .withSimFeedforward(new SimpleMotorFeedforward(0, .52, .34))
-          // Telemetry name and verbosity level
-          .withTelemetry("Kicker", TelemetryVerbosity.HIGH)
-          .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
-          // Motor properties to prevent over currenting.
-          .withMotorInverted(false)
-          .withIdleMode(MotorMode.COAST)
-          .withStatorCurrentLimit(Amps.of(40));
-
-  private TalonFX kickerMotor = new TalonFX(38);
-
-  // WRAPPER: Use TalonFXWrapper and Falcon500 simulation physics
-  private SmartMotorController kickerController =
-      new TalonFXWrapper(kickerMotor, DCMotor.getFalcon500(1), smcConfig);
-
-  private final FlyWheelConfig kickerConfig =
-      new FlyWheelConfig(kickerController)
-          // Diameter of the flywheel.
-          .withDiameter(Inches.of(4))
-          // Mass of the flywheel.
-          .withMass(Pounds.of(1))
-          // Maximum speed of the shooter.
-          .withUpperSoftLimit(RPM.of(1000))
-          .withTelemetry("KickerMech", TelemetryVerbosity.LOW);
-
-  private FlyWheel kicker = new FlyWheel(kickerConfig);
-
+  private final boolean m_isReal;
+  private FlyWheel kicker;
+  private AngularVelocity m_stubbedVelocity = RPM.of(0);
   private DoubleEntry m_kickerTargetRPM = null;
+
   /** Creates a new Kicker. */
-  public Kicker() {
+  public Kicker(boolean isReal) {
+    m_isReal = isReal;
+
+    if (m_isReal) {
+      SmartMotorControllerConfig smcConfig =
+          new SmartMotorControllerConfig(this)
+              .withControlMode(ControlMode.CLOSED_LOOP)
+              .withClosedLoopController(
+                  0, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
+              .withSimClosedLoopController(
+                  50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
+              .withFeedforward(new SimpleMotorFeedforward(0, .12, 0))
+              .withSimFeedforward(new SimpleMotorFeedforward(0, .52, .34))
+              .withTelemetry("Kicker", TelemetryVerbosity.HIGH)
+              .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
+              .withMotorInverted(false)
+              .withIdleMode(MotorMode.COAST)
+              .withStatorCurrentLimit(Amps.of(40));
+
+      TalonFX kickerMotor = new TalonFX(38);
+      var kickerController = new TalonFXWrapper(kickerMotor, DCMotor.getFalcon500(1), smcConfig);
+
+      FlyWheelConfig kickerConfig =
+          new FlyWheelConfig(kickerController)
+              .withDiameter(Inches.of(4))
+              .withMass(Pounds.of(1))
+              .withUpperSoftLimit(RPM.of(1000))
+              .withTelemetry("KickerMech", TelemetryVerbosity.LOW);
+
+      kicker = new FlyWheel(kickerConfig);
+    }
 
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable table = inst.getTable("Shooter");
-
-    // Target RPM setup
     m_kickerTargetRPM = table.getDoubleTopic("KickerTargetRPM").getEntry(0.0);
     m_kickerTargetRPM.set(0.0);
   }
 
   /** Run the kicker at a set speed (0.0 to 1.0). Positive usually feeds INTO the shooter. */
   public Command runKicker(double percentOutput) {
-    return kicker.set(percentOutput);
+    if (kicker != null) return kicker.set(percentOutput);
+    return Commands.run(() -> {}, this);
   }
 
   /** Stop the kicker immediately. */
   public Command stop() {
-    return kicker.set(0.0);
+    if (kicker != null) return kicker.set(0.0);
+    return Commands.run(() -> m_stubbedVelocity = RPM.of(0), this);
   }
 
   @Override
   public void periodic() {
-    // kicker.updateTelemetry();
+    Logger.recordOutput("Kicker/IsStubbed", !m_isReal);
+
+    if (kicker != null) {
+      kicker.updateTelemetry();
+    }
   }
 
   @Override
   public void simulationPeriodic() {
-    kicker.simIterate();
+    if (kicker != null) {
+      kicker.simIterate();
+    }
   }
 
   public Command setVelocity(AngularVelocity speed) {
-    return kicker.setSpeed(speed);
+    if (kicker != null) return kicker.setSpeed(speed);
+    return Commands.run(() -> m_stubbedVelocity = speed, this);
   }
 
   public Command setVelocity() {
-    return kicker.setSpeed(() -> RPM.of(m_kickerTargetRPM.getAsDouble()));
+    if (kicker != null) return kicker.setSpeed(() -> RPM.of(m_kickerTargetRPM.getAsDouble()));
+    return Commands.run(() -> m_stubbedVelocity = RPM.of(m_kickerTargetRPM.getAsDouble()), this);
   }
 
   public AngularVelocity getVelocity() {
-    return kicker.getSpeed();
+    if (kicker != null) return kicker.getSpeed();
+    return m_stubbedVelocity;
   }
 }
