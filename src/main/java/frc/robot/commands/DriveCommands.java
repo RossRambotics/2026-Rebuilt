@@ -82,6 +82,13 @@ public class DriveCommands {
     }
 
     Translation2d limitedVel = m_prevLinearVel.plus(delta);
+
+    // Clamp to speed limit in case limit was reduced while moving
+    double limitedVelMag = limitedVel.getNorm();
+    if (limitedVelMag > speedLimit) {
+      limitedVel = limitedVel.times(speedLimit / limitedVelMag);
+    }
+
     m_prevLinearVel = limitedVel;
 
     return limitedVel;
@@ -127,6 +134,10 @@ public class DriveCommands {
     }
 
     double limitedOmega = m_prevAngularVel + delta;
+
+    // Clamp to angular rate limit in case limit was reduced while rotating
+    limitedOmega = MathUtil.clamp(limitedOmega, -angularRateLimit, angularRateLimit);
+
     m_prevAngularVel = limitedOmega;
 
     return limitedOmega;

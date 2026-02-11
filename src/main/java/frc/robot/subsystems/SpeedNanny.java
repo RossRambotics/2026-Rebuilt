@@ -10,10 +10,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.generated.TunerConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class SpeedNanny extends SubsystemBase {
-  private static final double SPEED_EPSILON_MPS = 0.01;
-  private static final double ANGULAR_RATE_EPSILON_RAD_PER_SEC = 0.01;
+  private static final double LOOP_PERIOD_SEC =
+      0.02; // 20 ms loop period, used to calculate epsilon for speed checks based on max
+  // acceleration
 
   private final double m_kMaxAcceleration = 15.0;
   private final double m_kMaxSpeed =
@@ -77,7 +79,28 @@ public class SpeedNanny extends SubsystemBase {
     ChassisSpeeds speeds = RobotContainer.getInstance().getChassisSpeeds();
     double robotSpeedMps = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
     double robotAngularRateRadPerSec = Math.abs(speeds.omegaRadiansPerSecond);
-    return robotSpeedMps <= m_speedLimit + SPEED_EPSILON_MPS
-        && robotAngularRateRadPerSec <= m_angularRateLimit + ANGULAR_RATE_EPSILON_RAD_PER_SEC;
+
+    double speedEpsilonMps = m_kMaxAcceleration * LOOP_PERIOD_SEC;
+    double angularRateEpsilonRadPerSec = m_kMaxAngularAcceleration * LOOP_PERIOD_SEC;
+
+    boolean speedCheck = robotSpeedMps <= m_speedLimit + speedEpsilonMps;
+    boolean angularRateCheck =
+        robotAngularRateRadPerSec <= m_angularRateLimit + angularRateEpsilonRadPerSec;
+    boolean isUnderLimit = speedCheck && angularRateCheck;
+
+    Logger.recordOutput("SpeedNanny/CurrentSpeed_mps", robotSpeedMps);
+    Logger.recordOutput("SpeedNanny/SpeedLimit_mps", m_speedLimit);
+    Logger.recordOutput("SpeedNanny/AccelerationLimit_mps2", m_accelerationLimit);
+    Logger.recordOutput("SpeedNanny/SpeedWithEpsilon_mps", m_speedLimit + speedEpsilonMps);
+    Logger.recordOutput("SpeedNanny/CurrentAngularRate_radPerSec", robotAngularRateRadPerSec);
+    Logger.recordOutput("SpeedNanny/AngularRateLimit_radPerSec", m_angularRateLimit);
+    Logger.recordOutput(
+        "SpeedNanny/AngularRateWithEpsilon_radPerSec",
+        m_angularRateLimit + angularRateEpsilonRadPerSec);
+    Logger.recordOutput("SpeedNanny/SpeedCheck", speedCheck);
+    Logger.recordOutput("SpeedNanny/AngularRateCheck", angularRateCheck);
+    Logger.recordOutput("SpeedNanny/IsUnderSpeedLimit", isUnderLimit);
+
+    return isUnderLimit;
   }
 }
