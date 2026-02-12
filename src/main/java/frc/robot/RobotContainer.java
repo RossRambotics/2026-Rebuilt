@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.OperatorControls;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.SpeedNanny;
 import frc.robot.subsystems.drive.Drive;
@@ -60,6 +61,9 @@ public class RobotContainer {
   public SpeedNanny m_speedNanny = new SpeedNanny();
 
   public Shooter m_shooter = null;
+
+  // All subsystems bundled for passing to OperatorControls, commands, etc.
+  private Subsystems m_subsystems;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -133,6 +137,9 @@ public class RobotContainer {
         break;
     }
 
+    // Bundle subsystems for OperatorControls and other consumers
+    m_subsystems = new Subsystems(drive, m_shooter);
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -203,6 +210,9 @@ public class RobotContainer {
     //             // () -> -controller.getRightX()));
     //             // () -> -controller.getRawAxis(2)));
     //             () -> -controller.getRawAxis(4)));
+
+    // Student-owned operator controls (hood retraction, bump traversal, passing mode, etc.)
+    new OperatorControls(m_subsystems, controller).configureControls();
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));

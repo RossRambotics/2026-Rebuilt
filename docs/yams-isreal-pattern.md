@@ -151,4 +151,3 @@ m_shooter = new Shooter(false);  // stubbed mode for testing
 - Follower motor setup (e.g., `rightMotor.setControl(new Follower(...))`) must be inside the `if (m_isReal)` block
 - Use `!m_isReal` for telemetry value (key is "IsStubbed", true when stubbed)
 - Don't remove existing comments when refactoring
-

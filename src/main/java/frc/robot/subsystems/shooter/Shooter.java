@@ -670,7 +670,7 @@ public class Shooter extends SubsystemBase {
         RobotContainer.getInstance().getRobotPose2d().getRotation().getDegrees();
     Logger.recordOutput("Shooter/robotHeadingFieldDeg", robotHeadingDeg);
 
-    Logger.recordOutput("Shooter/TurretCurrentDegRobot", m_turret.getAngle().in(Degrees));
+    Logger.recordOutput("Shooter/TurretActualDegRobot", m_turret.getAngle().in(Degrees));
     Logger.recordOutput("Shooter/TurretTargetDegRobot", m_turretTargetRobotAngle.in(Degrees));
     Logger.recordOutput("Shooter/TurretErrorDeg", m_lastTurretErrorRobotAngle.in(Degrees));
 
@@ -686,7 +686,8 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput("Shooter/FutureRobotPoseDistanceMeters", predictedDistanceMeters);
       Logger.recordOutput("Shooter/TimeOfFlightSec", solution.tofSec);
       Logger.recordOutput(
-          "Shooter/CalculatedHoodAngleDeg", Radians.of(solution.hoodAngleRad).in(Degrees));
+          "Shooter/HoodTargetAngleDeg", Radians.of(solution.hoodAngleRad).in(Degrees));
+      Logger.recordOutput("Shooter/HoodActualAngleDeg", m_hood.getAngle().in(Degrees));
       Logger.recordOutput("Shooter/CalculatedFlyWheelRPM", solution.flywheelRPM);
       Logger.recordOutput(
           "Shooter/CalculatedTurretAngleDeg", Radians.of(solution.turretAngleRad).in(Degrees));
@@ -863,5 +864,14 @@ public class Shooter extends SubsystemBase {
 
   public boolean isShooting() {
     return m_isShooting;
+  }
+
+  /**
+   * Returns a command that retracts the hood to its minimum angle. While this command is running,
+   * the hood's default (auto-aiming) command is paused. When this command ends, the default command
+   * resumes automatically.
+   */
+  public Command getRetractHoodCmd() {
+    return m_hood.setAngle(Degrees.of(HoodConstants.HOOD_DEGREES_MIN));
   }
 }
