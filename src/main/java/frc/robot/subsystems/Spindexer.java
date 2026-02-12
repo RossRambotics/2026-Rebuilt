@@ -122,4 +122,11 @@ public class Spindexer extends SubsystemBase {
     if (spindexer != null) return spindexer.getSpeed();
     return m_stubbedVelocity;
   }
+
+  public AngularVelocity getTargetVelocity() {
+    if (spindexer != null) {
+      return spindexer.getMotorController().getMechanismSetpointVelocity().orElse(RPM.of(0));
+    }
+    return m_stubbedVelocity;
+  }
 }

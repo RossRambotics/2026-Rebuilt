@@ -120,4 +120,11 @@ public class Kicker extends SubsystemBase {
     if (kicker != null) return kicker.getSpeed();
     return m_stubbedVelocity;
   }
+
+  public AngularVelocity getTargetVelocity() {
+    if (kicker != null) {
+      return kicker.getMotorController().getMechanismSetpointVelocity().orElse(RPM.of(0));
+    }
+    return m_stubbedVelocity;
+  }
 }

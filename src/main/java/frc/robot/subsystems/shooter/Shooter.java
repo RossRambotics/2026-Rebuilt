@@ -688,7 +688,7 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput(
           "Shooter/HoodTargetAngleDeg", Radians.of(solution.hoodAngleRad).in(Degrees));
       Logger.recordOutput("Shooter/HoodActualAngleDeg", m_hood.getAngle().in(Degrees));
-      Logger.recordOutput("Shooter/CalculatedFlyWheelRPM", solution.flywheelRPM);
+      Logger.recordOutput("Shooter/FlyWheelTargetRPM", solution.flywheelRPM);
       Logger.recordOutput(
           "Shooter/CalculatedTurretAngleDeg", Radians.of(solution.turretAngleRad).in(Degrees));
 
@@ -709,9 +709,11 @@ public class Shooter extends SubsystemBase {
         "Shooter/ChassisSpeeds.omegaRadPerSec", chassisSpeeds.omegaRadiansPerSecond);
 
     // On-target and motor readings
-    Logger.recordOutput("Shooter/BottomFlyWheelRPM", m_bottomFlyWheel.getVelocity().in(RPM));
-    Logger.recordOutput("Shooter/KickerRPM", m_kicker.getVelocity().in(RPM));
-    Logger.recordOutput("Shooter/SpindexerRPM", m_spindexer.getVelocity().in(RPM));
+    Logger.recordOutput("Shooter/FlyWheelActualRPM", m_bottomFlyWheel.getVelocity().in(RPM));
+    Logger.recordOutput("Shooter/KickerActualRPM", m_kicker.getVelocity().in(RPM));
+    Logger.recordOutput("Shooter/KickerTargetRPM", m_kicker.getTargetVelocity().in(RPM));
+    Logger.recordOutput("Shooter/SpindexerActualRPM", m_spindexer.getVelocity().in(RPM));
+    Logger.recordOutput("Shooter/SpindexerTargetRPM", m_spindexer.getTargetVelocity().in(RPM));
     // Readiness indicators
     Logger.recordOutput("Shooter/IsTurretReady", m_isTurretReady);
     Logger.recordOutput("Shooter/IsBottomFlyWheelReady", m_isBottomFlyWheelReady);
