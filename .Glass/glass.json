@@ -78,11 +78,20 @@
       "/Shuffleboard/Hood/Hood.ZeroAngle": "Command",
       "/Shuffleboard/Hood/Hood/Hood Angle 0": "Command",
       "/Shuffleboard/Hood/Hood/Hood Angle 20": "Command",
+      "/Shuffleboard/Hood/Hood/Hood Angle 25": "Command",
       "/Shuffleboard/Hood/Hood/Hood Angle 30": "Command",
+      "/Shuffleboard/Hood/Hood/Hood Angle 35": "Command",
       "/Shuffleboard/Hood/Hood/Hood Angle 40": "Command",
+      "/Shuffleboard/Hood/Hood/Hood Angle 45": "Command",
       "/Shuffleboard/Hood/Hood/ResetZero": "Command",
       "/Shuffleboard/Kicker/Kicker/Kicker Dynamic": "Command",
+      "/Shuffleboard/Shooter/NormalTargeting": "Command",
+      "/Shuffleboard/Shooter/PredictiveTargeting": "Command",
       "/Shuffleboard/Shooter/Target/Blue Hub": "Command",
+      "/Shuffleboard/Shooter/Target/Blue Neutral Target Left": "Command",
+      "/Shuffleboard/Shooter/Target/Blue Neutral Target Right": "Command",
+      "/Shuffleboard/Shooter/Target/Blue Opposition Target Left": "Command",
+      "/Shuffleboard/Shooter/Target/Blue Opposition Target Right": "Command",
       "/Shuffleboard/Shooter/Target/Red Hub": "Command",
       "/Shuffleboard/Spindexer/Spindexer/Spindexer Dynamic": "Command",
       "/SmartDashboard/Alerts": "Alerts",
@@ -91,6 +100,10 @@
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/Up": "Command",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Hood/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/HoodMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/HoodMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/HoodMotor/ZeroEncoder": "Command",
       "/SmartDashboard/Mechanisms/Commands/Kicker/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/Kicker/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/Kicker/Up": "Command",
@@ -134,7 +147,7 @@
           "visible": true
         }
       },
-      "/Shuffleboard/Hood/Hood/Hood Angle 20": {
+      "/Shuffleboard/Hood/Hood/Hood Angle 0": {
         "window": {
           "visible": true
         }
@@ -144,7 +157,17 @@
           "visible": true
         }
       },
+      "/Shuffleboard/Hood/Hood/Hood Angle 35": {
+        "window": {
+          "visible": true
+        }
+      },
       "/Shuffleboard/Hood/Hood/Hood Angle 40": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/Shuffleboard/Hood/Hood/Hood Angle 45": {
         "window": {
           "visible": true
         }
@@ -160,6 +183,11 @@
         }
       },
       "/Shuffleboard/Spindexer/Spindexer/Spindexer Dynamic": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Auto Choices": {
         "window": {
           "visible": true
         }

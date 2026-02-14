@@ -163,7 +163,7 @@ public class DriveCommands {
           // Convert to field relative speeds & send command. getLinearVelocityFromJoysticks
           // now returns meters/sec directly, so use values as-is.
           ChassisSpeeds speeds =
-              new ChassisSpeeds(linearVelocity.getX(), linearVelocity.getY(), omega);
+              new ChassisSpeeds(linearVelocity.getX(), linearVelocity.getY(), omega * 10);
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
                   && DriverStation.getAlliance().get() == Alliance.Red;

@@ -42,7 +42,7 @@ public class Turret extends SubsystemBase {
     m_isReal = isReal;
 
     if (m_isReal) {
-      TalonFX turretMotor = new TalonFX(1);
+      TalonFX turretMotor = new TalonFX(40);
 
       SmartMotorControllerConfig motorConfig =
           new SmartMotorControllerConfig(this)

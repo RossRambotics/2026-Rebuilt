@@ -98,7 +98,7 @@ public class Shooter extends SubsystemBase {
 
   /** Creates a new Shooter. */
   public Shooter(boolean isReal) {
-    m_turret = new Turret(isReal);
+    m_turret = new Turret(false);
     m_hood = new Hood(isReal);
     m_bottomFlyWheel = new BottomFlyWheel(isReal);
     m_kicker = new Kicker(isReal);
@@ -166,7 +166,9 @@ public class Shooter extends SubsystemBase {
 
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 20", Degrees.of(20.0)));
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 30", Degrees.of(30.0)));
+    Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 35", Degrees.of(35.0)));
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 40", Degrees.of(40.0)));
+    Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 45", Degrees.of(45.0)));
     Shuffleboard.getTab("Hood").add(m_hood.getZeroHoodAngleCmd());
 
     Shuffleboard.getTab("BottomFlyWheel").add(this.getFlyWheelRPMCmd("Bottom Flywheel 0 RPM", 0.0));

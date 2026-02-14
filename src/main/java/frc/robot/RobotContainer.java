@@ -69,7 +69,7 @@ public class RobotContainer {
   public RobotContainer() {
     instance = this;
 
-    m_shooter = new Shooter(false);
+    m_shooter = new Shooter(true);
 
     switch (Constants.currentMode) {
       case REAL:
