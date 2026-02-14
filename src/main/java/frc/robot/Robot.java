@@ -7,8 +7,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.util.FuelSim;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -92,7 +94,9 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    setLimelightThrottle(100);
+  }
 
   /** This function is called periodically when disabled. */
   @Override
@@ -101,6 +105,7 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    setLimelightThrottle(1);
     autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -116,6 +121,7 @@ public class Robot extends LoggedRobot {
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
+    setLimelightThrottle(1);
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
@@ -148,5 +154,12 @@ public class Robot extends LoggedRobot {
   @Override
   public void simulationPeriodic() {
     FuelSim.getInstance().updateSim();
+  }
+
+  /** Sets the throttle_set value on both Limelights. */
+  private void setLimelightThrottle(int throttle) {
+    var nt = NetworkTableInstance.getDefault();
+    nt.getTable(VisionConstants.camera0Name).getEntry("throttle_set").setInteger(throttle);
+    nt.getTable(VisionConstants.camera1Name).getEntry("throttle_set").setInteger(throttle);
   }
 }
