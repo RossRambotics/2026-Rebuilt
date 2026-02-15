@@ -52,4 +52,11 @@ public class VisionConstants {
   public static double linearStdDevMegatag2Factor = 0.5; // More stable than full 3D solve
   public static double angularStdDevMegatag2Factor =
       Double.POSITIVE_INFINITY; // No rotation data available
+
+  // Gyro yaw validation
+  public static double gyroYawToleranceDeg = 5.0; // All yaws must agree within this
+
+  // MegaTag 1 reseed quality thresholds (stricter than general filtering)
+  public static int reseedMinTagCount = 2;
+  public static double reseedMaxAverageDistanceMeters = 4.0;
 }

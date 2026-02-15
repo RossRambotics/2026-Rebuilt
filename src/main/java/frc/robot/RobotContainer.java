@@ -95,6 +95,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
+                drive::getPose,
+                drive::setPose,
                 new VisionIOLimelight(camera0Name, drive::getRotation),
                 new VisionIOLimelight(camera1Name, drive::getRotation));
         // vision =
@@ -118,6 +120,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
+                drive::getPose,
+                drive::setPose,
                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
         break;
@@ -133,7 +137,13 @@ public class RobotContainer {
 
         // Replayed robot, disable IO implementations
         // (Use same number of dummy implementations as the real robot)
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                drive::getPose,
+                drive::setPose,
+                new VisionIO() {},
+                new VisionIO() {});
         break;
     }
 
@@ -161,6 +171,20 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+
+    // Dashboard buttons for gyro mode switching and reseed
+    SmartDashboard.putData(
+        Commands.runOnce(() -> vision.enableVisionGyro())
+            .withName("Enable Vision Gyro")
+            .ignoringDisable(true));
+    SmartDashboard.putData(
+        Commands.runOnce(() -> vision.enableNormalGyro())
+            .withName("Enable Normal Gyro")
+            .ignoringDisable(true));
+    SmartDashboard.putData(
+        Commands.runOnce(() -> vision.reseedFromVision())
+            .withName("Reseed Gyro From Vision")
+            .ignoringDisable(true));
 
     // Configure FuelSim for sim
     if (Constants.currentMode == Constants.Mode.SIM) {
