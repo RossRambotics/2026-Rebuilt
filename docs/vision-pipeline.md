@@ -84,4 +84,4 @@ If you want, I can:
 - Add the suggested telemetry to `Vision` or `VisionIOLimelight` (I can implement a small `Logger.recordOutput` for the last topic and timestamp),
 - Or add a Shuffleboard control that sets the Limelight `pipeline` entry from code.
 
-Tell me which one you'd like and I will implement it. 
+Tell me which one you'd like and I will implement it.
