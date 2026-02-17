@@ -37,9 +37,9 @@ import org.littletonrobotics.junction.Logger;
 public class Shooter extends SubsystemBase {
   // TODO update the location of the turret relative to the robot
   // Turret offsets from robot center (meters)
-  private final double TURRET_X_OFFSET_M = 0.25; // meters
-  private final double TURRET_Y_OFFSET_M = -0.25; // meters
-  private final double TURRET_Z_OFFSET_M = 0.55; // meters
+  private final double TURRET_X_OFFSET_M = 0.12; // meters
+  private final double TURRET_Y_OFFSET_M = -0.12; // meters
+  private final double TURRET_Z_OFFSET_M = 0.35; // meters
 
   // Turret pose in field-relative coordinates (Pose3d)
   private Pose3d m_turretPoseField3d = null;
@@ -70,7 +70,8 @@ public class Shooter extends SubsystemBase {
   private Angle m_lastTurretErrorRobotAngle = Degrees.of(0);
   // Shuffleboard entry: target hood angle in degrees
   private DoubleEntry m_targetHoodAngleDegEntry = null; // Shuffleboard entry (Deg)
-  // Last hood angle and flywheel RPM are tracked in telemetry via Logger; remove redundant fields
+  // Last hood angle and flywheel RPM are tracked in telemetry via Logger; remove
+  // redundant fields
   private FiringSolution m_lastFiringSolution = null;
   private boolean m_isShooting = false;
 
@@ -90,7 +91,9 @@ public class Shooter extends SubsystemBase {
   private boolean m_isSpeedReady = false;
   private boolean m_isBottomFlyWheelReady = false;
   private final Debouncer m_bottomFlywheelReadyDebouncer =
-      new Debouncer(BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC); // 100 ms continuous stability
+      new Debouncer(BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC); // 100 ms
+  // continuous
+  // stability
   // Debouncers for turret and hood readiness
   private final Debouncer m_turretReadyDebouncer = new Debouncer(TURRET_READY_DEBOUNCE_SEC);
   private final Debouncer m_hoodReadyDebouncer = new Debouncer(HOOD_READY_DEBOUNCE_SEC);
@@ -145,22 +148,23 @@ public class Shooter extends SubsystemBase {
         .add(this.getSetTargetCmd("Red Hub", new Pose3d(12.0, 4.1, 1.83, new Rotation3d())));
 
     // Shuffleboard.getTab("Shooter")
-    //     .add(
-    //         this.getSetTargetCmd(
-    //             "Blue Neutral Target Left", new Pose3d(0.85, 1.5, 0.0, new Rotation3d())));
+    // .add(
+    // this.getSetTargetCmd(
+    // "Blue Neutral Target Left", new Pose3d(0.85, 1.5, 0.0, new Rotation3d())));
     // Shuffleboard.getTab("Shooter")
-    //     .add(
-    //         this.getSetTargetCmd(
-    //             "Blue Neutral Target Right", new Pose3d(0.85, 6.5, 0.0, new Rotation3d())));
+    // .add(
+    // this.getSetTargetCmd(
+    // "Blue Neutral Target Right", new Pose3d(0.85, 6.5, 0.0, new Rotation3d())));
 
     // Shuffleboard.getTab("Shooter")
-    //     .add(
-    //         this.getSetTargetCmd(
-    //             "Blue Opposition Target Left", new Pose3d(2.0, 2.0, 0.0, new Rotation3d())));
+    // .add(
+    // this.getSetTargetCmd(
+    // "Blue Opposition Target Left", new Pose3d(2.0, 2.0, 0.0, new Rotation3d())));
     // Shuffleboard.getTab("Shooter")
-    //     .add(
-    //         this.getSetTargetCmd(
-    //             "Blue Opposition Target Right", new Pose3d(2.0, 6.0, 0.0, new Rotation3d())));
+    // .add(
+    // this.getSetTargetCmd(
+    // "Blue Opposition Target Right", new Pose3d(2.0, 6.0, 0.0, new
+    // Rotation3d())));
 
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 0", Degrees.of(0.0)));
 
@@ -226,7 +230,8 @@ public class Shooter extends SubsystemBase {
     Pose2d robotPose = RobotContainer.getInstance().getRobotPose2d();
 
     // use the turrets location, but the robots heading
-    // this is because we need to adjust the turret based on its angle being robot relative.
+    // this is because we need to adjust the turret based on its angle being robot
+    // relative.
     Pose2d temp = getTurretPose3dFieldRelative().toPose2d();
     Pose2d turretPose = new Pose2d(temp.getX(), temp.getY(), robotPose.getRotation());
 
@@ -244,6 +249,7 @@ public class Shooter extends SubsystemBase {
 
     return m_turretTargetRobotAngle;
   }
+
   /**
    * Command factory: returns a command that aims the turret using the current location (no
    * prediction).
@@ -329,7 +335,8 @@ public class Shooter extends SubsystemBase {
     // This method will be called once per scheduler run
 
     updateTurretPose();
-    // Update firing solution and telemetry (compute early so commands/targeting can use it)
+    // Update firing solution and telemetry (compute early so commands/targeting can
+    // use it)
     updateFiringSolution();
     // Updates target data (kept lightweight) and then publish telemetry last
     updateTargetData();
@@ -353,7 +360,8 @@ public class Shooter extends SubsystemBase {
             m_targetPoseField3d.toPose2d().getTranslation(),
             shooterOffsetRobot);
 
-    // store computed solution for consumers; telemetry will be published in updateTelemetry()
+    // store computed solution for consumers; telemetry will be published in
+    // updateTelemetry()
     m_lastFiringSolution = solution;
   }
 
@@ -596,7 +604,8 @@ public class Shooter extends SubsystemBase {
   }
 
   private void updateTargetData() {
-    // Kept lightweight: currently no per-loop side effects needed here. Telemetry is published in
+    // Kept lightweight: currently no per-loop side effects needed here. Telemetry
+    // is published in
     // updateTelemetry() which runs last in the loop.
   }
 
@@ -619,16 +628,19 @@ public class Shooter extends SubsystemBase {
           Math.abs(currentBottomRpm - targetBottomRpm) < BOTTOM_FLYWHEEL_RPM_TOLERANCE;
       m_isBottomFlyWheelReady = m_bottomFlywheelReadyDebouncer.calculate(rawBottomReady);
 
-      // Hood readiness: compare current hood angle to target hood angle (degrees, debounced)
+      // Hood readiness: compare current hood angle to target hood angle (degrees,
+      // debounced)
       double currentHoodDeg = m_hood.getAngle().in(Degrees);
       double targetHoodDeg = Radians.of(m_lastFiringSolution.hoodAngleRad).in(Degrees);
       boolean rawHoodReady = Math.abs(currentHoodDeg - targetHoodDeg) < HOOD_ANGLE_TOLERANCE_DEG;
       m_isHoodReady = m_hoodReadyDebouncer.calculate(rawHoodReady);
 
-      // Speed readiness: robot translational speed must be under SpeedNanny's current limit
+      // Speed readiness: robot translational speed must be under SpeedNanny's current
+      // limit
       m_isSpeedReady = RobotContainer.getInstance().m_speedNanny.isUnderSpeedLimit();
 
-      // Shooter as-a-whole is ready when turret, hood, bottom flywheel, and speed are ready
+      // Shooter as-a-whole is ready when turret, hood, bottom flywheel, and speed are
+      // ready
       m_isShooterReady =
           m_isTurretReady && m_isHoodReady && m_isBottomFlyWheelReady && m_isSpeedReady;
     } else {
@@ -795,7 +807,8 @@ public class Shooter extends SubsystemBase {
     // launchVel(vel, 0, Degrees.of(-45).in(Radians)));
   }
 
-  // NOTE: lightweight helper removed; keep 'launchVel' which includes robot velocity.
+  // NOTE: lightweight helper removed; keep 'launchVel' which includes robot
+  // velocity.
 
   /**
    * Computes the initial field-relative velocity of a launched fuel game piece.

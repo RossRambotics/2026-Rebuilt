@@ -1,0 +1,22 @@
+{
+  "name": "OsirisShooter",
+  "isFTC": false,
+  "disableSimplification": false,
+  "rotations": [
+    {
+      "axis": "x",
+      "degrees": 90
+    },
+    {
+      "axis": "z",
+      "degrees": 0
+    }
+  ],
+  "position": [
+    0.13,
+    0.0,
+    -0.15
+  ],
+  "cameras": [],
+  "components": []
+}
