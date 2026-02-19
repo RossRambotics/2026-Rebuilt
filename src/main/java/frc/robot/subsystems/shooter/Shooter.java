@@ -289,7 +289,7 @@ public class Shooter extends SubsystemBase {
         m_hood.setAngle(
             () -> {
               if (m_lastFiringSolution != null && m_isTurretActive) {
-                return Radians.of(m_lastFiringSolution.hoodAngleRad);
+                return Radians.of(m_lastFiringSolution.hoodMechAngleRad);
               }
               return Degrees.of(0);
             });
@@ -406,7 +406,8 @@ public class Shooter extends SubsystemBase {
 
     // --- LUT lookup ---
     distanceMeters = shooterFieldPos.getDistance(targetFieldPos);
-    double hoodAngleRad = Degrees.of(m_bottomFlyWheel.calculateAngle(distanceMeters)).in(Radians);
+    double hoodMechAngleRad =
+        Degrees.of(m_bottomFlyWheel.calculateAngle(distanceMeters)).in(Radians);
     double flywheelRPM = m_bottomFlyWheel.calculateRPM(distanceMeters);
 
     // --- Turret angle (robot-relative) ---
@@ -428,7 +429,7 @@ public class Shooter extends SubsystemBase {
 
     return new FiringSolution(
         turretAngleRad,
-        hoodAngleRad,
+        hoodMechAngleRad,
         flywheelRPM,
         futurePose,
         tofSec,
@@ -457,19 +458,19 @@ public class Shooter extends SubsystemBase {
 
       distanceMeters = shooterFieldPos.getDistance(targetFieldPos);
 
-      double hoodRad = Degrees.of(m_bottomFlyWheel.calculateAngle(distanceMeters)).in(Radians);
+      double hoodMechRad = Degrees.of(m_bottomFlyWheel.calculateAngle(distanceMeters)).in(Radians);
       double flywheelRPM = m_bottomFlyWheel.calculateRPM(distanceMeters);
 
       double exitVelocityMps = rpmToExitVelocity(flywheelRPM);
 
       double heightDiffMeters = m_targetPoseField3d.getZ() - TURRET_Z_OFFSET_M;
 
-      // convert hoodRad to angle above horizontal
-      hoodRad = Math.PI / 2 - hoodRad;
+      // Ball launches perpendicular to hood surface, so convert mech angle to launch angle
+      double launchAngleRad = hoodMechToLaunchAngle(hoodMechRad);
       double tofVacSec =
-          (exitVelocityMps * Math.sin(hoodRad)
+          (exitVelocityMps * Math.sin(launchAngleRad)
                   + Math.sqrt(
-                      Math.pow(exitVelocityMps * Math.sin(hoodRad), 2)
+                      Math.pow(exitVelocityMps * Math.sin(launchAngleRad), 2)
                           + 2 * 9.81 * heightDiffMeters))
               / 9.81;
 
@@ -484,7 +485,8 @@ public class Shooter extends SubsystemBase {
 
     // --- LUT lookup ---
     distanceMeters = shooterFieldPos.getDistance(targetFieldPos);
-    double hoodAngleRad = Degrees.of(m_bottomFlyWheel.calculateAngle(distanceMeters)).in(Radians);
+    double hoodMechAngleRad =
+        Degrees.of(m_bottomFlyWheel.calculateAngle(distanceMeters)).in(Radians);
     double flywheelRPM = m_bottomFlyWheel.calculateRPM(distanceMeters);
 
     // --- Velocity compensation for turret ---
@@ -506,7 +508,7 @@ public class Shooter extends SubsystemBase {
 
     return new FiringSolution(
         turretAngleRad,
-        hoodAngleRad,
+        hoodMechAngleRad,
         flywheelRPM,
         futurePose,
         tofSec,
@@ -514,9 +516,19 @@ public class Shooter extends SubsystemBase {
         turretFeasible);
   }
 
+  /**
+   * Stores the calculated parameters needed to make a shot.
+   *
+   * <p>Hood angle convention: {@code hoodMechAngleRad} is the <em>mechanical</em> angle of the hood
+   * from horizontal. At 0° the hood surface is horizontal and the ball launches straight up (90°
+   * above horizontal); at 90° the hood is vertical and the ball launches horizontally. The
+   * operating range is [{@link HoodConstants#HOOD_DEGREES_MIN}, {@link
+   * HoodConstants#HOOD_DEGREES_MAX}]. Use {@link #hoodMechToLaunchAngle} to convert to a
+   * physics-compatible launch angle when needed.
+   */
   public record FiringSolution(
       double turretAngleRad,
-      double hoodAngleRad,
+      double hoodMechAngleRad,
       double flywheelRPM,
       Pose2d futurePose,
       double tofSec,
@@ -538,6 +550,19 @@ public class Shooter extends SubsystemBase {
     double vBottom = omegaBottom * R_BOTTOM_METERS;
 
     return EFFICIENCY_K * (vTop + vBottom) / 2.0;
+  }
+
+  /**
+   * Converts a mechanical hood angle to a launch angle above horizontal.
+   *
+   * <p>The hood launches the ball perpendicular to its surface, so a horizontal hood (0°) fires
+   * straight up (90° above horizontal). The relationship is: launch angle = 90° − hood mech angle.
+   *
+   * @param hoodMechRad Mechanical hood angle in radians (0 = horizontal, ball fires straight up)
+   * @return Launch angle above horizontal in radians (0 = horizontal shot, π/2 = vertical shot)
+   */
+  public static double hoodMechToLaunchAngle(double hoodMechRad) {
+    return Math.PI / 2 - hoodMechRad;
   }
 
   public static Pose2d predictPoseLinear(
@@ -638,7 +663,7 @@ public class Shooter extends SubsystemBase {
       // Hood readiness: compare current hood angle to target hood angle (degrees,
       // debounced)
       double currentHoodDeg = m_hood.getAngle().in(Degrees);
-      double targetHoodDeg = Radians.of(m_lastFiringSolution.hoodAngleRad).in(Degrees);
+      double targetHoodDeg = Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees);
       boolean rawHoodReady = Math.abs(currentHoodDeg - targetHoodDeg) < HOOD_ANGLE_TOLERANCE_DEG;
       m_isHoodReady = m_hoodReadyDebouncer.calculate(rawHoodReady);
 
@@ -707,7 +732,7 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput("Shooter/FutureRobotPoseDistanceMeters", predictedDistanceMeters);
       Logger.recordOutput("Shooter/TimeOfFlightSec", solution.tofSec);
       Logger.recordOutput(
-          "Shooter/HoodTargetAngleDeg", Radians.of(solution.hoodAngleRad).in(Degrees));
+          "Shooter/HoodTargetAngleDeg", Radians.of(solution.hoodMechAngleRad).in(Degrees));
       Logger.recordOutput("Shooter/HoodActualAngleDeg", m_hood.getAngle().in(Degrees));
       Logger.recordOutput("Shooter/FlyWheelTargetRPM", solution.flywheelRPM);
       Logger.recordOutput(
@@ -801,8 +826,8 @@ public class Shooter extends SubsystemBase {
 
   public void launchFuelSim() {
     Pose3d turretPoseFR = m_turretPoseField3d; // turret pose field relative
-    double hoodAngleRad =
-        Math.PI / 2 - m_lastFiringSolution.hoodAngleRad; // switch the angle to be above horizontal
+    // Ball launches perpendicular to hood surface; convert mechanical angle to launch angle
+    double hoodAngleRad = hoodMechToLaunchAngle(m_lastFiringSolution.hoodMechAngleRad);
     double vel = rpmToExitVelocity(m_lastFiringSolution.flywheelRPM);
     double yawRad = turretPoseFR.getRotation().getZ();
     // double yawRad = m_lastFiringSolution.turretAngleRad;
@@ -841,16 +866,19 @@ public class Shooter extends SubsystemBase {
    * applied to the fuel at launch.
    *
    * @param vel_ms Shooter exit velocity in meters per second
-   * @param hoodAngleRad Hood angle in radians, measured above horizontal
+   * @param launchAngleAboveHorizontalRad Launch angle in radians above horizontal (0 = horizontal
+   *     shot, π/2 = straight up). Use {@link #hoodMechToLaunchAngle} to convert from a mechanical
+   *     hood angle.
    * @param turretYawRad Turret yaw angle in radians, field-relative
    * @return Field-relative velocity vector of the fuel at launch
    */
-  private Translation3d launchVel(double vel_ms, double hoodAngleRad, double turretYawRad) {
+  private Translation3d launchVel(
+      double vel_ms, double launchAngleAboveHorizontalRad, double turretYawRad) {
     // Shooter imparted, field relative velocity
-    double horizontal = vel_ms * Math.cos(hoodAngleRad);
+    double horizontal = vel_ms * Math.cos(launchAngleAboveHorizontalRad);
     double vx = horizontal * Math.cos(turretYawRad);
     double vy = horizontal * Math.sin(turretYawRad);
-    double vz = vel_ms * Math.sin(hoodAngleRad);
+    double vz = vel_ms * Math.sin(launchAngleAboveHorizontalRad);
 
     // Robot field velocity
     ChassisSpeeds speeds = RobotContainer.getInstance().getChassisSpeeds();
