@@ -70,10 +70,13 @@ public class OperatorControls {
     // === WORKING EXAMPLES (study these first) ===
     configureHoodRetraction(); // Y button — hold to retract hood
     configureTrenchZoneAutoRetract(); // Automatic — retracts hood when robot enters zone
+    configureBumpTraversal(); // Right bumper — hold to lock heading to 45 degrees
 
     // === YOUR TURN (uncomment as you complete each one) ===
-    // configureBumpTraversal();   // Right bumper — hold to lock heading to 45 degrees
-    // configurePassingMode();     // Left bumper — hold to aim at nearest passing target
+    // configureBumpTraversal(); // Right bumper — hold to lock heading to 45
+    // degrees
+    // configurePassingMode(); // Left bumper — hold to aim at nearest passing
+    // target
   }
 
   // ========================================================================
@@ -97,40 +100,65 @@ public class OperatorControls {
   // and whenever the robot drives into it, the hood retracts automatically.
   //
   // Key concepts:
-  //   - Rectangle2d defines a rectangle on the field (center, width, height)
-  //   - A Trigger checks a condition every 20 ms
-  //   - whileTrue() runs a command as long as the trigger condition is true
+  // - Rectangle2d defines a rectangle on the field (center, width, height)
+  // - A Trigger checks a condition every 20 ms
+  // - whileTrue() runs a command as long as the trigger condition is true
   // ========================================================================
   private void configureTrenchZoneAutoRetract() {
     // Define the trench zone as a rectangle on the field, in meters.
     //
-    //   Field coordinate system:
-    //     X = 0 at your alliance wall, increases toward the far wall (~16.5 m)
-    //     Y = 0 at the right wall (driver's perspective), increases left (~8.2 m)
+    // Field coordinate system:
+    // X = 0 at your alliance wall, increases toward the far wall (~16.5 m)
+    // Y = 0 at the right wall (driver's perspective), increases left (~8.2 m)
     //
-    //   Rectangle2d(center, xWidth, yWidth):
-    //     center = a Pose2d (position + rotation) for the rectangle's center
-    //              Use Rotation2d.kZero for an axis-aligned (non-rotated) rectangle.
-    //     xWidth = how wide along the X axis (meters)
-    //     yWidth = how wide along the Y axis (meters)
+    // Rectangle2d(center, xWidth, yWidth):
+    // center = a Pose2d (position + rotation) for the rectangle's center
+    // Use Rotation2d.kZero for an axis-aligned (non-rotated) rectangle.
+    // xWidth = how wide along the X axis (meters)
+    // yWidth = how wide along the Y axis (meters)
     //
-    // TODO: Measure the real trench position on your field and update these values!
-    Rectangle2d trenchZone =
+    Rectangle2d trenchZoneBL =
         new Rectangle2d(
-            new Pose2d(5.5, 1.0, Rotation2d.kZero), // center of the trench zone (not rotated)
+            new Pose2d(4.5, 0.5, Rotation2d.kZero), // center of the trench zone (not rotated)
             3.0, // 3 meters wide along X
             1.5 // 1.5 meters wide along Y
             );
-
+    Rectangle2d trenchZoneBR =
+        new Rectangle2d(
+            new Pose2d(4.5, 7.45, Rotation2d.kZero), // center of the trench zone (not rotated)
+            3.0, // 3 meters wide along X
+            1.5 // 1.5 meters wide along Y
+            );
+    Rectangle2d trenchZoneRL =
+        new Rectangle2d(
+            new Pose2d(12.0, 0.5, Rotation2d.kZero), // center of the trench zone (not rotated)
+            3.0, // 3 meters wide along X
+            1.5 // 1.5 meters wide along Y
+            );
+    Rectangle2d trenchZoneRR =
+        new Rectangle2d(
+            new Pose2d(12.0, 7.45, Rotation2d.kZero), // center of the trench zone (not rotated)
+            3.0, // 3 meters wide along X
+            1.5 // 1.5 meters wide along Y
+            );
     // A Trigger that checks: "is the robot inside the trench zone right now?"
     // drive.getPose() returns the robot's Pose2d (position + heading).
     // .getTranslation() gives just the position (Translation2d), which is what
     // Rectangle2d.contains() needs.
-    Trigger inTrenchZone = new Trigger(() -> trenchZone.contains(drive.getPose().getTranslation()));
-
+    Trigger inTrenchZoneBL =
+        new Trigger(() -> trenchZoneBL.contains(drive.getPose().getTranslation()));
+    Trigger inTrenchZoneBR =
+        new Trigger(() -> trenchZoneBR.contains(drive.getPose().getTranslation()));
+    Trigger inTrenchZoneRL =
+        new Trigger(() -> trenchZoneRL.contains(drive.getPose().getTranslation()));
+    Trigger inTrenchZoneRR =
+        new Trigger(() -> trenchZoneRR.contains(drive.getPose().getTranslation()));
     // While the robot is in the zone, retract the hood.
     // When the robot drives out, the hood returns to normal auto-aiming.
-    inTrenchZone.whileTrue(shooter.getRetractHoodCmd());
+    inTrenchZoneBL.whileTrue(shooter.getRetractHoodCmd());
+    inTrenchZoneBR.whileTrue(shooter.getRetractHoodCmd());
+    inTrenchZoneRL.whileTrue(shooter.getRetractHoodCmd());
+    inTrenchZoneRR.whileTrue(shooter.getRetractHoodCmd());
   }
 
   // ========================================================================
@@ -141,36 +169,101 @@ public class OperatorControls {
   // translate freely with the left stick — only rotation is locked.
   //
   // HINTS:
-  //   - Button: controller.rightBumper()
-  //   - Binding: .whileTrue(...)
-  //   - Command: DriveCommands.joystickDriveAtAngle(drive, xSupplier, ySupplier, angleSupplier)
-  //       This is already written — it drives with joystick translation but locks rotation.
+  // - Button: controller.rightBumper()
+  // - Binding: .whileTrue(...)
+  // - Command: DriveCommands.joystickDriveAtAngle(drive, xSupplier, ySupplier,
+  // angleSupplier)
+  // This is already written — it drives with joystick translation but locks
+  // rotation.
   //
-  //   - For X and Y suppliers, use the same ones as the normal drive:
-  //       () -> -controller.getLeftY()     // forward/backward
-  //       () -> -controller.getLeftX()     // left/right
+  // - For X and Y suppliers, use the same ones as the normal drive:
+  // () -> -controller.getLeftY() // forward/backward
+  // () -> -controller.getLeftX() // left/right
   //
-  //   - For the angle supplier, create a Rotation2d of 45 degrees:
-  //       () -> Rotation2d.fromDegrees(45)
+  // - For the angle supplier, create a Rotation2d of 45 degrees:
+  // () -> Rotation2d.fromDegrees(45)
   //
-  //   Your code should look like:
-  //       controller.rightBumper().whileTrue(
-  //           DriveCommands.joystickDriveAtAngle(
-  //               drive,
-  //               <x supplier>,
-  //               <y supplier>,
-  //               <angle supplier>
-  //           )
-  //       );
+  // Your code should look like:
+  // controller.rightBumper().whileTrue(
+  // DriveCommands.joystickDriveAtAngle(
+  // drive,
+  // <x supplier>,
+  // <y supplier>,
+  // <angle supplier>
+  // )
+  // );
   // ========================================================================
   private void configureBumpTraversal() {
-    // YOUR CODE HERE
+    controller
+        .rightBumper()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getLeftY(), // forward/backward
+                () -> -controller.getLeftX(), // left/right
+                () -> Rotation2d.fromDegrees(45)));
+
+    Rectangle2d rampZoneBL =
+        new Rectangle2d(
+            new Pose2d(4.5, 0.5, Rotation2d.kZero), // center of the trench zone (not rotated)
+            3.0, // 3 meters wide along X
+            1.5 // 1.5 meters wide along Y
+            );
+    Rectangle2d rampZoneBR =
+        new Rectangle2d(
+            new Pose2d(4.5, 7.45, Rotation2d.kZero), // center of the trench zone (not rotated)
+            3.0, // 3 meters wide along X
+            1.5 // 1.5 meters wide along Y
+            );
+    Rectangle2d rampZoneRL =
+        new Rectangle2d(
+            new Pose2d(12.0, 0.5, Rotation2d.kZero), // center of the trench zone (not rotated)
+            3.0, // 3 meters wide along X
+            1.5 // 1.5 meters wide along Y
+            );
+    Rectangle2d rampZoneRR =
+        new Rectangle2d(
+            new Pose2d(12.0, 7.45, Rotation2d.kZero), // center of the trench zone (not rotated)
+            3.0, // 3 meters wide along X
+            1.5 // 1.5 meters wide along Y
+            );
+    Trigger inRampZoneBL = new Trigger(() -> rampZoneBL.contains(drive.getPose().getTranslation()));
+    Trigger inRampZoneBR = new Trigger(() -> rampZoneBR.contains(drive.getPose().getTranslation()));
+    Trigger inRampZoneRL = new Trigger(() -> rampZoneRL.contains(drive.getPose().getTranslation()));
+    Trigger inRampZoneRR = new Trigger(() -> rampZoneRR.contains(drive.getPose().getTranslation()));
+    // While the robot is in the zone, retract the hood.
+    // When the robot drives out, the hood returns to normal auto-aiming.
+    inRampZoneBL.whileTrue(
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> Rotation2d.fromDegrees(45)));
+    inRampZoneBR.whileTrue(
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> Rotation2d.fromDegrees(45)));
+    inRampZoneRL.whileTrue(
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> Rotation2d.fromDegrees(45)));
+    inRampZoneRR.whileTrue(
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> Rotation2d.fromDegrees(45)));
   }
 
   // ========================================================================
   // TODO 2: Passing Mode — Aim at the Nearest Passing Target
   //
-  // When the robot moves to various field locations, switch the shooter to "passing mode."
+  // When the robot moves to various field locations, switch the shooter to
+  // "passing mode."
   // Every 20 ms, check the robot's position and aim at the closest
   // passing target from the list below.
   //
@@ -179,39 +272,39 @@ public class OperatorControls {
   //
   // STEP-BY-STEP GUIDE:
   //
-  //   1. Get the robot's position:
-  //        Translation2d robotPos = drive.getPose().getTranslation();
+  // 1. Get the robot's position:
+  // Translation2d robotPos = drive.getPose().getTranslation();
   //
-  //   2. Loop through the targets and find the closest one:
-  //        double closestDistanceMeters = Double.MAX_VALUE;
-  //        int closestIndex = 0;
+  // 2. Loop through the targets and find the closest one:
+  // double closestDistanceMeters = Double.MAX_VALUE;
+  // int closestIndex = 0;
   //
-  //        for (int i = 0; i < PASSING_TARGET_POSES.length; i++) {
-  //            Translation2d targetPos =
+  // for (int i = 0; i < PASSING_TARGET_POSES.length; i++) {
+  // Translation2d targetPos =
   // PASSING_TARGET_POSES[i].getTranslation().toTranslation2d();
-  //            double distMeters = robotPos.getDistance(targetPos);
-  //            if (distMeters < closestDistanceMeters) {
-  //                closestDistanceMeters = distMeters;
-  //                closestIndex = i;
-  //            }
-  //        }
+  // double distMeters = robotPos.getDistance(targetPos);
+  // if (distMeters < closestDistanceMeters) {
+  // closestDistanceMeters = distMeters;
+  // closestIndex = i;
+  // }
+  // }
   //
-  //   3. Tell the shooter to aim at it:
-  //        shooter.setTargetPose(
-  //            PASSING_TARGET_NAMES[closestIndex],
-  //            PASSING_TARGET_POSES[closestIndex]
-  //        );
+  // 3. Tell the shooter to aim at it:
+  // shooter.setTargetPose(
+  // PASSING_TARGET_NAMES[closestIndex],
+  // PASSING_TARGET_POSES[closestIndex]
+  // );
   //
-  //   4. Wrap steps 1-3 in a command that runs continuously:
-  //        Commands.run(() -> {
-  //            // steps 1-3 go here
-  //        })
+  // 4. Wrap steps 1-3 in a command that runs continuously:
+  // Commands.run(() -> {
+  // // steps 1-3 go here
+  // })
   //
-  //   5. When the button is released, reset to the hub:
-  //        .finallyDo(() -> shooter.setTargetPose("Blue Hub", DEFAULT_TARGET))
+  // 5. When the button is released, reset to the hub:
+  // .finallyDo(() -> shooter.setTargetPose("Blue Hub", DEFAULT_TARGET))
   //
-  //   6. Bind it:
-  //        controller.leftBumper().whileTrue( <your command> );
+  // 6. Bind it:
+  // controller.leftBumper().whileTrue( <your command> );
   // ========================================================================
 
   /** Passing targets — field positions the robot can pass to. */
