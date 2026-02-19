@@ -1035,8 +1035,21 @@ public class Shooter extends SubsystemBase {
    * Returns a command that retracts the hood to its minimum angle. While this command is running,
    * the hood's default (auto-aiming) command is paused. When this command ends, the default command
    * resumes automatically.
+   *
+   * @param reason Human-readable description of why the hood is being retracted (logged to
+   *     "Shooter/Hood/RetractReason").
    */
-  public Command getRetractHoodCmd() {
-    return m_hood.setAngle(Degrees.of(HoodConstants.HOOD_DEGREES_MIN));
+  public Command getRetractHoodCmd(String reason) {
+    return m_hood
+        .setAngle(Degrees.of(HoodConstants.HOOD_DEGREES_MIN))
+        .beforeStarting(
+            () -> {
+              Logger.recordOutput("Shooter/Hood/IsRetracted", true);
+              Logger.recordOutput("Shooter/Hood/RetractReason", reason);
+            })
+        .finallyDo(
+            interrupted -> {
+              Logger.recordOutput("Shooter/Hood/IsRetracted", false);
+            });
   }
 }

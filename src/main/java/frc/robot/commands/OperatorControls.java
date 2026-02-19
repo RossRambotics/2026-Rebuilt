@@ -89,7 +89,7 @@ public class OperatorControls {
   // while held, and when it ends, the default command resumes.
   // ========================================================================
   private void configureHoodRetraction() {
-    controller.y().whileTrue(shooter.getRetractHoodCmd());
+    controller.y().whileTrue(shooter.getRetractHoodCmd("YButton"));
   }
 
   // ========================================================================
@@ -155,10 +155,10 @@ public class OperatorControls {
         new Trigger(() -> trenchZoneRR.contains(drive.getPose().getTranslation()));
     // While the robot is in the zone, retract the hood.
     // When the robot drives out, the hood returns to normal auto-aiming.
-    inTrenchZoneBL.whileTrue(shooter.getRetractHoodCmd());
-    inTrenchZoneBR.whileTrue(shooter.getRetractHoodCmd());
-    inTrenchZoneRL.whileTrue(shooter.getRetractHoodCmd());
-    inTrenchZoneRR.whileTrue(shooter.getRetractHoodCmd());
+    inTrenchZoneBL.whileTrue(shooter.getRetractHoodCmd("TrenchZone/BL"));
+    inTrenchZoneBR.whileTrue(shooter.getRetractHoodCmd("TrenchZone/BR"));
+    inTrenchZoneRL.whileTrue(shooter.getRetractHoodCmd("TrenchZone/RL"));
+    inTrenchZoneRR.whileTrue(shooter.getRetractHoodCmd("TrenchZone/RR"));
   }
 
   // ========================================================================
