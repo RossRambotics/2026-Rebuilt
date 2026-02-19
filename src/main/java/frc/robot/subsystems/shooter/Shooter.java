@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Spindexer;
 import frc.robot.util.FuelSim;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -84,6 +85,12 @@ public class Shooter extends SubsystemBase {
   private static final double HOOD_READY_DEBOUNCE_SEC = 0.10; // 100 ms
   private static final double BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC = 0.10; // 100 ms
   private static final double AUTO_SHOOT_INTERVAL_SEC = 0.5; // 2 balls per second
+
+  // Manual control rates (tunable — degrees or RPM per second)
+  private static final double MANUAL_TURRET_RATE_DEG_PER_SEC = 180.0;
+  private static final double MANUAL_HOOD_RATE_DEG_PER_SEC = 90.0;
+  private static final double MANUAL_FLYWHEEL_RATE_RPM_PER_SEC = 1000.0;
+  private static final double MANUAL_FLYWHEEL_MAX_RPM = 6000.0;
 
   // Readiness flags
   private boolean m_isShooterReady = false;
@@ -858,6 +865,119 @@ public class Shooter extends SubsystemBase {
     vy += robotVyField;
 
     return new Translation3d(vx, vy, vz);
+  }
+
+  /**
+   * Returns a command that manually controls the turret rotation at a constant rate.
+   *
+   * <p>The {@code inputSupplier} should return a value from -1.0 to +1.0 (like a joystick axis).
+   * Positive values rotate the turret to the right (positive degrees), negative to the left. The
+   * turret angle is clamped to [{@link Turret#TURRET_DEGREES_MIN}, {@link
+   * Turret#TURRET_DEGREES_MAX}].
+   *
+   * <p>While this command is running, auto-targeting is paused. When it ends, auto-targeting
+   * resumes automatically.
+   *
+   * @param inputSupplier supplier returning -1.0 to +1.0 (e.g., joystick axis)
+   * @return a command that manually controls the turret
+   */
+  public Command getManualTurretCmd(Supplier<Double> inputSupplier) {
+    double[] angleDeg = {0.0};
+    double[] lastTimeSec = {0.0};
+
+    return m_turret
+        .setAngle(
+            () -> {
+              double nowSec = Timer.getFPGATimestamp();
+              double dtSec = nowSec - lastTimeSec[0];
+              lastTimeSec[0] = nowSec;
+              // Skip first tick to avoid a large dt jump
+              if (dtSec > 0.1) dtSec = 0.0;
+
+              angleDeg[0] += inputSupplier.get() * MANUAL_TURRET_RATE_DEG_PER_SEC * dtSec;
+              angleDeg[0] =
+                  MathUtil.clamp(angleDeg[0], Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX);
+              return Degrees.of(angleDeg[0]);
+            })
+        .beforeStarting(
+            () -> {
+              angleDeg[0] = m_turret.getAngle().in(Degrees);
+              lastTimeSec[0] = Timer.getFPGATimestamp();
+            });
+  }
+
+  /**
+   * Returns a command that manually controls the hood pitch at a constant rate.
+   *
+   * <p>The {@code inputSupplier} should return a value from -1.0 to +1.0 (like a joystick axis).
+   * Positive values raise the hood (increase angle), negative values lower it. The hood angle is
+   * clamped to [{@link HoodConstants#HOOD_DEGREES_MIN}, {@link HoodConstants#HOOD_DEGREES_MAX}].
+   *
+   * <p>While this command is running, auto-aiming is paused. When it ends, auto-aiming resumes
+   * automatically.
+   *
+   * @param inputSupplier supplier returning -1.0 to +1.0 (e.g., joystick axis)
+   * @return a command that manually controls the hood
+   */
+  public Command getManualHoodCmd(Supplier<Double> inputSupplier) {
+    double[] angleDeg = {0.0};
+    double[] lastTimeSec = {0.0};
+
+    return m_hood
+        .setAngle(
+            () -> {
+              double nowSec = Timer.getFPGATimestamp();
+              double dtSec = nowSec - lastTimeSec[0];
+              lastTimeSec[0] = nowSec;
+              if (dtSec > 0.1) dtSec = 0.0;
+
+              angleDeg[0] += inputSupplier.get() * MANUAL_HOOD_RATE_DEG_PER_SEC * dtSec;
+              angleDeg[0] =
+                  MathUtil.clamp(
+                      angleDeg[0], HoodConstants.HOOD_DEGREES_MIN, HoodConstants.HOOD_DEGREES_MAX);
+              return Degrees.of(angleDeg[0]);
+            })
+        .beforeStarting(
+            () -> {
+              angleDeg[0] = m_hood.getAngle().in(Degrees);
+              lastTimeSec[0] = Timer.getFPGATimestamp();
+            });
+  }
+
+  /**
+   * Returns a command that manually controls the flywheel speed at a constant rate.
+   *
+   * <p>The {@code inputSupplier} should return a value from -1.0 to +1.0 (like a joystick axis).
+   * Positive values increase RPM, negative values decrease it. The RPM is clamped to [0, {@link
+   * #MANUAL_FLYWHEEL_MAX_RPM}].
+   *
+   * <p>While this command is running, the automatic flywheel speed control is paused. When it ends,
+   * auto control resumes automatically.
+   *
+   * @param inputSupplier supplier returning -1.0 to +1.0 (e.g., joystick axis)
+   * @return a command that manually controls the flywheel
+   */
+  public Command getManualFlywheelCmd(Supplier<Double> inputSupplier) {
+    double[] rpmValue = {0.0};
+    double[] lastTimeSec = {0.0};
+
+    return m_bottomFlyWheel
+        .setVelocity(
+            () -> {
+              double nowSec = Timer.getFPGATimestamp();
+              double dtSec = nowSec - lastTimeSec[0];
+              lastTimeSec[0] = nowSec;
+              if (dtSec > 0.1) dtSec = 0.0;
+
+              rpmValue[0] += inputSupplier.get() * MANUAL_FLYWHEEL_RATE_RPM_PER_SEC * dtSec;
+              rpmValue[0] = MathUtil.clamp(rpmValue[0], 0, MANUAL_FLYWHEEL_MAX_RPM);
+              return RPM.of(rpmValue[0]);
+            })
+        .beforeStarting(
+            () -> {
+              rpmValue[0] = m_bottomFlyWheel.getVelocity().in(RPM);
+              lastTimeSec[0] = Timer.getFPGATimestamp();
+            });
   }
 
   public Command getAutoShootCmd() {
