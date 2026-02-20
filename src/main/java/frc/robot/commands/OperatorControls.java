@@ -205,27 +205,27 @@ public class OperatorControls {
 
     Rectangle2d rampZoneBL =
         new Rectangle2d(
-            new Pose2d(4.5, 0.5, Rotation2d.kZero), // center of the trench zone (not rotated)
+            new Pose2d(4.5, 2.5, Rotation2d.kZero), // center of the ramp zone (not rotated)
             3.0, // 3 meters wide along X
-            1.5 // 1.5 meters wide along Y
+            2.0 // 2.0 meters wide along Y
             );
     Rectangle2d rampZoneBR =
         new Rectangle2d(
-            new Pose2d(4.5, 7.45, Rotation2d.kZero), // center of the trench zone (not rotated)
+            new Pose2d(4.5, 5.5, Rotation2d.kZero), // center of the ramp zone (not rotated)
             3.0, // 3 meters wide along X
-            1.5 // 1.5 meters wide along Y
+            2.0 // 2.0 meters wide along Y
             );
     Rectangle2d rampZoneRL =
         new Rectangle2d(
-            new Pose2d(12.0, 0.5, Rotation2d.kZero), // center of the trench zone (not rotated)
+            new Pose2d(12.0, 2.5, Rotation2d.kZero), // center of the ramp zone (not rotated)
             3.0, // 3 meters wide along X
-            1.5 // 1.5 meters wide along Y
+            2.0 // 2.0 meters wide along Y
             );
     Rectangle2d rampZoneRR =
         new Rectangle2d(
-            new Pose2d(12.0, 7.45, Rotation2d.kZero), // center of the trench zone (not rotated)
+            new Pose2d(12.0, 5.5, Rotation2d.kZero), // center of the ramp zone (not rotated)
             3.0, // 3 meters wide along X
-            1.5 // 1.5 meters wide along Y
+            2.0 // 2.0 meters wide along Y
             );
     Trigger inRampZoneBL = new Trigger(() -> rampZoneBL.contains(drive.getPose().getTranslation()));
     Trigger inRampZoneBR = new Trigger(() -> rampZoneBR.contains(drive.getPose().getTranslation()));
