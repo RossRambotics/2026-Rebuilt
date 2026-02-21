@@ -164,11 +164,12 @@ public class Vision extends SubsystemBase {
           angularStdDev *= cameraStdDevFactors[cameraIndex];
         }
 
-        // Send vision observation
+        // Send vision observation (angular std dev set to MAX_VALUE so vision
+        // never corrects heading — use reseedFromVision() to update heading)
         consumer.accept(
             observation.pose().toPose2d(),
             observation.timestamp(),
-            VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
+            VecBuilder.fill(linearStdDev, linearStdDev, Double.MAX_VALUE));
 
         // Track accepted MegaTag 1 yaw for gyro validation
         if (observation.type() == PoseObservationType.MEGATAG_1) {
