@@ -69,7 +69,7 @@ public class RobotContainer {
   public RobotContainer() {
     instance = this;
 
-    m_shooter = new Shooter(true);
+    m_shooter = new Shooter(false);
 
     switch (Constants.currentMode) {
       case REAL:
@@ -85,12 +85,12 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackRight));
 
         // drive =
-        //     new Drive(
-        //         new GyroIO() {},
-        //         new ModuleIOSim(TunerConstants.FrontLeft),
-        //         new ModuleIOSim(TunerConstants.FrontRight),
-        //         new ModuleIOSim(TunerConstants.BackLeft),
-        //         new ModuleIOSim(TunerConstants.BackRight));
+        // new Drive(
+        // new GyroIO() {},
+        // new ModuleIOSim(TunerConstants.FrontLeft),
+        // new ModuleIOSim(TunerConstants.FrontRight),
+        // new ModuleIOSim(TunerConstants.BackLeft),
+        // new ModuleIOSim(TunerConstants.BackRight));
 
         vision =
             new Vision(
@@ -212,30 +212,31 @@ public class RobotContainer {
 
     // // Lock to 0° when A button is held
     // controller
-    //     .a()
-    //     .whileTrue(
-    //         DriveCommands.joystickDriveAtAngle(
-    //             drive,
-    //             () -> -controller.getLeftY(),
-    //             () -> -controller.getLeftX(),
-    //             () -> Rotation2d.kZero));
+    // .a()
+    // .whileTrue(
+    // DriveCommands.joystickDriveAtAngle(
+    // drive,
+    // () -> -controller.getLeftY(),
+    // () -> -controller.getLeftX(),
+    // () -> Rotation2d.kZero));
 
     controller.a().whileTrue(Commands.runOnce(() -> m_shooter.launchFuelSim()));
     controller.b().whileTrue(m_shooter.getAutoShootCmd());
 
     // Robot centric drive when B button is held
     // controller
-    //     .b()
-    //     .whileTrue(
-    //         DriveCommands.joystickDriveRobotCentric(
-    //             drive,
-    //             () -> -controller.getLeftY(),
-    //             () -> -controller.getLeftX(),
-    //             // () -> -controller.getRightX()));
-    //             // () -> -controller.getRawAxis(2)));
-    //             () -> -controller.getRawAxis(4)));
+    // .b()
+    // .whileTrue(
+    // DriveCommands.joystickDriveRobotCentric(
+    // drive,
+    // () -> -controller.getLeftY(),
+    // () -> -controller.getLeftX(),
+    // // () -> -controller.getRightX()));
+    // // () -> -controller.getRawAxis(2)));
+    // () -> -controller.getRawAxis(4)));
 
-    // Student-owned operator controls (hood retraction, bump traversal, passing mode, etc.)
+    // Student-owned operator controls (hood retraction, bump traversal, passing
+    // mode, etc.)
     new OperatorControls(m_subsystems, controller).configureControls();
 
     // Switch to X pattern when X button is pressed

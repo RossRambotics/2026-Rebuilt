@@ -34,14 +34,10 @@
           "open": true
         }
       },
-      "Shooter": {
-        "open": true
-      },
       "Shuffleboard": {
         "Hood": {
           "open": true
-        },
-        "open": true
+        }
       },
       "Tuning": {
         "BottomFlyWheel": {
