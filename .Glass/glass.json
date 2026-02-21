@@ -34,6 +34,9 @@
           "open": true
         }
       },
+      "Shooter": {
+        "open": true
+      },
       "Shuffleboard": {
         "Hood": {
           "open": true
@@ -92,6 +95,8 @@
       "/Shuffleboard/Spindexer/Spindexer/Spindexer Dynamic": "Command",
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Auto Choices": "String Chooser",
+      "/SmartDashboard/Enable Normal Gyro": "Command",
+      "/SmartDashboard/Enable Vision Gyro": "Command",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheel/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/Up": "Command",
@@ -115,7 +120,8 @@
       "/SmartDashboard/Mechanisms/Commands/TurretMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/TurretMotor/Up": "Command",
       "/SmartDashboard/Mechanisms/Commands/TurretMotor/ZeroEncoder": "Command",
-      "/SmartDashboard/PathPlanner": "Alerts"
+      "/SmartDashboard/PathPlanner": "Alerts",
+      "/SmartDashboard/Reseed Gyro From Vision": "Command"
     },
     "windows": {
       "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 0 RPM": {

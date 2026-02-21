@@ -78,7 +78,7 @@ public class TunerConstants {
 
   // CAN bus that the devices are located on;
   // All swerve devices must share the same CAN bus
-  public static final CANBus kCANBus = new CANBus("*", "./logs/example.hoot");
+  public static final CANBus kCANBus = new CANBus("rio", "./logs/example.hoot");
   // public static final CANBus kCANBus = new CANBus("rio",
   // "./logs/example.hoot");
 
