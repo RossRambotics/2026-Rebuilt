@@ -8,19 +8,25 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
@@ -35,16 +41,52 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class ClimbElevator extends SubsystemBase {
 
+  // TODO: Tune homing speed and hard-stop detection thresholds on hardware.
+  // Negative duty cycle drives the elevator downward toward the bottom hard stop.
+  private static final double HOME_DUTY_CYCLE = -0.1;
+  private static final double HOME_STALL_VELOCITY_RPS = 0.5;
+  private static final double HOME_STALL_CURRENT_AMPS = 20.0;
+
   private final boolean m_isReal;
+  private TalonFX elevatorMotor;
   private Elevator elevator;
   private Distance m_stubbedHeight = Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M);
+
+  // Calibration request bypasses both hardware and software limits so the elevator
+  // can drive all the way to its mechanical bottom hard stop.
+  private final DutyCycleOut elevatorCalibrationRequest =
+      new DutyCycleOut(HOME_DUTY_CYCLE)
+          .withIgnoreHardwareLimits(true)
+          .withIgnoreSoftwareLimits(true);
+
+  // StatusSignals used for hard-stop detection. Initialized to null and
+  // assigned in the real-hardware block of the constructor.
+  private StatusSignal<AngularVelocity> elevatorMotorVelocity = null;
+  private StatusSignal<Current> elevatorMotorTorqueCurrent = null;
+
+  /**
+   * Fires when the elevator has stalled against its bottom hard stop: velocity drops below
+   * HOME_STALL_VELOCITY_RPS and stator current exceeds HOME_STALL_CURRENT_AMPS for 100 ms.
+   */
+  public final Trigger isHardStop =
+      new Trigger(
+              () -> {
+                if (elevatorMotorVelocity == null) return false;
+                return Math.abs(elevatorMotorVelocity.refresh().getValue().in(RotationsPerSecond))
+                        < HOME_STALL_VELOCITY_RPS
+                    && Math.abs(elevatorMotorTorqueCurrent.refresh().getValue().in(Amps))
+                        > HOME_STALL_CURRENT_AMPS;
+              })
+          .debounce(0.1);
 
   /** Creates a new ClimbElevator. */
   public ClimbElevator(boolean isReal) {
     m_isReal = isReal;
 
     if (m_isReal) {
-      TalonFX elevatorMotor = new TalonFX(43);
+      elevatorMotor = new TalonFX(43);
+      elevatorMotorVelocity = elevatorMotor.getVelocity();
+      elevatorMotorTorqueCurrent = elevatorMotor.getTorqueCurrent();
 
       SmartMotorControllerConfig smcConfig =
           new SmartMotorControllerConfig(this)
@@ -143,6 +185,34 @@ public class ClimbElevator extends SubsystemBase {
    */
   public Command getManualCmd(Supplier<Double> joystick) {
     return setDutyCycle(joystick).withName("Climb/Manual");
+  }
+
+  // ---------------------------------------------------------------------------
+  // Homing / calibration
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Slowly drives the elevator downward toward its bottom hard stop. When a velocity drop and
+   * current spike are detected (isHardStop), the motor is commanded to zero for 250 ms to let it
+   * settle, then the TalonFX encoder is zeroed to 0 rotations and YAMS is resynced to MIN_HEIGHT_M.
+   *
+   * <p>Returns immediately as a no-op when the subsystem is stubbed.
+   *
+   * @return Command to run
+   */
+  public Command homeAndCalibrate() {
+    if (!m_isReal) return Commands.none();
+    return run(() -> elevatorMotor.setControl(elevatorCalibrationRequest))
+        .until(isHardStop)
+        .andThen(
+            setDutyCycle(0.0)
+                .withTimeout(0.25)
+                .finallyDo(
+                    () -> {
+                      elevatorMotor.setPosition(Rotations.of(0));
+                      elevator.setHeight(Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M)).schedule();
+                    }))
+        .withName("ClimbElevator/HomeAndCalibrate");
   }
 
   // ---------------------------------------------------------------------------

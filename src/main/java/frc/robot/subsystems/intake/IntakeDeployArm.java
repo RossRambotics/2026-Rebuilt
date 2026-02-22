@@ -10,17 +10,23 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
@@ -35,16 +41,53 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class IntakeDeployArm extends SubsystemBase {
 
+  // TODO: Tune homing speed and hard-stop detection thresholds on hardware.
+  // Direction must be verified: positive duty cycle should drive the arm toward
+  // RETRACT_ANGLE_DEG (the retracted hard stop).
+  private static final double HOME_DUTY_CYCLE = 0.1;
+  private static final double HOME_STALL_VELOCITY_RPS = 0.5;
+  private static final double HOME_STALL_CURRENT_AMPS = 20.0;
+
   private final boolean m_isReal;
+  private TalonFX armMotor;
   private Arm arm;
   private Angle m_stubbedAngle = Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG);
+
+  // Calibration request bypasses both hardware and software limits so the arm
+  // can drive all the way to its mechanical hard stop.
+  private final DutyCycleOut armCalibrationRequest =
+      new DutyCycleOut(HOME_DUTY_CYCLE)
+          .withIgnoreHardwareLimits(true)
+          .withIgnoreSoftwareLimits(true);
+
+  // StatusSignals used for hard-stop detection. Initialized to null and
+  // assigned in the real-hardware block of the constructor.
+  private StatusSignal<AngularVelocity> armMotorVelocity = null;
+  private StatusSignal<Current> armMotorTorqueCurrent = null;
+
+  /**
+   * Fires when the intake arm has stalled against its retracted hard stop: velocity drops below
+   * HOME_STALL_VELOCITY_RPS and stator current exceeds HOME_STALL_CURRENT_AMPS for 100 ms.
+   */
+  public final Trigger isHardStop =
+      new Trigger(
+              () -> {
+                if (armMotorVelocity == null) return false;
+                return Math.abs(armMotorVelocity.refresh().getValue().in(RotationsPerSecond))
+                        < HOME_STALL_VELOCITY_RPS
+                    && Math.abs(armMotorTorqueCurrent.refresh().getValue().in(Amps))
+                        > HOME_STALL_CURRENT_AMPS;
+              })
+          .debounce(0.1);
 
   /** Creates a new IntakeDeployArm. */
   public IntakeDeployArm(boolean isReal) {
     m_isReal = isReal;
 
     if (m_isReal) {
-      TalonFX armMotor = new TalonFX(41);
+      armMotor = new TalonFX(41);
+      armMotorVelocity = armMotor.getVelocity();
+      armMotorTorqueCurrent = armMotor.getTorqueCurrent();
 
       SmartMotorControllerConfig motorConfig =
           new SmartMotorControllerConfig(this)
@@ -120,6 +163,30 @@ public class IntakeDeployArm extends SubsystemBase {
    */
   public boolean isNearAngle(Angle target, Angle tolerance) {
     return getAngle().isNear(target, tolerance);
+  }
+
+  /**
+   * Slowly drives the arm toward its retracted hard stop (RETRACT_ANGLE_DEG). When a velocity drop
+   * and current spike are detected (isHardStop), the motor is commanded to zero for 250 ms to let
+   * it settle, then the TalonFX encoder is zeroed to RETRACT_ANGLE_DEG and YAMS is resynced.
+   *
+   * <p>Returns immediately as a no-op when the subsystem is stubbed.
+   *
+   * @return Command to run
+   */
+  public Command homeAndCalibrate() {
+    if (!m_isReal) return Commands.none();
+    return run(() -> armMotor.setControl(armCalibrationRequest))
+        .until(isHardStop)
+        .andThen(
+            setDutyCycle(0.0)
+                .withTimeout(0.25)
+                .finallyDo(
+                    () -> {
+                      armMotor.setPosition(Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG));
+                      arm.setAngle(Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG)).schedule();
+                    }))
+        .withName("IntakeDeployArm/HomeAndCalibrate");
   }
 
   /** SysId characterization routine. */

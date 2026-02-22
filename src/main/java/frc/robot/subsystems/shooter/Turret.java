@@ -6,16 +6,22 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
@@ -34,15 +40,51 @@ public class Turret extends SubsystemBase {
   public static final int TURRET_DEGREES_MIN = -90;
   public static final int TURRET_DEGREES_MAX = 90;
 
+  // TODO: Tune homing speed and hard-stop detection thresholds on hardware.
+  // Negative duty cycle drives the turret toward TURRET_DEGREES_MIN (left hard stop).
+  private static final double HOME_DUTY_CYCLE = -0.1;
+  private static final double HOME_STALL_VELOCITY_RPS = 0.5;
+  private static final double HOME_STALL_CURRENT_AMPS = 20.0;
+
   private final boolean m_isReal;
+  private TalonFX turretMotor;
   private Pivot turret;
   private Angle m_stubbedAngle = Degrees.of(0);
+
+  // Calibration request bypasses both hardware and software limits so the turret
+  // can drive all the way to its mechanical hard stop.
+  private final DutyCycleOut turretCalibrationRequest =
+      new DutyCycleOut(HOME_DUTY_CYCLE)
+          .withIgnoreHardwareLimits(true)
+          .withIgnoreSoftwareLimits(true);
+
+  // StatusSignals used for hard-stop detection. Initialized to null and
+  // assigned in the real-hardware block of the constructor.
+  private StatusSignal<AngularVelocity> turretMotorVelocity = null;
+  private StatusSignal<Current> turretMotorTorqueCurrent = null;
+
+  /**
+   * Fires when the turret has stalled against its mechanical hard stop: velocity drops below
+   * HOME_STALL_VELOCITY_RPS and stator current exceeds HOME_STALL_CURRENT_AMPS for 100 ms.
+   */
+  public final Trigger isHardStop =
+      new Trigger(
+              () -> {
+                if (turretMotorVelocity == null) return false;
+                return Math.abs(turretMotorVelocity.refresh().getValue().in(RotationsPerSecond))
+                        < HOME_STALL_VELOCITY_RPS
+                    && Math.abs(turretMotorTorqueCurrent.refresh().getValue().in(Amps))
+                        > HOME_STALL_CURRENT_AMPS;
+              })
+          .debounce(0.1);
 
   public Turret(boolean isReal) {
     m_isReal = isReal;
 
     if (m_isReal) {
-      TalonFX turretMotor = new TalonFX(40);
+      turretMotor = new TalonFX(40);
+      turretMotorVelocity = turretMotor.getVelocity();
+      turretMotorTorqueCurrent = turretMotor.getTorqueCurrent();
 
       SmartMotorControllerConfig motorConfig =
           new SmartMotorControllerConfig(this)
@@ -108,6 +150,31 @@ public class Turret extends SubsystemBase {
   public Command setDutyCycle(double dutyCycle) {
     if (turret != null) return turret.set(dutyCycle);
     return Commands.run(() -> {}, this);
+  }
+
+  /**
+   * Slowly drives the turret toward its minimum-angle hard stop (TURRET_DEGREES_MIN). When a
+   * velocity drop and current spike are detected (isHardStop), the motor is commanded to zero for
+   * 250 ms to let it settle, then the TalonFX encoder is zeroed to TURRET_DEGREES_MIN and YAMS is
+   * resynced.
+   *
+   * <p>Returns immediately as a no-op when the subsystem is stubbed.
+   *
+   * @return Command to run
+   */
+  public Command homeAndCalibrate() {
+    if (!m_isReal) return Commands.none();
+    return run(() -> turretMotor.setControl(turretCalibrationRequest))
+        .until(isHardStop)
+        .andThen(
+            setDutyCycle(0.0)
+                .withTimeout(0.25)
+                .finallyDo(
+                    () -> {
+                      turretMotor.setPosition(Degrees.of(TURRET_DEGREES_MIN));
+                      turret.setAngle(Degrees.of(TURRET_DEGREES_MIN)).schedule();
+                    }))
+        .withName("Turret/HomeAndCalibrate");
   }
 
   @Override
