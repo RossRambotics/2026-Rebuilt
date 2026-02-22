@@ -35,6 +35,7 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
@@ -64,6 +65,8 @@ public class RobotContainer {
 
   public Shooter m_shooter = null;
 
+  public Intake m_intake = null;
+
   // All subsystems bundled for passing to OperatorControls, commands, etc.
   private Subsystems m_subsystems;
 
@@ -72,6 +75,7 @@ public class RobotContainer {
     instance = this;
 
     m_shooter = new Shooter(true);
+    m_intake = new Intake(false);
 
     switch (Constants.currentMode) {
       case REAL:
@@ -150,7 +154,7 @@ public class RobotContainer {
     }
 
     // Bundle subsystems for OperatorControls and other consumers
-    m_subsystems = new Subsystems(drive, m_shooter);
+    m_subsystems = new Subsystems(drive, m_shooter, m_intake);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());

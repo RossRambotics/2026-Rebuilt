@@ -1,6 +1,7 @@
 package frc.robot;
 
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 
 /**
@@ -9,4 +10,4 @@ import frc.robot.subsystems.shooter.Shooter;
  * <p>When you add a new subsystem, add a field here so OperatorControls (and any other consumer)
  * can access it without changing constructor signatures everywhere.
  */
-public record Subsystems(Drive drive, Shooter shooter) {}
+public record Subsystems(Drive drive, Shooter shooter, Intake intake) {}
