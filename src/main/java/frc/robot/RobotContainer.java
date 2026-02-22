@@ -29,6 +29,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.OperatorControls;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.SpeedNanny;
+import frc.robot.subsystems.climb.ClimbElevator;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -67,6 +68,8 @@ public class RobotContainer {
 
   public Intake m_intake = null;
 
+  public ClimbElevator m_climbElevator = null;
+
   // All subsystems bundled for passing to OperatorControls, commands, etc.
   private Subsystems m_subsystems;
 
@@ -76,6 +79,7 @@ public class RobotContainer {
 
     m_shooter = new Shooter(true);
     m_intake = new Intake(false);
+    m_climbElevator = new ClimbElevator(false);
 
     switch (Constants.currentMode) {
       case REAL:
@@ -154,7 +158,7 @@ public class RobotContainer {
     }
 
     // Bundle subsystems for OperatorControls and other consumers
-    m_subsystems = new Subsystems(drive, m_shooter, m_intake);
+    m_subsystems = new Subsystems(drive, m_shooter, m_intake, m_climbElevator);
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());

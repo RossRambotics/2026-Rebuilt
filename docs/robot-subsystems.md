@@ -48,18 +48,27 @@ Key files: `Vision.java`, `VisionConstants.java`
 
 ---
 
-### Intake _(TODO — not yet implemented)_
-A coordinator subsystem (`Intake.java`) that will own and orchestrate IntakeRoller and IntakeDeployArm.
+### Intake
+A coordinator subsystem (`Intake.java`) that owns and orchestrates IntakeRoller and IntakeDeployArm. Exposes compound commands (`getDeployCmd`, `getRetractCmd`) and standalone roller commands (`getRollerOnCmd`, `getRollerOffCmd`, `getReverseCmd`).
 
-#### IntakeRoller _(TODO)_
-Spins game pieces into the robot. Velocity-controlled via YAMS FlyWheel (Kraken X60). Reserved CAN ID: **42**.
+#### IntakeRoller
+Spins game pieces into the robot. Velocity-controlled via YAMS FlyWheel (Kraken X60). CAN ID: **42**. Idle mode: COAST.
 
-#### IntakeDeployArm _(TODO)_
-Deploys and retracts the intake mechanism. Position-controlled via YAMS Arm (Kraken X60). Reserved CAN ID: **41**.
+#### IntakeDeployArm
+Deploys and retracts the intake mechanism. Position-controlled via YAMS Arm (Kraken X60). CAN ID: **41**. Idle mode: **COAST** — arm must fold freely if struck by another robot to prevent mechanical damage. Deploy uses a two-phase command: position-control until at angle, then releases to coast so the arm floats freely while the roller runs. Retract holds position with active control.
 
-> **Important:** Brake mode must be **OFF** (coast mode) so the arm can fold back freely if struck by another robot, preventing mechanical damage.
+> **Constants:** Deploy angle, retract angle, gear reduction (60:1), and roller RPM are in `IntakeConstants.java` — marked TODO for hardware tuning.
 
-Key files (planned): `Intake.java`, `IntakeRoller.java`, `IntakeDeployArm.java`
+Key files: `Intake.java`, `IntakeRoller.java`, `IntakeDeployArm.java`, `IntakeConstants.java`
+
+---
+
+### Climb Elevator
+A single-motor elevator mechanism for end-game climbing. Position-controlled via YAMS `Elevator` with an `ElevatorFeedforward`. Idle mode: **BRAKE** — holds the robot's weight when hanging. Exposes `getExtendCmd()`, `getRetractCmd()`, and `getManualCmd(Supplier<Double>)` for operator control.
+
+> **Constants:** Min/max heights, gear reduction, drum radius, and carriage mass are in `ClimbElevatorConstants.java` — marked TODO for hardware tuning.
+
+Key files: `ClimbElevator.java`, `ClimbElevatorConstants.java`
 
 ---
 
@@ -101,6 +110,19 @@ Key file: `SpeedNanny.java`
 | 39 | TalonFX | Spindexer | Intake/indexer roller | Falcon 500 |
 | 40 | TalonFX | Turret | Turret yaw (12:1 reduction) ⚠️ force-stubbed | Kraken X60 |
 
+### Intake
+
+| CAN ID | Device Type | Subsystem | Role | Motor Model |
+|--------|-------------|-----------|------|-------------|
+| 41 | TalonFX | IntakeDeployArm | Arm deploy/retract (60:1 reduction, COAST) | Kraken X60 |
+| 42 | TalonFX | IntakeRoller | Game piece roller (COAST) | Kraken X60 |
+
+### Climb Elevator
+
+| CAN ID | Device Type | Subsystem | Role | Motor Model |
+|--------|-------------|-----------|------|-------------|
+| 43 | TalonFX | ClimbElevator | Elevator lift — reserved | Kraken X60 |
+
 ---
 
 ## All Devices by CAN ID
@@ -126,5 +148,8 @@ Key file: `SpeedNanny.java`
 | 38 | TalonFX — Kicker | Shooter / Kicker |
 | 39 | TalonFX — Spindexer | Spindexer |
 | 40 | TalonFX — Turret Yaw ⚠️ | Shooter / Turret |
+| 41 | TalonFX — Intake Deploy Arm | Intake / IntakeDeployArm |
+| 42 | TalonFX — Intake Roller | Intake / IntakeRoller |
+| 43 | TalonFX — Climb Elevator (reserved) | ClimbElevator |
 
-**Total: 16 TalonFX motors, 4 CANcoders, 1 Pigeon 2**
+**Total: 19 TalonFX motors, 4 CANcoders, 1 Pigeon 2**
