@@ -50,6 +50,7 @@ public class Turret extends SubsystemBase {
   private TalonFX turretMotor;
   private Pivot turret;
   private Angle m_stubbedAngle = Degrees.of(0);
+  private boolean m_isCalibrated = false;
 
   // Calibration request bypasses both hardware and software limits so the turret
   // can drive all the way to its mechanical hard stop.
@@ -173,13 +174,38 @@ public class Turret extends SubsystemBase {
                     () -> {
                       turretMotor.setPosition(Degrees.of(TURRET_DEGREES_MIN));
                       turret.setAngle(Degrees.of(TURRET_DEGREES_MIN)).schedule();
+                      m_isCalibrated = true;
                     }))
         .withName("Turret/HomeAndCalibrate");
+  }
+
+  /**
+   * Zeroes the turret encoder in-place, assuming the mechanism is already resting at its minimum
+   * angle hard stop (TURRET_DEGREES_MIN). No motion is commanded. Runs while disabled so it can be
+   * used on the field before a match.
+   *
+   * @return Command to run
+   */
+  public Command calibrateInPlace() {
+    Command c =
+        Commands.runOnce(
+            () -> {
+              if (turretMotor != null) {
+                turretMotor.setPosition(Degrees.of(TURRET_DEGREES_MIN));
+                turret.setAngle(Degrees.of(TURRET_DEGREES_MIN)).schedule();
+              } else {
+                m_stubbedAngle = Degrees.of(TURRET_DEGREES_MIN);
+              }
+              m_isCalibrated = true;
+            });
+    c.setName("Turret/CalibrateInPlace");
+    return c.ignoringDisable(true);
   }
 
   @Override
   public void periodic() {
     Logger.recordOutput("Turret/IsStubbed", !m_isReal);
+    Logger.recordOutput("Turret/IsCalibrated", m_isCalibrated);
 
     if (turret != null) {
       turret.updateTelemetry();

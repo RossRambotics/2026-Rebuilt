@@ -47,6 +47,7 @@ public class Hood extends SubsystemBase {
   private TalonFX hoodMotor;
   private Arm hood;
   private Angle m_stubbedAngle = Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
+  private boolean m_isCalibrated = false;
 
   // Calibration request bypasses both hardware and software limits so the hood
   // can drive all the way to its mechanical hard stop.
@@ -190,13 +191,38 @@ public class Hood extends SubsystemBase {
                     () -> {
                       hoodMotor.setPosition(Degrees.of(HoodConstants.HOOD_DEGREES_MIN));
                       hood.setAngle(Degrees.of(HoodConstants.HOOD_DEGREES_MIN)).schedule();
+                      m_isCalibrated = true;
                     }))
         .withName("Hood/HomeAndCalibrate");
+  }
+
+  /**
+   * Zeroes the hood encoder in-place, assuming the mechanism is already resting at its minimum
+   * angle hard stop. No motion is commanded. Runs while disabled so it can be used on the field
+   * before a match.
+   *
+   * @return Command to run
+   */
+  public Command calibrateInPlace() {
+    Command c =
+        Commands.runOnce(
+            () -> {
+              if (hoodMotor != null) {
+                hoodMotor.setPosition(Degrees.of(HoodConstants.HOOD_DEGREES_MIN));
+                hood.setAngle(Degrees.of(HoodConstants.HOOD_DEGREES_MIN)).schedule();
+              } else {
+                m_stubbedAngle = Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
+              }
+              m_isCalibrated = true;
+            });
+    c.setName("Hood/CalibrateInPlace");
+    return c.ignoringDisable(true);
   }
 
   @Override
   public void periodic() {
     Logger.recordOutput("Hood/IsStubbed", !m_isReal);
+    Logger.recordOutput("Hood/IsCalibrated", m_isCalibrated);
 
     if (hood != null) {
       hood.updateTelemetry();

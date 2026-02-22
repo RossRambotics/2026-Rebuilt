@@ -52,6 +52,7 @@ public class IntakeDeployArm extends SubsystemBase {
   private TalonFX armMotor;
   private Arm arm;
   private Angle m_stubbedAngle = Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG);
+  private boolean m_isCalibrated = false;
 
   // Calibration request bypasses both hardware and software limits so the arm
   // can drive all the way to its mechanical hard stop.
@@ -185,8 +186,32 @@ public class IntakeDeployArm extends SubsystemBase {
                     () -> {
                       armMotor.setPosition(Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG));
                       arm.setAngle(Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG)).schedule();
+                      m_isCalibrated = true;
                     }))
         .withName("IntakeDeployArm/HomeAndCalibrate");
+  }
+
+  /**
+   * Zeroes the arm encoder in-place, assuming the mechanism is already resting at its retracted
+   * hard stop (RETRACT_ANGLE_DEG). No motion is commanded. Runs while disabled so it can be used on
+   * the field before a match.
+   *
+   * @return Command to run
+   */
+  public Command calibrateInPlace() {
+    Command c =
+        Commands.runOnce(
+            () -> {
+              if (armMotor != null) {
+                armMotor.setPosition(Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG));
+                arm.setAngle(Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG)).schedule();
+              } else {
+                m_stubbedAngle = Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG);
+              }
+              m_isCalibrated = true;
+            });
+    c.setName("IntakeDeployArm/CalibrateInPlace");
+    return c.ignoringDisable(true);
   }
 
   /** SysId characterization routine. */
@@ -200,6 +225,7 @@ public class IntakeDeployArm extends SubsystemBase {
   @Override
   public void periodic() {
     Logger.recordOutput("IntakeDeployArm/IsStubbed", !m_isReal);
+    Logger.recordOutput("IntakeDeployArm/IsCalibrated", m_isCalibrated);
 
     if (arm != null) {
       arm.updateTelemetry();

@@ -51,6 +51,7 @@ public class ClimbElevator extends SubsystemBase {
   private TalonFX elevatorMotor;
   private Elevator elevator;
   private Distance m_stubbedHeight = Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M);
+  private boolean m_isCalibrated = false;
 
   // Calibration request bypasses both hardware and software limits so the elevator
   // can drive all the way to its mechanical bottom hard stop.
@@ -211,8 +212,32 @@ public class ClimbElevator extends SubsystemBase {
                     () -> {
                       elevatorMotor.setPosition(Rotations.of(0));
                       elevator.setHeight(Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M)).schedule();
+                      m_isCalibrated = true;
                     }))
         .withName("ClimbElevator/HomeAndCalibrate");
+  }
+
+  /**
+   * Zeroes the elevator encoder in-place, assuming the carriage is already resting at its bottom
+   * hard stop (MIN_HEIGHT_M). No motion is commanded. Runs while disabled so it can be used on the
+   * field before a match.
+   *
+   * @return Command to run
+   */
+  public Command calibrateInPlace() {
+    Command c =
+        Commands.runOnce(
+            () -> {
+              if (elevatorMotor != null) {
+                elevatorMotor.setPosition(Rotations.of(0));
+                elevator.setHeight(Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M)).schedule();
+              } else {
+                m_stubbedHeight = Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M);
+              }
+              m_isCalibrated = true;
+            });
+    c.setName("ClimbElevator/CalibrateInPlace");
+    return c.ignoringDisable(true);
   }
 
   // ---------------------------------------------------------------------------
@@ -234,6 +259,7 @@ public class ClimbElevator extends SubsystemBase {
   @Override
   public void periodic() {
     Logger.recordOutput("ClimbElevator/IsStubbed", !m_isReal);
+    Logger.recordOutput("ClimbElevator/IsCalibrated", m_isCalibrated);
 
     if (elevator != null) {
       elevator.updateTelemetry();
