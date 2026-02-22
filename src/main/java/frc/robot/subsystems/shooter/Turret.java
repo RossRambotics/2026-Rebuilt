@@ -18,6 +18,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -119,6 +120,16 @@ public class Turret extends SubsystemBase {
 
       turret = new Pivot(turretConfig);
     }
+
+    // Auto-calibrate on the first enable if the encoder has not been zeroed yet.
+    new Trigger(RobotState::isEnabled).onTrue(Commands.runOnce(this::ensureCalibrated));
+  }
+
+  /** Schedules homeAndCalibrate() on enable if the encoder has not yet been zeroed. */
+  private void ensureCalibrated() {
+    if (!m_isCalibrated) {
+      homeAndCalibrate().schedule();
+    }
   }
 
   public Command setAngle(Angle angle) {
@@ -164,7 +175,14 @@ public class Turret extends SubsystemBase {
    * @return Command to run
    */
   public Command homeAndCalibrate() {
-    if (!m_isReal) return Commands.none();
+    if (!m_isReal) {
+      return this.runOnce(
+              () -> {
+                m_stubbedAngle = Degrees.of(TURRET_DEGREES_MIN);
+                m_isCalibrated = true;
+              })
+          .withName("Turret/HomeAndCalibrate");
+    }
     return run(() -> turretMotor.setControl(turretCalibrationRequest))
         .until(isHardStop)
         .andThen(
