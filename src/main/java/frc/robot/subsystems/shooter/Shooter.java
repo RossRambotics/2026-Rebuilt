@@ -154,6 +154,8 @@ public class Shooter extends SubsystemBase {
     Shuffleboard.getTab("Shooter")
         .add(this.getSetTargetCmd("Red Hub", new Pose3d(12.0, 4.1, 1.83, new Rotation3d())));
 
+    Shuffleboard.getTab("YAMS_SysID").add(m_hood.sysId());
+
     // Shuffleboard.getTab("Shooter")
     // .add(
     // this.getSetTargetCmd(
