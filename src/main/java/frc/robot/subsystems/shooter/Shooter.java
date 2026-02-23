@@ -465,7 +465,8 @@ public class Shooter extends SubsystemBase {
 
       double heightDiffMeters = m_targetPoseField3d.getZ() - TURRET_Z_OFFSET_M;
 
-      // Ball launches perpendicular to hood surface, so convert mech angle to launch angle
+      // Ball launches perpendicular to hood surface, so convert mech angle to launch
+      // angle
       double launchAngleRad = hoodMechToLaunchAngle(hoodMechRad);
       double tofVacSec =
           (exitVelocityMps * Math.sin(launchAngleRad)
@@ -719,6 +720,7 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/TurretActualDegRobot", m_turret.getAngle().in(Degrees));
     Logger.recordOutput("Shooter/TurretTargetDegRobot", m_turretTargetRobotAngle.in(Degrees));
     Logger.recordOutput("Shooter/TurretErrorDeg", m_lastTurretErrorRobotAngle.in(Degrees));
+    Logger.recordOutput("Shooter/TargetPose2d", m_targetPoseField3d.toPose2d());
 
     // Firing solution telemetry
     if (m_lastFiringSolution != null) {
@@ -826,7 +828,8 @@ public class Shooter extends SubsystemBase {
 
   public void launchFuelSim() {
     Pose3d turretPoseFR = m_turretPoseField3d; // turret pose field relative
-    // Ball launches perpendicular to hood surface; convert mechanical angle to launch angle
+    // Ball launches perpendicular to hood surface; convert mechanical angle to
+    // launch angle
     double hoodAngleRad = hoodMechToLaunchAngle(m_lastFiringSolution.hoodMechAngleRad);
     double vel = rpmToExitVelocity(m_lastFiringSolution.flywheelRPM);
     double yawRad = turretPoseFR.getRotation().getZ();

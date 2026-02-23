@@ -229,7 +229,6 @@ public class ClimbElevator extends SubsystemBase {
                 .finallyDo(
                     () -> {
                       elevatorMotor.setPosition(Rotations.of(0));
-                      elevator.setHeight(Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M)).schedule();
                       m_isCalibrated = true;
                     }))
         .withName("ClimbElevator/HomeAndCalibrate");
@@ -248,7 +247,6 @@ public class ClimbElevator extends SubsystemBase {
             () -> {
               if (elevatorMotor != null) {
                 elevatorMotor.setPosition(Rotations.of(0));
-                elevator.setHeight(Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M)).schedule();
               } else {
                 m_stubbedHeight = Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M);
               }

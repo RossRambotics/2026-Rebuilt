@@ -203,7 +203,6 @@ public class IntakeDeployArm extends SubsystemBase {
                 .finallyDo(
                     () -> {
                       armMotor.setPosition(Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG));
-                      arm.setAngle(Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG)).schedule();
                       m_isCalibrated = true;
                     }))
         .withName("IntakeDeployArm/HomeAndCalibrate");
@@ -222,7 +221,6 @@ public class IntakeDeployArm extends SubsystemBase {
             () -> {
               if (armMotor != null) {
                 armMotor.setPosition(Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG));
-                arm.setAngle(Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG)).schedule();
               } else {
                 m_stubbedAngle = Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG);
               }

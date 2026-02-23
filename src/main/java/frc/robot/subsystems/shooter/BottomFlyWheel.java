@@ -126,7 +126,7 @@ public class BottomFlyWheel extends SubsystemBase {
               .withClosedLoopController(
                   0, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
               .withSimClosedLoopController(
-                  50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
+                  25, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
               // Feedforward Constants
               .withFeedforward(new SimpleMotorFeedforward(0, .12, 0))
               .withSimFeedforward(new SimpleMotorFeedforward(0, .52, .34))
@@ -147,9 +147,9 @@ public class BottomFlyWheel extends SubsystemBase {
               // Diameter of the flywheel.
               .withDiameter(Inches.of(4))
               // Mass of the flywheel.
-              .withMass(Pounds.of(1))
+              .withMass(Pounds.of(6))
               // Maximum speed of the shooter.
-              .withUpperSoftLimit(RPM.of(1000))
+              .withUpperSoftLimit(RPM.of(6000))
               // Telemetry name and verbosity for the arm.
               .withTelemetry("BottomFlyWheel", TelemetryVerbosity.HIGH);
 

@@ -191,7 +191,6 @@ public class Turret extends SubsystemBase {
                 .finallyDo(
                     () -> {
                       turretMotor.setPosition(Degrees.of(TURRET_DEGREES_MIN));
-                      turret.setAngle(Degrees.of(TURRET_DEGREES_MIN)).schedule();
                       m_isCalibrated = true;
                     }))
         .withName("Turret/HomeAndCalibrate");
@@ -210,7 +209,6 @@ public class Turret extends SubsystemBase {
             () -> {
               if (turretMotor != null) {
                 turretMotor.setPosition(Degrees.of(TURRET_DEGREES_MIN));
-                turret.setAngle(Degrees.of(TURRET_DEGREES_MIN)).schedule();
               } else {
                 m_stubbedAngle = Degrees.of(TURRET_DEGREES_MIN);
               }

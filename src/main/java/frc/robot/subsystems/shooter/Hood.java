@@ -91,7 +91,7 @@ public class Hood extends SubsystemBase {
               .withClosedLoopController(
                   50, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(720))
               .withSimClosedLoopController(
-                  50, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(720))
+                  25, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(720))
               .withFeedforward(
                   new ArmFeedforward(0.25, 0.45, 0.1 / (2 * Math.PI), 0.01 / (2 * Math.PI)))
               .withGearing(new MechanismGearing(GearBox.fromReductionStages(19)))
@@ -172,7 +172,6 @@ public class Hood extends SubsystemBase {
                 () -> {
                   if (hoodMotor != null) {
                     hoodMotor.setPosition(Degrees.of(HoodConstants.HOOD_DEGREES_MIN));
-                    hood.setAngle(Degrees.of(HoodConstants.HOOD_DEGREES_MIN)).schedule();
                   } else {
                     m_stubbedAngle = Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
                   }
@@ -208,7 +207,6 @@ public class Hood extends SubsystemBase {
                 .finallyDo(
                     () -> {
                       hoodMotor.setPosition(Degrees.of(HoodConstants.HOOD_DEGREES_MIN));
-                      hood.setAngle(Degrees.of(HoodConstants.HOOD_DEGREES_MIN)).schedule();
                       m_isCalibrated = true;
                     }))
         .withName("Hood/HomeAndCalibrate");
@@ -227,7 +225,6 @@ public class Hood extends SubsystemBase {
             () -> {
               if (hoodMotor != null) {
                 hoodMotor.setPosition(Degrees.of(HoodConstants.HOOD_DEGREES_MIN));
-                hood.setAngle(Degrees.of(HoodConstants.HOOD_DEGREES_MIN)).schedule();
               } else {
                 m_stubbedAngle = Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
               }
@@ -246,9 +243,9 @@ public class Hood extends SubsystemBase {
       hood.updateTelemetry();
 
       Logger.recordOutput(
-          "Shooter/HoodTargetAngleDegrees",
+          "Hood/HoodTargetAngleDegrees",
           this.hood.getMechanismSetpoint().map(a -> a.in(Degrees)).orElse(Double.NaN));
-      Logger.recordOutput("Shooter/HoodCurrentDegrees", this.hood.getAngle().in(Degrees));
+      Logger.recordOutput("Hood/HoodCurrentDegrees", this.hood.getAngle().in(Degrees));
     }
   }
 
