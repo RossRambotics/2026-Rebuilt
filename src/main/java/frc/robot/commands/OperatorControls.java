@@ -5,9 +5,11 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems;
+import frc.robot.subsystems.SpotSelector;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.Shooter;
 
@@ -54,11 +56,14 @@ public class OperatorControls {
   private final Drive drive;
   private final Shooter shooter;
   private final CommandXboxController controller;
+  private final SpotSelector spotSelector;
 
-  public OperatorControls(Subsystems subsystems, CommandXboxController controller) {
+  public OperatorControls(
+      Subsystems subsystems, CommandXboxController controller, SpotSelector spotSelector) {
     this.drive = subsystems.drive();
     this.shooter = subsystems.shooter();
     this.controller = controller;
+    this.spotSelector = spotSelector;
   }
 
   /**
@@ -227,10 +232,24 @@ public class OperatorControls {
             3.0, // 3 meters wide along X
             2.0 // 2.0 meters wide along Y
             );
-    Trigger inRampZoneBL = new Trigger(() -> rampZoneBL.contains(drive.getPose().getTranslation()));
-    Trigger inRampZoneBR = new Trigger(() -> rampZoneBR.contains(drive.getPose().getTranslation()));
-    Trigger inRampZoneRL = new Trigger(() -> rampZoneRL.contains(drive.getPose().getTranslation()));
-    Trigger inRampZoneRR = new Trigger(() -> rampZoneRR.contains(drive.getPose().getTranslation()));
+    // Suppress zone triggers during autonomous and while DriveToSpot is actively pathfinding.
+    // DriverStation.isTeleop() handles the autonomous period; spotSelector.isAutoDriving()
+    // handles teleop pathfinding via the Y button.
+    Trigger notAutoDriving =
+        new Trigger(() -> DriverStation.isTeleop() && !spotSelector.isAutoDriving());
+
+    Trigger inRampZoneBL =
+        new Trigger(() -> rampZoneBL.contains(drive.getPose().getTranslation()))
+            .and(notAutoDriving);
+    Trigger inRampZoneBR =
+        new Trigger(() -> rampZoneBR.contains(drive.getPose().getTranslation()))
+            .and(notAutoDriving);
+    Trigger inRampZoneRL =
+        new Trigger(() -> rampZoneRL.contains(drive.getPose().getTranslation()))
+            .and(notAutoDriving);
+    Trigger inRampZoneRR =
+        new Trigger(() -> rampZoneRR.contains(drive.getPose().getTranslation()))
+            .and(notAutoDriving);
     // While the robot is in the zone, retract the hood.
     // When the robot drives out, the hood returns to normal auto-aiming.
     inRampZoneBL.whileTrue(

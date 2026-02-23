@@ -20,15 +20,19 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.DriveToSpot;
+import frc.robot.commands.FieldSpot;
 import frc.robot.commands.OperatorControls;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.SpeedNanny;
+import frc.robot.subsystems.SpotSelector;
 import frc.robot.subsystems.climb.ClimbElevator;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -63,6 +67,8 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
 
   public SpeedNanny m_speedNanny = new SpeedNanny();
+
+  public final SpotSelector m_spotSelector = new SpotSelector();
 
   public Shooter m_shooter = null;
 
@@ -182,6 +188,9 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
 
+    // Publish spot-selection commands to Shuffleboard
+    configureSpotSelectorDashboard();
+
     // Dashboard buttons for gyro mode switching and reseed
     SmartDashboard.putData(
         Commands.runOnce(() -> vision.enableVisionGyro())
@@ -233,6 +242,23 @@ public class RobotContainer {
     controller.a().whileTrue(Commands.runOnce(() -> m_shooter.launchFuelSim()));
     controller.b().whileTrue(m_shooter.getAutoShootCmd());
 
+    // Y button: drive to the currently selected field spot via PathPlanner on-the-fly pathfinding.
+    // Use the button box (see TODO below) to select a spot before pressing Y.
+    controller.y().whileTrue(new DriveToSpot(drive, m_spotSelector));
+
+    // TODO: Wire button box buttons to spot selection once hardware is available.
+    // Example bindings (replace JoystickButton refs with your actual button box inputs):
+    // buttonBox.button(1).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_LEFT));
+    // buttonBox.button(2).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_RIGHT));
+    // buttonBox.button(3).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_LEFT));
+    // buttonBox.button(4).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_RIGHT));
+    // buttonBox.button(5).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.HUB_ALLIANCE));
+    // buttonBox.button(6).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.HUB_NEUTRAL));
+    // buttonBox.button(7).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_LEFT));
+    // buttonBox.button(8).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_CENTER));
+    // buttonBox.button(9).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_RIGHT));
+    // buttonBox.button(10).onTrue(m_spotSelector.cmdClearSelection());
+
     // Robot centric drive when B button is held
     // controller
     // .b()
@@ -247,7 +273,7 @@ public class RobotContainer {
 
     // Student-owned operator controls (hood retraction, bump traversal, passing
     // mode, etc.)
-    new OperatorControls(m_subsystems, controller).configureControls();
+    new OperatorControls(m_subsystems, controller, m_spotSelector).configureControls();
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -268,6 +294,24 @@ public class RobotContainer {
                     },
                     drive)
                 .ignoringDisable(true));
+  }
+
+  /**
+   * Publishes all spot-selection commands to a dedicated Shuffleboard tab so operators can trigger
+   * them from the dashboard (or verify button box wiring during testing).
+   */
+  private void configureSpotSelectorDashboard() {
+    var tab = Shuffleboard.getTab("SpotSelector");
+    tab.add("Alliance Trench Left", m_spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_LEFT));
+    tab.add("Alliance Trench Right", m_spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_RIGHT));
+    tab.add("Opponent Trench Left", m_spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_LEFT));
+    tab.add("Opponent Trench Right", m_spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_RIGHT));
+    tab.add("Hub Alliance", m_spotSelector.cmdSelectSpot(FieldSpot.HUB_ALLIANCE));
+    tab.add("Hub Neutral", m_spotSelector.cmdSelectSpot(FieldSpot.HUB_NEUTRAL));
+    tab.add("Climb Left", m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_LEFT));
+    tab.add("Climb Center", m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_CENTER));
+    tab.add("Climb Right", m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_RIGHT));
+    tab.add("Clear Selection", m_spotSelector.cmdClearSelection());
   }
 
   /**
