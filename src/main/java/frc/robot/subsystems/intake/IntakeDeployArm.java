@@ -25,6 +25,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -135,7 +136,7 @@ public class IntakeDeployArm extends SubsystemBase {
   /** Schedules homeAndCalibrate() on enable if the encoder has not yet been zeroed. */
   private void ensureCalibrated() {
     if (!m_isCalibrated) {
-      homeAndCalibrate().schedule();
+      CommandScheduler.getInstance().schedule(homeAndCalibrate());
     }
   }
 
