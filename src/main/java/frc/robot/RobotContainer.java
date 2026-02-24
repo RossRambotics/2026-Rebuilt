@@ -12,6 +12,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.ClimbCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToSpot;
 import frc.robot.commands.FieldSpot;
@@ -171,6 +173,18 @@ public class RobotContainer {
 
     // Bundle subsystems for OperatorControls and other consumers
     m_subsystems = new Subsystems(drive, m_shooter, m_intake, m_climbElevator);
+
+    // Register SuperFastClimb as PathPlanner named commands for use in .auto files.
+    // Must be registered before AutoBuilder.buildAutoChooser().
+    NamedCommands.registerCommand(
+        "SuperFastClimb/Left",
+        ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_LEFT));
+    NamedCommands.registerCommand(
+        "SuperFastClimb/Center",
+        ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_CENTER));
+    NamedCommands.registerCommand(
+        "SuperFastClimb/Right",
+        ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_RIGHT));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());

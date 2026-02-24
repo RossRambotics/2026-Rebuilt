@@ -22,4 +22,31 @@ public final class ClimbElevatorConstants {
 
   // Tolerance for at-height detection
   public static final double AT_HEIGHT_TOLERANCE_M = 0.01;
+
+  // ── SuperFastClimb command constants ─────────────────────────────────────
+
+  /**
+   * Tilt magnitude (Math.hypot(rollRobotRad, pitchRobotRad)) in radians that confirms the climb arm
+   * has hooked the tower bar. When exceeded, the drive stops and the arm retracts (winch). TODO:
+   * Tune on hardware — start large and tighten until reliable.
+   */
+  public static final double TILT_HOOK_THRESHOLD_RAD = Math.toRadians(10.0);
+
+  /** Meters the robot drives past the approach pose in the approach heading direction. */
+  public static final double CLIMB_PASS_DISTANCE_M = 1.0;
+
+  /** Max seconds to wait for the elevator to reach MAX_HEIGHT before proceeding to the pass. */
+  public static final double CLIMB_EXTEND_TIMEOUT_SEC = 3.0;
+
+  /** Approach phase PathPlanner linear speed limit (m/s). */
+  public static final double CLIMB_APPROACH_MAX_SPEED_MPS = 3.0;
+
+  /** Approach phase PathPlanner linear acceleration limit (m/s²). */
+  public static final double CLIMB_APPROACH_MAX_ACCEL_MPS2 = 2.5;
+
+  /** Tower-pass phase PathPlanner linear speed limit (m/s). Slower to allow tilt monitoring. */
+  public static final double CLIMB_PASS_MAX_SPEED_MPS = 1.5;
+
+  /** Tower-pass phase PathPlanner linear acceleration limit (m/s²). */
+  public static final double CLIMB_PASS_MAX_ACCEL_MPS2 = 1.5;
 }

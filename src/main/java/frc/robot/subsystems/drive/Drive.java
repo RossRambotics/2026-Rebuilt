@@ -332,6 +332,12 @@ public class Drive extends SubsystemBase {
     return output;
   }
 
+  /** Returns the combined roll+pitch tilt magnitude in radians. Zero when gyro disconnected. */
+  @AutoLogOutput(key = "Drive/TiltMagnitudeRad")
+  public double getTiltMagnitudeRad() {
+    return Math.hypot(gyroInputs.rollRobotRad, gyroInputs.pitchRobotRad);
+  }
+
   /** Returns the current odometry pose. */
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {

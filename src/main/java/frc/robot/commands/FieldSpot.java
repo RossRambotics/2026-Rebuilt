@@ -6,6 +6,8 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 /**
  * Predefined field spots the robot can autonomously drive to via {@link DriveToSpot}.
@@ -67,6 +69,45 @@ public enum FieldSpot {
           /* TODO: fill in 2026 climb right x */ 6.0,
           /* TODO: fill in 2026 climb right y */ 2.7,
           Rotation2d.fromDegrees(/* TODO */ 90)));
+
+  /**
+   * Full length of the 2026 field in meters (driver-station wall to driver-station wall). TODO:
+   * verify against the official 2026 field drawings.
+   */
+  public static final double FIELD_LENGTH_M = 16.540;
+
+  /**
+   * Full width of the 2026 field in meters (side wall to side wall). TODO: verify against the
+   * official 2026 field drawings.
+   */
+  public static final double FIELD_WIDTH_M = 8.070;
+
+  /**
+   * Mirrors a Blue-alliance pose to Red if the Driver Station reports Red.
+   *
+   * <p>The 2026 field is rotationally symmetric (180° rotation about field center):
+   *
+   * <ul>
+   *   <li>x → fieldLength - x
+   *   <li>y → fieldWidth - y
+   *   <li>rotation → rotation + 180°
+   * </ul>
+   *
+   * <p>All {@link FieldSpot} poses are defined in Blue-alliance coordinates. This is the single
+   * place that converts them for Red.
+   *
+   * @param pose Blue-alliance pose
+   * @return alliance-correct pose
+   */
+  public static Pose2d flipIfRed(Pose2d pose) {
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) != Alliance.Red) {
+      return pose;
+    }
+    return new Pose2d(
+        FIELD_LENGTH_M - pose.getX(),
+        FIELD_WIDTH_M - pose.getY(),
+        pose.getRotation().rotateBy(Rotation2d.fromDegrees(180)));
+  }
 
   /** Human-readable name shown in telemetry and driver displays. */
   public final String displayName;
