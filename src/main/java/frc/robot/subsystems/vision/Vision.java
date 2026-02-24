@@ -85,6 +85,19 @@ public class Vision extends SubsystemBase {
     return inputs[cameraIndex].latestTargetObservation.tx();
   }
 
+  /**
+   * Returns the number of AprilTags currently detected by the specified camera.
+   *
+   * @param cameraIndex The index of the camera (0 = limelight-frontl, 1 = limelight-frontr).
+   * @return The count of detected tag IDs, or 0 if cameraIndex is out of bounds.
+   */
+  public int getTagCount(int cameraIndex) {
+    if (cameraIndex < 0 || cameraIndex >= inputs.length) {
+      return 0;
+    }
+    return inputs[cameraIndex].tagIds.length;
+  }
+
   @Override
   public void periodic() {
     for (int i = 0; i < io.length; i++) {

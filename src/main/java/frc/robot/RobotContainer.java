@@ -41,6 +41,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
@@ -75,6 +76,8 @@ public class RobotContainer {
   public Intake m_intake = null;
 
   public ClimbElevator m_climbElevator = null;
+
+  public LEDSubsystem m_ledSubsystem = null;
 
   // All subsystems bundled for passing to OperatorControls, commands, etc.
   private Subsystems m_subsystems;
@@ -162,6 +165,10 @@ public class RobotContainer {
                 new VisionIO() {});
         break;
     }
+
+    // Instantiate LED subsystem — real only on REAL hardware, stubbed in sim/replay
+    m_ledSubsystem =
+        new LEDSubsystem(Constants.currentMode == Constants.Mode.REAL, vision, m_shooter);
 
     // Bundle subsystems for OperatorControls and other consumers
     m_subsystems = new Subsystems(drive, m_shooter, m_intake, m_climbElevator);

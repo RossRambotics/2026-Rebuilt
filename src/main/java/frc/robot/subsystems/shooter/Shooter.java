@@ -1037,6 +1037,14 @@ public class Shooter extends SubsystemBase {
   }
 
   /**
+   * Returns true if the shooter is fully ready to fire (turret, hood, flywheel, and speed are all
+   * within tolerance and debounced).
+   */
+  public boolean isReady() {
+    return m_isShooterReady;
+  }
+
+  /**
    * Returns a command that retracts the hood to its minimum angle. While this command is running,
    * the hood's default (auto-aiming) command is paused. When this command ends, the default command
    * resumes automatically.
