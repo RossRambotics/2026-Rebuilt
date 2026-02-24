@@ -51,9 +51,12 @@ import frc.robot.util.FuelSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
@@ -82,7 +85,9 @@ public class RobotContainer {
   // All subsystems bundled for passing to OperatorControls, commands, etc.
   private Subsystems m_subsystems;
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     instance = this;
 
@@ -95,13 +100,12 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
         // a CANcoder
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+        drive = new Drive(
+            new GyroIOPigeon2(),
+            new ModuleIOTalonFX(TunerConstants.FrontLeft),
+            new ModuleIOTalonFX(TunerConstants.FrontRight),
+            new ModuleIOTalonFX(TunerConstants.BackLeft),
+            new ModuleIOTalonFX(TunerConstants.BackRight));
 
         // drive =
         // new Drive(
@@ -111,13 +115,12 @@ public class RobotContainer {
         // new ModuleIOSim(TunerConstants.BackLeft),
         // new ModuleIOSim(TunerConstants.BackRight));
 
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                drive::getPose,
-                drive::setPose,
-                new VisionIOLimelight(camera0Name, drive::getRotation),
-                new VisionIOLimelight(camera1Name, drive::getRotation));
+        vision = new Vision(
+            drive::addVisionMeasurement,
+            drive::getPose,
+            drive::setPose,
+            new VisionIOLimelight(camera0Name, drive::getRotation),
+            new VisionIOLimelight(camera1Name, drive::getRotation));
         // vision =
         // new Vision(
         // demoDrive::addVisionMeasurement,
@@ -127,48 +130,51 @@ public class RobotContainer {
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+        drive = new Drive(
+            new GyroIO() {
+            },
+            new ModuleIOSim(TunerConstants.FrontLeft),
+            new ModuleIOSim(TunerConstants.FrontRight),
+            new ModuleIOSim(TunerConstants.BackLeft),
+            new ModuleIOSim(TunerConstants.BackRight));
 
         // Sim robot, instantiate physics sim IO implementations
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                drive::getPose,
-                drive::setPose,
-                new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
-                new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
+        vision = new Vision(
+            drive::addVisionMeasurement,
+            drive::getPose,
+            drive::setPose,
+            new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
+            new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
         break;
       default:
         // Replayed robot, disable IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
+        drive = new Drive(
+            new GyroIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            },
+            new ModuleIO() {
+            });
 
         // Replayed robot, disable IO implementations
         // (Use same number of dummy implementations as the real robot)
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                drive::getPose,
-                drive::setPose,
-                new VisionIO() {},
-                new VisionIO() {});
+        vision = new Vision(
+            drive::addVisionMeasurement,
+            drive::getPose,
+            drive::setPose,
+            new VisionIO() {
+            },
+            new VisionIO() {
+            });
         break;
     }
 
     // Instantiate LED subsystem — real only on REAL hardware, stubbed in sim/replay
-    m_ledSubsystem =
-        new LEDSubsystem(Constants.currentMode == Constants.Mode.REAL, vision, m_shooter);
+    m_ledSubsystem = new LEDSubsystem(false, vision, m_shooter);
 
     // Bundle subsystems for OperatorControls and other consumers
     m_subsystems = new Subsystems(drive, m_shooter, m_intake, m_climbElevator);
@@ -219,9 +225,11 @@ public class RobotContainer {
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
+   * it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
@@ -249,12 +257,14 @@ public class RobotContainer {
     controller.a().whileTrue(Commands.runOnce(() -> m_shooter.launchFuelSim()));
     controller.b().whileTrue(m_shooter.getAutoShootCmd());
 
-    // Y button: drive to the currently selected field spot via PathPlanner on-the-fly pathfinding.
+    // Y button: drive to the currently selected field spot via PathPlanner
+    // on-the-fly pathfinding.
     // Use the button box (see TODO below) to select a spot before pressing Y.
     controller.y().whileTrue(new DriveToSpot(drive, m_spotSelector));
 
     // TODO: Wire button box buttons to spot selection once hardware is available.
-    // Example bindings (replace JoystickButton refs with your actual button box inputs):
+    // Example bindings (replace JoystickButton refs with your actual button box
+    // inputs):
     // buttonBox.button(1).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_LEFT));
     // buttonBox.button(2).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_RIGHT));
     // buttonBox.button(3).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_LEFT));
@@ -290,21 +300,21 @@ public class RobotContainer {
         .back()
         .onTrue(
             Commands.runOnce(
-                    () -> {
-                      boolean isRed =
-                          DriverStation.getAlliance().isPresent()
-                              && DriverStation.getAlliance().get() == Alliance.Red;
-                      drive.setPose(
-                          new Pose2d(
-                              drive.getPose().getTranslation(),
-                              isRed ? Rotation2d.kZero : Rotation2d.fromDegrees(180)));
-                    },
-                    drive)
+                () -> {
+                  boolean isRed = DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red;
+                  drive.setPose(
+                      new Pose2d(
+                          drive.getPose().getTranslation(),
+                          isRed ? Rotation2d.kZero : Rotation2d.fromDegrees(180)));
+                },
+                drive)
                 .ignoringDisable(true));
   }
 
   /**
-   * Publishes all spot-selection commands to a dedicated Shuffleboard tab so operators can trigger
+   * Publishes all spot-selection commands to a dedicated Shuffleboard tab so
+   * operators can trigger
    * them from the dashboard (or verify button box wiring during testing).
    */
   private void configureSpotSelectorDashboard() {
@@ -350,7 +360,7 @@ public class RobotContainer {
       Distance fullWidth, // meters, side-to-side
       Distance bumperHeight, // meters
       Distance intakeDepth // meters, how far the intake extends past frame
-      ) {
+  ) {
 
     /** Convenience factory for your 26.75 in square robot with 1 intake at back */
     public static Dimensions createRobot() {
@@ -359,7 +369,7 @@ public class RobotContainer {
           Inches.of(26.75), // fullWidth
           Inches.of(10.0), // bumperHeight
           Inches.of(7.0) // intakeDepth
-          );
+      );
     }
   }
 
@@ -385,7 +395,8 @@ public class RobotContainer {
         -dimensions.fullWidth.div(2).in(Meters), // yMin (back edge)
         -dimensions.fullWidth.div(2).plus(Inches.of(7)).in(Meters), // yMax (intake depth)
         () -> true, // only one intake check
-        () -> {}) // callback when fuel is collected
+        () -> {
+        }) // callback when fuel is collected
     ;
 
     // Start the simulation
@@ -394,19 +405,19 @@ public class RobotContainer {
     // Dashboard reset button
     SmartDashboard.putData(
         Commands.runOnce(
-                () -> {
-                  FuelSim.getInstance().clearFuel();
-                  FuelSim.getInstance().spawnStartingFuel();
-                })
+            () -> {
+              FuelSim.getInstance().clearFuel();
+              FuelSim.getInstance().spawnStartingFuel();
+            })
             .withName("Reset Fuel")
             .ignoringDisable(true));
 
     // Dashboard clear fuel button
     SmartDashboard.putData(
         Commands.runOnce(
-                () -> {
-                  FuelSim.getInstance().clearFuel();
-                })
+            () -> {
+              FuelSim.getInstance().clearFuel();
+            })
             .withName("Clear Fuel")
             .ignoringDisable(true));
   }
