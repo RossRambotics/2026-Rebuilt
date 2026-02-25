@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
+import frc.robot.commands.ShootingTarget;
 import frc.robot.subsystems.Spindexer;
 import frc.robot.util.FuelSim;
 import java.util.function.Supplier;
@@ -60,11 +61,11 @@ public class Shooter extends SubsystemBase {
   private boolean m_isTurretActive = true;
 
   // Human-readable name of current target
-  private String m_targetName = "Blue Hub";
+  private String m_targetName = ShootingTarget.HUB.displayName;
 
   // Current target pose (field-relative)
   // Target pose in field-relative coordinates (Pose3d)
-  private Pose3d m_targetPoseField3d = new Pose3d(4.5, 4.1, 1.83, new Rotation3d());
+  private Pose3d m_targetPoseField3d = ShootingTarget.HUB.getFieldPose3d();
 
   // Last calculated turret values / telemetry
   private Angle m_turretTargetRobotAngle = Degrees.of(0);
@@ -128,52 +129,7 @@ public class Shooter extends SubsystemBase {
     Shuffleboard.getTab("Shooter").add(getEnableNormalTargetingModeCmd());
     Shuffleboard.getTab("Shooter").add(getEnablePredictiveTargetingModeCmd());
 
-    // Shuffleboard commands for targeting (BLUE ALLIANCE)
-    Shuffleboard.getTab("Shooter")
-        .add(this.getSetTargetCmd("Blue Hub", new Pose3d(4.5, 4.1, 1.83, new Rotation3d())));
-
-    Shuffleboard.getTab("Shooter")
-        .add(
-            this.getSetTargetCmd(
-                "Blue Neutral Target Left", new Pose3d(0.85, 1.5, 0.0, new Rotation3d())));
-    Shuffleboard.getTab("Shooter")
-        .add(
-            this.getSetTargetCmd(
-                "Blue Neutral Target Right", new Pose3d(0.85, 6.5, 0.0, new Rotation3d())));
-
-    Shuffleboard.getTab("Shooter")
-        .add(
-            this.getSetTargetCmd(
-                "Blue Opposition Target Left", new Pose3d(2.0, 2.0, 0.0, new Rotation3d())));
-    Shuffleboard.getTab("Shooter")
-        .add(
-            this.getSetTargetCmd(
-                "Blue Opposition Target Right", new Pose3d(2.0, 6.0, 0.0, new Rotation3d())));
-
-    // Shuffleboard commands for targeting (RED ALLIANCE)
-    Shuffleboard.getTab("Shooter")
-        .add(this.getSetTargetCmd("Red Hub", new Pose3d(12.0, 4.1, 1.83, new Rotation3d())));
-
     Shuffleboard.getTab("YAMS_SysID").add(m_hood.sysId());
-
-    // Shuffleboard.getTab("Shooter")
-    // .add(
-    // this.getSetTargetCmd(
-    // "Blue Neutral Target Left", new Pose3d(0.85, 1.5, 0.0, new Rotation3d())));
-    // Shuffleboard.getTab("Shooter")
-    // .add(
-    // this.getSetTargetCmd(
-    // "Blue Neutral Target Right", new Pose3d(0.85, 6.5, 0.0, new Rotation3d())));
-
-    // Shuffleboard.getTab("Shooter")
-    // .add(
-    // this.getSetTargetCmd(
-    // "Blue Opposition Target Left", new Pose3d(2.0, 2.0, 0.0, new Rotation3d())));
-    // Shuffleboard.getTab("Shooter")
-    // .add(
-    // this.getSetTargetCmd(
-    // "Blue Opposition Target Right", new Pose3d(2.0, 6.0, 0.0, new
-    // Rotation3d())));
 
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 0", Degrees.of(0.0)));
 
@@ -772,14 +728,14 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/IsSpeedReady", m_isSpeedReady);
   }
 
-  public Command getSetTargetCmd(String name, Pose3d target) {
+  public Command getSetTargetCmd(ShootingTarget target) {
     Command c =
         Commands.runOnce(
                 () -> {
-                  this.setTargetPose(name, target);
+                  this.setTargetPose(target.displayName, target.getFieldPose3d());
                 })
             .ignoringDisable(true);
-    c.setName("Target/" + name);
+    c.setName("Target/" + target.displayName);
 
     return c;
   }
@@ -826,6 +782,52 @@ public class Shooter extends SubsystemBase {
     c.setName("Spindexer/" + name);
 
     return c;
+  }
+
+  // ── Turret calibration (button box) ──────────────────────────────────────
+
+  /** Drives turret to hard stop and zeroes encoder. Requires enable. */
+  public Command getTurretHomeAndCalibrateCmd() {
+    return m_turret.homeAndCalibrate();
+  }
+
+  /** Zeroes turret encoder at current position. Runs while disabled. */
+  public Command getTurretCalibrateInPlaceCmd() {
+    return m_turret.calibrateInPlace().ignoringDisable(true);
+  }
+
+  // ── Hood calibration (button box) ────────────────────────────────────────
+
+  /** Drives hood to hard stop and zeroes encoder. Requires enable. */
+  public Command getHoodHomeAndCalibrateCmd() {
+    return m_hood.homeAndCalibrate();
+  }
+
+  /** Zeroes hood encoder at current position. Runs while disabled. */
+  public Command getHoodCalibrateInPlaceCmd() {
+    return m_hood.calibrateInPlace().ignoringDisable(true);
+  }
+
+  /** Zeroes hood encoder to HOOD_DEGREES_MIN. Runs while disabled. */
+  public Command getHoodZeroCmd() {
+    return m_hood.getZeroHoodAngleCmd();
+  }
+
+  // ── Spindexer (button box) ────────────────────────────────────────────────
+
+  /** Run spindexer forward to feed toward shooter. */
+  public Command getSpindexerRunCmd() {
+    return m_spindexer.getRunCmd();
+  }
+
+  /** Stop spindexer. */
+  public Command getSpindexerStopCmd() {
+    return m_spindexer.getStopCmd();
+  }
+
+  /** Run spindexer in reverse to clear jams. */
+  public Command getSpindexerReverseCmd() {
+    return m_spindexer.getReverseCmd();
   }
 
   public void launchFuelSim() {

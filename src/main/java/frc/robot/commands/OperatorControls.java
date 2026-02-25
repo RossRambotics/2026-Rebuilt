@@ -6,18 +6,23 @@ import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.SpotSelector;
+import frc.robot.subsystems.climb.ClimbElevator;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.vision.Vision;
 
 /**
- * OperatorControls — Joystick button bindings for teleop.
+ * OperatorControls — Joystick button bindings and button box publishing for teleop.
  *
- * <p>Each method below sets up one control. Study the working examples first, then fill in the
- * TODOs.
+ * <p>{@link #configureControls()} sets up all joystick bindings and the Elastic button box. Call it
+ * once from {@code RobotContainer.configureButtonBindings()}.
  *
  * <h2>Xbox Controller Quick Reference</h2>
  *
@@ -55,6 +60,9 @@ import frc.robot.subsystems.shooter.Shooter;
 public class OperatorControls {
   private final Drive drive;
   private final Shooter shooter;
+  private final Intake intake;
+  private final ClimbElevator climbElevator;
+  private final Vision vision;
   private final CommandXboxController controller;
   private final SpotSelector spotSelector;
 
@@ -62,6 +70,9 @@ public class OperatorControls {
       Subsystems subsystems, CommandXboxController controller, SpotSelector spotSelector) {
     this.drive = subsystems.drive();
     this.shooter = subsystems.shooter();
+    this.intake = subsystems.intake();
+    this.climbElevator = subsystems.climbElevator();
+    this.vision = subsystems.vision();
     this.controller = controller;
     this.spotSelector = spotSelector;
   }
@@ -82,6 +93,134 @@ public class OperatorControls {
     // degrees
     // configurePassingMode(); // Left bumper — hold to aim at nearest passing
     // target
+
+    configureButtonBox();
+  }
+
+  // ========================================================================
+  // Button Box — Elastic Dashboard
+  //
+  // Commands published here appear as toggle buttons in the Elastic dashboard.
+  // Click once to start, click again to cancel.
+  // Commands that run while disabled are wrapped with .ignoringDisable(true).
+  // ========================================================================
+  private void configureButtonBox() {
+    // ── Spots ───────────────────────────────────────────────────────────────
+    SmartDashboard.putData(
+        "Spots/Alliance Trench Left", spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_LEFT));
+    SmartDashboard.putData(
+        "Spots/Alliance Trench Right", spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_RIGHT));
+    SmartDashboard.putData(
+        "Spots/Opponent Trench Left", spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_LEFT));
+    SmartDashboard.putData(
+        "Spots/Opponent Trench Right", spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_RIGHT));
+    SmartDashboard.putData(
+        "Spots/Hub Alliance", spotSelector.cmdSelectSpot(FieldSpot.HUB_ALLIANCE));
+    SmartDashboard.putData("Spots/Hub Neutral", spotSelector.cmdSelectSpot(FieldSpot.HUB_NEUTRAL));
+    SmartDashboard.putData("Spots/Climb Left", spotSelector.cmdSelectSpot(FieldSpot.CLIMB_LEFT));
+    SmartDashboard.putData(
+        "Spots/Climb Center", spotSelector.cmdSelectSpot(FieldSpot.CLIMB_CENTER));
+    SmartDashboard.putData("Spots/Climb Right", spotSelector.cmdSelectSpot(FieldSpot.CLIMB_RIGHT));
+    SmartDashboard.putData("Spots/Clear Selection", spotSelector.cmdClearSelection());
+
+    // ── Climb ────────────────────────────────────────────────────────────────
+    SmartDashboard.putData(
+        "Climb/Left", ClimbCommands.superFastClimb(drive, climbElevator, FieldSpot.CLIMB_LEFT));
+    SmartDashboard.putData(
+        "Climb/Center", ClimbCommands.superFastClimb(drive, climbElevator, FieldSpot.CLIMB_CENTER));
+    SmartDashboard.putData(
+        "Climb/Right", ClimbCommands.superFastClimb(drive, climbElevator, FieldSpot.CLIMB_RIGHT));
+    SmartDashboard.putData("Climb/Extend Arm", climbElevator.getExtendCmd());
+    SmartDashboard.putData("Climb/Retract Arm", climbElevator.getRetractCmd());
+
+    // ── Shooter ──────────────────────────────────────────────────────────────
+    SmartDashboard.putData("Shooter/Normal Targeting", shooter.getEnableNormalTargetingModeCmd());
+    SmartDashboard.putData(
+        "Shooter/Predictive Targeting", shooter.getEnablePredictiveTargetingModeCmd());
+
+    SmartDashboard.putData("Shooter/Target Hub", shooter.getSetTargetCmd(ShootingTarget.HUB));
+    SmartDashboard.putData(
+        "Shooter/Target Neutral Left", shooter.getSetTargetCmd(ShootingTarget.NEUTRAL_LEFT));
+    SmartDashboard.putData(
+        "Shooter/Target Neutral Right", shooter.getSetTargetCmd(ShootingTarget.NEUTRAL_RIGHT));
+    SmartDashboard.putData(
+        "Shooter/Target Opposition Left", shooter.getSetTargetCmd(ShootingTarget.OPPOSITION_LEFT));
+    SmartDashboard.putData(
+        "Shooter/Target Opposition Right",
+        shooter.getSetTargetCmd(ShootingTarget.OPPOSITION_RIGHT));
+
+    SmartDashboard.putData("Shooter/Auto Shoot", shooter.getAutoShootCmd());
+    SmartDashboard.putData("Shooter/Retract Hood", shooter.getRetractHoodCmd("ButtonBox"));
+
+    // TODO: SmartDashboard.putData("Shooter/Shot 1m", shooter.getFixedShotCmd(...));
+    // TODO: SmartDashboard.putData("Shooter/Shot 2m", shooter.getFixedShotCmd(...));
+    // TODO: SmartDashboard.putData("Shooter/Shot 3m", shooter.getFixedShotCmd(...));
+    // TODO: SmartDashboard.putData("Shooter/Turret Left 5deg",
+    //     shooter.getTurretNudgeCmd(Degrees.of(-5)));
+    // TODO: SmartDashboard.putData("Shooter/Turret Center", shooter.getTurretCenterCmd());
+    // TODO: SmartDashboard.putData("Shooter/Turret Right 5deg",
+    //     shooter.getTurretNudgeCmd(Degrees.of(5)));
+    // TODO: SmartDashboard.putData("Shooter/RPM +100", shooter.getRPMTrimCmd(+100));
+    // TODO: SmartDashboard.putData("Shooter/RPM -100", shooter.getRPMTrimCmd(-100));
+    // TODO: SmartDashboard.putData("Shooter/RPM Reset", shooter.getRPMTrimResetCmd());
+
+    // ── Intake & Spindexer ───────────────────────────────────────────────────
+    SmartDashboard.putData("Intake/Deploy", intake.getDeployCmd());
+    SmartDashboard.putData("Intake/Retract", intake.getRetractCmd());
+    SmartDashboard.putData("Intake/Roller On", intake.getRollerOnCmd());
+    SmartDashboard.putData("Intake/Roller Off", intake.getRollerOffCmd());
+    SmartDashboard.putData("Intake/Eject", intake.getReverseCmd());
+
+    SmartDashboard.putData("Intake/Run Spindexer", shooter.getSpindexerRunCmd());
+    SmartDashboard.putData("Intake/Stop Spindexer", shooter.getSpindexerStopCmd());
+    SmartDashboard.putData("Intake/Reverse Spindexer", shooter.getSpindexerReverseCmd());
+
+    // ── Calibration ──────────────────────────────────────────────────────────
+    SmartDashboard.putData(
+        "Calibration/Reset Gyro",
+        Commands.runOnce(
+                () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+                drive)
+            .withName("Calibration/Reset Gyro")
+            .ignoringDisable(true));
+
+    SmartDashboard.putData(
+        "Calibration/Turret Home & Calibrate", shooter.getTurretHomeAndCalibrateCmd());
+    SmartDashboard.putData(
+        "Calibration/Turret Calibrate In Place", shooter.getTurretCalibrateInPlaceCmd());
+
+    SmartDashboard.putData(
+        "Calibration/Hood Home & Calibrate", shooter.getHoodHomeAndCalibrateCmd());
+    SmartDashboard.putData(
+        "Calibration/Hood Calibrate In Place", shooter.getHoodCalibrateInPlaceCmd());
+    SmartDashboard.putData("Calibration/Hood Zero", shooter.getHoodZeroCmd());
+
+    SmartDashboard.putData(
+        "Calibration/Intake Arm Home & Calibrate", intake.getDeployArm().homeAndCalibrate());
+    SmartDashboard.putData(
+        "Calibration/Intake Arm Calibrate In Place",
+        intake.getDeployArm().calibrateInPlace().ignoringDisable(true));
+
+    SmartDashboard.putData("Calibration/Climb Home & Calibrate", climbElevator.homeAndCalibrate());
+    SmartDashboard.putData(
+        "Calibration/Climb Calibrate In Place",
+        climbElevator.calibrateInPlace().ignoringDisable(true));
+
+    SmartDashboard.putData(
+        "Calibration/Enable Vision Gyro",
+        Commands.runOnce(vision::enableVisionGyro)
+            .withName("Calibration/Enable Vision Gyro")
+            .ignoringDisable(true));
+    SmartDashboard.putData(
+        "Calibration/Enable Normal Gyro",
+        Commands.runOnce(vision::enableNormalGyro)
+            .withName("Calibration/Enable Normal Gyro")
+            .ignoringDisable(true));
+    SmartDashboard.putData(
+        "Calibration/Reseed from Vision",
+        Commands.runOnce(vision::reseedFromVision)
+            .withName("Calibration/Reseed from Vision")
+            .ignoringDisable(true));
   }
 
   // ========================================================================

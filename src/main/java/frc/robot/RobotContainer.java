@@ -172,7 +172,7 @@ public class RobotContainer {
     m_ledSubsystem = new LEDSubsystem(false, vision, m_shooter);
 
     // Bundle subsystems for OperatorControls and other consumers
-    m_subsystems = new Subsystems(drive, m_shooter, m_intake, m_climbElevator);
+    m_subsystems = new Subsystems(drive, m_shooter, m_intake, m_climbElevator, vision);
 
     // Register SuperFastClimb as PathPlanner named commands for use in .auto files.
     // Must be registered before AutoBuilder.buildAutoChooser().
@@ -211,19 +211,7 @@ public class RobotContainer {
     // Publish spot-selection commands to Shuffleboard
     configureSpotSelectorDashboard();
 
-    // Dashboard buttons for gyro mode switching and reseed
-    SmartDashboard.putData(
-        Commands.runOnce(() -> vision.enableVisionGyro())
-            .withName("Enable Vision Gyro")
-            .ignoringDisable(true));
-    SmartDashboard.putData(
-        Commands.runOnce(() -> vision.enableNormalGyro())
-            .withName("Enable Normal Gyro")
-            .ignoringDisable(true));
-    SmartDashboard.putData(
-        Commands.runOnce(() -> vision.reseedFromVision())
-            .withName("Reseed Gyro From Vision")
-            .ignoringDisable(true));
+    // Vision/gyro calibration commands are published by OperatorControls.configureButtonBox().
 
     // Configure FuelSim for sim
     if (Constants.currentMode == Constants.Mode.SIM) {

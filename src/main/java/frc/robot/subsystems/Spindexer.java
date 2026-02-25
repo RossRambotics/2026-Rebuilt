@@ -79,6 +79,27 @@ public class Spindexer extends SubsystemBase {
     m_spindexerTargetRPM.set(0.0);
   }
 
+  /** Forward feed speed toward the shooter. TODO: tune on hardware. */
+  private static final double RUN_RPM = 500.0;
+
+  /** Reverse speed for clearing jams. TODO: tune on hardware. */
+  private static final double REVERSE_RPM = -500.0;
+
+  /** Command factory: run spindexer forward to feed toward shooter. */
+  public Command getRunCmd() {
+    return setVelocity(RPM.of(RUN_RPM)).withName("Spindexer/Run");
+  }
+
+  /** Command factory: stop spindexer. */
+  public Command getStopCmd() {
+    return stop().withName("Spindexer/Stop");
+  }
+
+  /** Command factory: run spindexer in reverse to clear jams. */
+  public Command getReverseCmd() {
+    return setVelocity(RPM.of(REVERSE_RPM)).withName("Spindexer/Reverse");
+  }
+
   /** Run the spindexer at a set speed (0.0 to 1.0). Positive usually feeds INTO the shooter. */
   public Command runSpindexer(double percentOutput) {
     if (spindexer != null) return spindexer.set(percentOutput);

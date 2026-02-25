@@ -4,6 +4,7 @@ import frc.robot.subsystems.climb.ClimbElevator;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.vision.Vision;
 
 /**
  * Bundle of all subsystems, passed to classes that need to bind controls or create commands.
@@ -12,4 +13,4 @@ import frc.robot.subsystems.shooter.Shooter;
  * can access it without changing constructor signatures everywhere.
  */
 public record Subsystems(
-    Drive drive, Shooter shooter, Intake intake, ClimbElevator climbElevator) {}
+    Drive drive, Shooter shooter, Intake intake, ClimbElevator climbElevator, Vision vision) {}
