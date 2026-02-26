@@ -93,6 +93,17 @@
       "/Shuffleboard/Shooter/Target/Blue Opposition Target Right": "Command",
       "/Shuffleboard/Shooter/Target/Red Hub": "Command",
       "/Shuffleboard/Spindexer/Spindexer/Spindexer Dynamic": "Command",
+      "/Shuffleboard/SpotSelector/Alliance Trench Left": "Command",
+      "/Shuffleboard/SpotSelector/Alliance Trench Right": "Command",
+      "/Shuffleboard/SpotSelector/Clear Selection": "Command",
+      "/Shuffleboard/SpotSelector/Climb Center": "Command",
+      "/Shuffleboard/SpotSelector/Climb Left": "Command",
+      "/Shuffleboard/SpotSelector/Climb Right": "Command",
+      "/Shuffleboard/SpotSelector/Hub Alliance": "Command",
+      "/Shuffleboard/SpotSelector/Hub Neutral": "Command",
+      "/Shuffleboard/SpotSelector/Opponent Trench Left": "Command",
+      "/Shuffleboard/SpotSelector/Opponent Trench Right": "Command",
+      "/Shuffleboard/YAMS_SysID/InstantCommand": "Command",
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Auto Choices": "String Chooser",
       "/SmartDashboard/Enable Normal Gyro": "Command",
@@ -124,77 +135,7 @@
       "/SmartDashboard/Reseed Gyro From Vision": "Command"
     },
     "windows": {
-      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 0 RPM": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 1000 RPM": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 2000 RPM": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 3000 RPM": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Dynamic": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Shuffleboard/Hood/Hood/Hood Angle 0": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Shuffleboard/Hood/Hood/Hood Angle 30": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Shuffleboard/Hood/Hood/Hood Angle 35": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Shuffleboard/Hood/Hood/Hood Angle 40": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Shuffleboard/Hood/Hood/Hood Angle 45": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Shuffleboard/Hood/Hood/ResetZero": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Shuffleboard/Kicker/Kicker/Kicker Dynamic": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/Shuffleboard/Spindexer/Spindexer/Spindexer Dynamic": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/Auto Choices": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Mechanisms/Commands/BottomFlyWheel/Live Tuning": {
         "window": {
           "visible": true
         }
