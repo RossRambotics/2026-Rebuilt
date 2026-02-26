@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rectangle2d;
@@ -152,17 +154,15 @@ public class OperatorControls {
     SmartDashboard.putData("Shooter/Auto Shoot", shooter.getAutoShootCmd());
     SmartDashboard.putData("Shooter/Retract Hood", shooter.getRetractHoodCmd("ButtonBox"));
 
-    // TODO: SmartDashboard.putData("Shooter/Shot 1m", shooter.getFixedShotCmd(...));
-    // TODO: SmartDashboard.putData("Shooter/Shot 2m", shooter.getFixedShotCmd(...));
-    // TODO: SmartDashboard.putData("Shooter/Shot 3m", shooter.getFixedShotCmd(...));
-    // TODO: SmartDashboard.putData("Shooter/Turret Left 5deg",
-    //     shooter.getTurretNudgeCmd(Degrees.of(-5)));
-    // TODO: SmartDashboard.putData("Shooter/Turret Center", shooter.getTurretCenterCmd());
-    // TODO: SmartDashboard.putData("Shooter/Turret Right 5deg",
-    //     shooter.getTurretNudgeCmd(Degrees.of(5)));
-    // TODO: SmartDashboard.putData("Shooter/RPM +100", shooter.getRPMTrimCmd(+100));
-    // TODO: SmartDashboard.putData("Shooter/RPM -100", shooter.getRPMTrimCmd(-100));
-    // TODO: SmartDashboard.putData("Shooter/RPM Reset", shooter.getRPMTrimResetCmd());
+    SmartDashboard.putData("Shooter/Shot 1m", shooter.getFixedShot1mCmd());
+    SmartDashboard.putData("Shooter/Shot 2m", shooter.getFixedShot2mCmd());
+    SmartDashboard.putData("Shooter/Shot 3m", shooter.getFixedShot3mCmd());
+    SmartDashboard.putData("Shooter/Turret Left 5deg", shooter.getTurretNudgeCmd(Degrees.of(-5)));
+    SmartDashboard.putData("Shooter/Turret Center", shooter.getTurretCenterCmd());
+    SmartDashboard.putData("Shooter/Turret Right 5deg", shooter.getTurretNudgeCmd(Degrees.of(5)));
+    SmartDashboard.putData("Shooter/RPM +100", shooter.getRPMTrimCmd(+100));
+    SmartDashboard.putData("Shooter/RPM -100", shooter.getRPMTrimCmd(-100));
+    SmartDashboard.putData("Shooter/RPM Reset", shooter.getRPMTrimResetCmd());
 
     // ── Intake & Spindexer ───────────────────────────────────────────────────
     SmartDashboard.putData("Intake/Deploy", intake.getDeployCmd());

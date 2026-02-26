@@ -77,6 +77,10 @@ public class Shooter extends SubsystemBase {
   private FiringSolution m_lastFiringSolution = null;
   private boolean m_isShooting = false;
 
+  // Persistent in-match RPM offset accumulated by the trim buttons.
+  // Added inside every flywheel velocity calculation (auto and fixed).
+  private double m_rpmTrimOffsetRpm = 0.0;
+
   // Readiness thresholds (allowable error)
   private static final double TURRET_ANGLE_TOLERANCE_DEG = 2.0; // degrees
   private static final double HOOD_ANGLE_TOLERANCE_DEG = 2.0; // degrees
@@ -86,6 +90,15 @@ public class Shooter extends SubsystemBase {
   private static final double HOOD_READY_DEBOUNCE_SEC = 0.10; // 100 ms
   private static final double BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC = 0.10; // 100 ms
   private static final double AUTO_SHOOT_INTERVAL_SEC = 0.5; // 2 balls per second
+
+  // ── Fixed-distance shot constants ────────────────────────────────────────
+  // TODO: tune all six values by shooting from measured distances on the field.
+  private static final double FIXED_SHOT_1M_HOOD_DEG = 40.0; // TODO: tune
+  private static final double FIXED_SHOT_1M_RPM = 2000.0; // TODO: tune
+  private static final double FIXED_SHOT_2M_HOOD_DEG = 30.0; // TODO: tune
+  private static final double FIXED_SHOT_2M_RPM = 3000.0; // TODO: tune
+  private static final double FIXED_SHOT_3M_HOOD_DEG = 25.0; // TODO: tune
+  private static final double FIXED_SHOT_3M_RPM = 4000.0; // TODO: tune
 
   // Manual control rates (tunable — degrees or RPM per second)
   private static final double MANUAL_TURRET_RATE_DEG_PER_SEC = 180.0;
@@ -259,9 +272,9 @@ public class Shooter extends SubsystemBase {
     return m_bottomFlyWheel.setVelocity(
         () -> {
           if (m_lastFiringSolution != null && m_isTurretActive) {
-            return RPM.of(m_lastFiringSolution.flywheelRPM);
+            return RPM.of(m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm);
           }
-          return RPM.of(2000);
+          return RPM.of(2000 + m_rpmTrimOffsetRpm);
         });
   }
 
@@ -726,6 +739,7 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/IsShooterReady", m_isShooterReady);
     Logger.recordOutput("Shooter/IsHoodReady", m_isHoodReady);
     Logger.recordOutput("Shooter/IsSpeedReady", m_isSpeedReady);
+    Logger.recordOutput("Shooter/RPMTrimOffsetRpm", m_rpmTrimOffsetRpm);
   }
 
   public Command getSetTargetCmd(ShootingTarget target) {
@@ -1066,5 +1080,94 @@ public class Shooter extends SubsystemBase {
             interrupted -> {
               Logger.recordOutput("Shooter/Hood/IsRetracted", false);
             });
+  }
+
+  // ── Fixed-distance shots ──────────────────────────────────────────────────
+
+  /**
+   * Locks the turret to 0° robot-relative, commands the hood to a fixed angle, and spins the
+   * flywheel to a fixed RPM. Holds indefinitely — cancel via Elastic to return to normal auto mode.
+   *
+   * <p>Use when pose estimation is unavailable. Pair with {@link #getAutoShootCmd()} to fire.
+   *
+   * @param hoodAngle fixed hood angle
+   * @param rpm fixed flywheel speed
+   */
+  public Command getFixedShotCmd(Angle hoodAngle, double rpm) {
+    return Commands.parallel(
+            m_turret.setAngle(Degrees.of(0)),
+            m_hood.setAngle(hoodAngle),
+            m_bottomFlyWheel.setVelocity(() -> RPM.of(rpm + m_rpmTrimOffsetRpm)))
+        .withName("FixedShot");
+  }
+
+  /** Fixed shot from 1 m. Tune {@code FIXED_SHOT_1M_HOOD_DEG} and {@code FIXED_SHOT_1M_RPM}. */
+  public Command getFixedShot1mCmd() {
+    return getFixedShotCmd(Degrees.of(FIXED_SHOT_1M_HOOD_DEG), FIXED_SHOT_1M_RPM)
+        .withName("FixedShot/1m");
+  }
+
+  /** Fixed shot from 2 m. Tune {@code FIXED_SHOT_2M_HOOD_DEG} and {@code FIXED_SHOT_2M_RPM}. */
+  public Command getFixedShot2mCmd() {
+    return getFixedShotCmd(Degrees.of(FIXED_SHOT_2M_HOOD_DEG), FIXED_SHOT_2M_RPM)
+        .withName("FixedShot/2m");
+  }
+
+  /** Fixed shot from 3 m. Tune {@code FIXED_SHOT_3M_HOOD_DEG} and {@code FIXED_SHOT_3M_RPM}. */
+  public Command getFixedShot3mCmd() {
+    return getFixedShotCmd(Degrees.of(FIXED_SHOT_3M_HOOD_DEG), FIXED_SHOT_3M_RPM)
+        .withName("FixedShot/3m");
+  }
+
+  // ── In-match RPM trim ────────────────────────────────────────────────────
+
+  /**
+   * Adds {@code deltaRpm} to the persistent RPM trim offset. Applied to every flywheel velocity
+   * calculation (auto and fixed). Runs as a one-shot — each Elastic click accumulates.
+   *
+   * @param deltaRpm RPM to add (positive or negative)
+   */
+  public Command getRPMTrimCmd(double deltaRpm) {
+    return Commands.runOnce(() -> m_rpmTrimOffsetRpm += deltaRpm)
+        .withName("RPMTrim/" + (deltaRpm > 0 ? "+" : "") + (int) deltaRpm);
+  }
+
+  /** Resets the RPM trim offset to zero. */
+  public Command getRPMTrimResetCmd() {
+    return Commands.runOnce(() -> m_rpmTrimOffsetRpm = 0.0).withName("RPMTrim/Reset");
+  }
+
+  // ── Turret manual controls ────────────────────────────────────────────────
+
+  /**
+   * Captures the current turret angle, adds {@code offset}, clamps to soft limits, then holds there
+   * indefinitely. Cancel via Elastic to return to auto-targeting.
+   *
+   * <p>Pressing again while active captures the new physical angle, so presses accumulate naturally
+   * (e.g. two +5° presses hold at +10°).
+   *
+   * @param offset angle to add to the current turret position (positive = clockwise)
+   */
+  public Command getTurretNudgeCmd(Angle offset) {
+    Angle[] targetAngle = {Degrees.of(0)};
+    return Commands.sequence(
+            Commands.runOnce(
+                () ->
+                    targetAngle[0] =
+                        Degrees.of(
+                            MathUtil.clamp(
+                                m_turret.getAngle().in(Degrees) + offset.in(Degrees),
+                                Turret.TURRET_DEGREES_MIN,
+                                Turret.TURRET_DEGREES_MAX))),
+            m_turret.setAngle(() -> targetAngle[0]))
+        .withName("Turret/Nudge");
+  }
+
+  /**
+   * Snaps the turret to 0° robot-relative and holds. Cancel via Elastic to return to
+   * auto-targeting.
+   */
+  public Command getTurretCenterCmd() {
+    return m_turret.setAngle(Degrees.of(0)).withName("Turret/Center");
   }
 }
