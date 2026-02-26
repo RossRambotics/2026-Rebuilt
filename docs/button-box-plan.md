@@ -137,9 +137,10 @@ fixed distance shots.
 | Turret Center | `shooter.getTurretCenterCmd()` |
 | Turret → 5° | `shooter.getTurretNudgeCmd(Degrees.of(5))` |
 
-`getTurretNudgeCmd(Angle offset)` — adds offset to current turret setpoint. ← **not yet implemented**
+`getTurretNudgeCmd(Angle offset)` — captures current physical angle, adds offset, clamps to
+±90°, holds until cancelled. Presses accumulate.
 
-`getTurretCenterCmd()` — snaps turret to 0° robot-relative and holds. ← **not yet implemented**
+`getTurretCenterCmd()` — holds turret at 0° robot-relative until cancelled.
 
 ### In-Match RPM Trim
 
@@ -151,8 +152,8 @@ Accumulates a persistent RPM offset on top of whatever the shooter is targeting 
 | RPM −100 | `shooter.getRPMTrimCmd(-100)` |
 | RPM Reset | `shooter.getRPMTrimResetCmd()` |
 
-`m_rpmTrimOffset` lives in `Shooter` and is added inside the flywheel velocity calculation.
-← **not yet implemented**
+`m_rpmTrimOffsetRpm` lives in `Shooter` and is added inside every flywheel velocity calculation
+(both auto-targeting and fixed shot). Logged as `Shooter/RPMTrimOffsetRpm`.
 
 ---
 
@@ -267,7 +268,7 @@ All four positional subsystems (Turret, Hood, IntakeDeployArm, ClimbElevator) fo
 - [x] Create `configureButtonBox()` in `OperatorControls`, called from `configureControls()`
 - [x] Add `getRunCmd()`, `getStopCmd()`, `getReverseCmd()` to `Spindexer.java` (RPM-based)
 - [x] Expose Turret and Hood calibration commands publicly via `Shooter` wrapper methods
-- [ ] Expose `IntakeDeployArm` calibration commands via `Intake` wrapper methods (currently called via `intake.getDeployArm()` directly — add `Intake` convenience wrappers if preferred)
+- [x] Expose `IntakeDeployArm` calibration commands via `Intake` wrapper methods (`getDeployArmHomeAndCalibrateCmd()`, `getDeployArmCalibrateInPlaceCmd()`)
 
 ### Spots Tab
 - [x] All 10 `SpotSelector` commands published in `OperatorControls.configureButtonBox()`
@@ -282,16 +283,17 @@ All four positional subsystems (Turret, Hood, IntakeDeployArm, ClimbElevator) fo
 - [x] `getAutoShootCmd()` and `getRetractHoodCmd("ButtonBox")` published
 - [x] **Refactor shooting targets** — `ShootingTarget` enum with Blue-alliance Pose3d values,
       `flipIfRed3d()`, and `getSetTargetCmd(ShootingTarget)` — done; Shuffleboard entries removed
-- [ ] **Implement `Shooter.getFixedShotCmd(Angle hoodAngle, double rpm)`** — lock turret 0° robot
-      frame, set fixed hood angle and RPM, hold until cancelled
-- [ ] Add 6 fixed shot constants to `ShooterConstants` (hood deg + RPM for 1 m, 2 m, 3 m)
-- [ ] Publish fixed shot buttons (1 m, 2 m, 3 m) — TODOs in `configureButtonBox()`
-- [ ] **Implement `Shooter.getTurretNudgeCmd(Angle offset)`**
-- [ ] **Implement `Shooter.getTurretCenterCmd()`**
-- [ ] Publish turret nudge buttons (← 5°, Center, → 5°) — TODOs in `configureButtonBox()`
-- [ ] **Implement `Shooter.getRPMTrimCmd(double deltaRpm)`** and `getRPMTrimResetCmd()`
-- [ ] Wire `m_rpmTrimOffset` into flywheel velocity calculation
-- [ ] Publish RPM trim buttons (+100, −100, Reset) — TODOs in `configureButtonBox()`
+- [x] **Implement `Shooter.getFixedShotCmd(Angle hoodAngle, double rpm)`** — locks turret to 0°
+      robot frame, sets fixed hood angle and RPM, holds until cancelled
+- [x] Add 6 fixed shot constants to `Shooter` (hood deg + RPM for 1 m, 2 m, 3 m) — all TODO: tune
+- [x] Publish fixed shot buttons (1 m, 2 m, 3 m) via `getFixedShot1mCmd/2mCmd/3mCmd()`
+- [x] **Implement `Shooter.getTurretNudgeCmd(Angle offset)`** — captures current angle, adds offset,
+      clamps to soft limits, holds indefinitely; presses accumulate
+- [x] **Implement `Shooter.getTurretCenterCmd()`** — holds turret at 0° robot-relative
+- [x] Publish turret nudge buttons (← 5°, Center, → 5°)
+- [x] **Implement `Shooter.getRPMTrimCmd(double deltaRpm)`** and `getRPMTrimResetCmd()`
+- [x] Wire `m_rpmTrimOffsetRpm` into flywheel velocity calculation (auto and fixed shot)
+- [x] Publish RPM trim buttons (+100, −100, Reset)
 
 ### Intake & Spindexer Tab
 - [x] All 5 intake command factories published
