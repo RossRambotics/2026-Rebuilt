@@ -85,35 +85,35 @@ Then update all CAN devices:
 
 | CAN ID | Device | Target Firmware | Updated |
 |--------|--------|----------------|---------|
-| 1 | Front Right Drive (TalonFX) | Latest Phoenix 6 | [ ] |
-| 2 | Front Right Steer (TalonFX) | Latest Phoenix 6 | [ ] |
-| 3 | Front Left Drive (TalonFX) | Latest Phoenix 6 | [ ] |
+| 1 | Front Right Drive (Falcon 500) | Latest Phoenix 6 | [ ] |
+| 2 | Front Right Steer (Falcon 500) | Latest Phoenix 6 | [ ] |
+| 3 | Front Left Drive (Falcon 500) | Latest Phoenix 6 | [ ] |
 | 4 | Front Right CANcoder | Latest Phoenix 6 | [ ] |
 | 5 | Front Left CANcoder | Latest Phoenix 6 | [ ] |
 | 6 | Back Left CANcoder | Latest Phoenix 6 | [ ] |
 | 7 | Back Right CANcoder | Latest Phoenix 6 | [ ] |
-| 12 | Back Left Steer (TalonFX) | Latest Phoenix 6 | [ ] |
-| 13 | Back Left Drive (TalonFX) | Latest Phoenix 6 | [ ] |
-| 14 | Back Right Steer (TalonFX) | Latest Phoenix 6 | [ ] |
-| 15 | Back Right Drive (TalonFX) | Latest Phoenix 6 | [ ] |
-| 16 | Front Left Steer (TalonFX) | Latest Phoenix 6 | [ ] |
+| 12 | Back Left Steer (Falcon 500) | Latest Phoenix 6 | [ ] |
+| 13 | Back Left Drive (Falcon 500) | Latest Phoenix 6 | [ ] |
+| 14 | Back Right Steer (Falcon 500) | Latest Phoenix 6 | [ ] |
+| 15 | Back Right Drive (Falcon 500) | Latest Phoenix 6 | [ ] |
+| 16 | Front Left Steer (Falcon 500) | Latest Phoenix 6 | [ ] |
 | 19 | Pigeon2 Gyro | Latest Phoenix 6 | [ ] |
 
 **RoboRIO native bus — Mechanisms:**
 
 | CAN ID | Device | Target Firmware | Updated |
 |--------|--------|----------------|---------|
-| 24 | Hood (TalonFX) | Latest Phoenix 6 | [ ] |
-| 35 | Flywheel Left (TalonFX) | Latest Phoenix 6 | [ ] |
-| 36 | Flywheel Right (TalonFX) | Latest Phoenix 6 | [ ] |
-| 38 | Kicker (TalonFX) | Latest Phoenix 6 | [ ] |
-| 39 | Spindexer (TalonFX) | Latest Phoenix 6 | [ ] |
-| 40 | Turret (TalonFX) | Latest Phoenix 6 | [ ] |
-| 41 | Intake Arm (TalonFX) | Latest Phoenix 6 | [ ] |
-| 42 | Intake Roller (TalonFX) | Latest Phoenix 6 | [ ] |
-| 43 | Climb Elevator (TalonFX) | Latest Phoenix 6 | [ ] |
+| 24 | Hood (Kraken X44) | Latest Phoenix 6 | [ ] |
+| 35 | Flywheel Left (Kraken X60) | Latest Phoenix 6 | [ ] |
+| 36 | Flywheel Right (Kraken X60) | Latest Phoenix 6 | [ ] |
+| 38 | Kicker (Kraken X60) | Latest Phoenix 6 | [ ] |
+| 39 | Spindexer (Kraken X60) | Latest Phoenix 6 | [ ] |
+| 40 | Turret (Kraken X60) | Latest Phoenix 6 | [ ] |
+| 41 | Intake Arm (Kraken X60) | Latest Phoenix 6 | [ ] |
+| 42 | Intake Roller (Kraken X60) | Latest Phoenix 6 | [ ] |
+| 43 | Climb Elevator (Kraken X60) | Latest Phoenix 6 | [ ] |
 
-> Note: Falcon 500s (IDs 38, 39) use Phoenix 6 firmware when running with the Phoenix6 API — confirm they appear as `TalonFX` in Tuner X, not as legacy `Talon FX (Phoenix 5)`.
+> Note: Falcon 500s run Phoenix 6 firmware and appear as `TalonFX` in Tuner X. If any drivetrain motor shows as legacy `Talon FX (Phoenix 5)`, update its firmware before proceeding.
 
 - [ ] CANivore firmware updated
 - [ ] All 22 CTRE devices updated to latest Phoenix 6 firmware
@@ -123,7 +123,7 @@ Then update all CAN devices:
 
 ### 0a.4 — Activate Phoenix Pro License
 
-Phoenix Pro unlocks FOC (Field Oriented Control) on Kraken X60 and Kraken X44 motors — required for the performance gains the code is tuned for. The project uses `TorqueCurrentFOC` and `VelocityVoltage` FOC control modes.
+Phoenix Pro unlocks FOC (Field Oriented Control) on all TalonFX devices — Falcon 500s, Kraken X60s, and Kraken X44s all benefit. The project uses `TorqueCurrentFOC` and `VelocityVoltage` FOC control modes.
 
 **License type needed:** Phoenix Pro (per-robot seat, annual)
 
@@ -135,22 +135,23 @@ Phoenix Pro unlocks FOC (Field Oriented Control) on Kraken X60 and Kraken X44 mo
 4. Click **Activate License on Robot**
 5. Verify: each TalonFX in the Devices list shows **Pro Licensed** status
 
-**Devices that benefit from Phoenix Pro (FOC):**
+**Devices that receive Phoenix Pro FOC (all TalonFX on this robot):**
 
 | CAN ID | Device | FOC Mode Used |
 |--------|--------|---------------|
-| 1, 3, 13, 15 | Drive motors (Kraken X60) | VelocityTorqueCurrentFOC |
-| 2, 12, 14, 16 | Steer motors | PositionVoltage / MotionMagicVoltage |
+| 1, 3, 13, 15 | Drive motors (Falcon 500) | VelocityTorqueCurrentFOC |
+| 2, 12, 14, 16 | Steer motors (Falcon 500) | PositionVoltage / MotionMagicVoltage |
 | 24 | Hood (Kraken X44) | MotionMagicVoltage |
 | 35, 36 | Flywheel (Kraken X60) | VelocityVoltage FOC |
+| 38 | Kicker (Kraken X60) | VelocityVoltage FOC |
+| 39 | Spindexer (Kraken X60) | VelocityVoltage FOC |
 | 40 | Turret (Kraken X60) | MotionMagicVoltage |
 | 41 | Intake Arm (Kraken X60) | MotionMagicVoltage |
+| 42 | Intake Roller (Kraken X60) | VelocityVoltage FOC |
 | 43 | Climb Elevator (Kraken X60) | MotionMagicVoltage |
 
-> Falcons (IDs 38, 39) do **not** support Phoenix Pro FOC — they operate in non-FOC voltage mode regardless.
-
 - [ ] Phoenix Pro license activated on robot
-- [ ] All Kraken motors show **Pro** badge in Tuner X devices list
+- [ ] All 22 TalonFX devices show **Pro** badge in Tuner X devices list
 - [ ] No `LicenseCheck` faults on any TalonFX
 
 ---
@@ -301,28 +302,28 @@ Open **Phoenix Tuner X** and connect to the robot. Every device in the table bel
 
 | CAN ID | Device | Type | Subsystem | Verified |
 |--------|--------|------|-----------|----------|
-| 1 | Front Right — Drive | TalonFX (Kraken X60) | Drive | [ ] |
-| 2 | Front Right — Steer | TalonFX | Drive | [ ] |
-| 3 | Front Left — Drive | TalonFX (Kraken X60) | Drive | [ ] |
-| 4 | Front Right — CANcoder | CANcoder | Drive | [ ] |
-| 5 | Front Left — CANcoder | CANcoder | Drive | [ ] |
-| 6 | Back Left — CANcoder | CANcoder | Drive | [ ] |
-| 7 | Back Right — CANcoder | CANcoder | Drive | [ ] |
-| 12 | Back Left — Steer | TalonFX | Drive | [ ] |
-| 13 | Back Left — Drive | TalonFX (Kraken X60) | Drive | [ ] |
-| 14 | Back Right — Steer | TalonFX | Drive | [ ] |
-| 15 | Back Right — Drive | TalonFX (Kraken X60) | Drive | [ ] |
-| 16 | Front Left — Steer | TalonFX | Drive | [ ] |
-| 19 | Pigeon2 Gyro | Pigeon2 | Drive | [ ] |
-| 24 | Hood | TalonFX (Kraken X44) | Shooter | [ ] |
-| 35 | Flywheel Left (leader) | TalonFX (Kraken X60) | Shooter | [ ] |
-| 36 | Flywheel Right (follower, opposed) | TalonFX (Kraken X60) | Shooter | [ ] |
-| 38 | Kicker | TalonFX (Falcon 500) | Shooter | [ ] |
-| 39 | Spindexer | TalonFX (Falcon 500) | Feed | [ ] |
-| 40 | Turret | TalonFX (Kraken X60) | Shooter | [ ] |
-| 41 | Intake Deploy Arm | TalonFX (Kraken X60) | Intake | [ ] |
-| 42 | Intake Roller | TalonFX (Kraken X60) | Intake | [ ] |
-| 43 | Climb Elevator | TalonFX (Kraken X60) | Climb | [ ] |
+| 1 | Front Right — Drive | Falcon 500 (TalonFX) | Drive — CANivore | [ ] |
+| 2 | Front Right — Steer | Falcon 500 (TalonFX) | Drive — CANivore | [ ] |
+| 3 | Front Left — Drive | Falcon 500 (TalonFX) | Drive — CANivore | [ ] |
+| 4 | Front Right — CANcoder | CANcoder | Drive — CANivore | [ ] |
+| 5 | Front Left — CANcoder | CANcoder | Drive — CANivore | [ ] |
+| 6 | Back Left — CANcoder | CANcoder | Drive — CANivore | [ ] |
+| 7 | Back Right — CANcoder | CANcoder | Drive — CANivore | [ ] |
+| 12 | Back Left — Steer | Falcon 500 (TalonFX) | Drive — CANivore | [ ] |
+| 13 | Back Left — Drive | Falcon 500 (TalonFX) | Drive — CANivore | [ ] |
+| 14 | Back Right — Steer | Falcon 500 (TalonFX) | Drive — CANivore | [ ] |
+| 15 | Back Right — Drive | Falcon 500 (TalonFX) | Drive — CANivore | [ ] |
+| 16 | Front Left — Steer | Falcon 500 (TalonFX) | Drive — CANivore | [ ] |
+| 19 | Pigeon2 Gyro | Pigeon2 | Drive — CANivore | [ ] |
+| 24 | Hood | Kraken X44 (TalonFX) | Shooter — RIO bus | [ ] |
+| 35 | Flywheel Left (leader) | Kraken X60 (TalonFX) | Shooter — RIO bus | [ ] |
+| 36 | Flywheel Right (follower, opposed) | Kraken X60 (TalonFX) | Shooter — RIO bus | [ ] |
+| 38 | Kicker | Kraken X60 (TalonFX) | Shooter — RIO bus | [ ] |
+| 39 | Spindexer | Kraken X60 (TalonFX) | Feed — RIO bus | [ ] |
+| 40 | Turret | Kraken X60 (TalonFX) | Shooter — RIO bus | [ ] |
+| 41 | Intake Deploy Arm | Kraken X60 (TalonFX) | Intake — RIO bus | [ ] |
+| 42 | Intake Roller | Kraken X60 (TalonFX) | Intake — RIO bus | [ ] |
+| 43 | Climb Elevator | Kraken X60 (TalonFX) | Climb — RIO bus | [ ] |
 
 **Total: 22 devices** (12 swerve drive/steer, 4 CANcoders, 1 Pigeon2, 5 shooter, 1 feed, 2 intake, 1 climb)
 
