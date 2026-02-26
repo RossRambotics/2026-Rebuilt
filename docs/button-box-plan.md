@@ -268,7 +268,7 @@ All four positional subsystems (Turret, Hood, IntakeDeployArm, ClimbElevator) fo
 - [x] Create `configureButtonBox()` in `OperatorControls`, called from `configureControls()`
 - [x] Add `getRunCmd()`, `getStopCmd()`, `getReverseCmd()` to `Spindexer.java` (RPM-based)
 - [x] Expose Turret and Hood calibration commands publicly via `Shooter` wrapper methods
-- [ ] Expose `IntakeDeployArm` calibration commands via `Intake` wrapper methods (currently called via `intake.getDeployArm()` directly — add `Intake` convenience wrappers if preferred)
+- [x] Expose `IntakeDeployArm` calibration commands via `Intake` wrapper methods (`getDeployArmHomeAndCalibrateCmd()`, `getDeployArmCalibrateInPlaceCmd()`)
 
 ### Spots Tab
 - [x] All 10 `SpotSelector` commands published in `OperatorControls.configureButtonBox()`

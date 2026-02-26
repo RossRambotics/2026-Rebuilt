@@ -99,6 +99,20 @@ public class Intake extends SubsystemBase {
   }
 
   // ---------------------------------------------------------------------------
+  // Deploy arm calibration wrappers
+  // ---------------------------------------------------------------------------
+
+  /** Drives deploy arm to hard stop, detects stall, and zeroes encoder. Requires enable. */
+  public Command getDeployArmHomeAndCalibrateCmd() {
+    return m_deployArm.homeAndCalibrate();
+  }
+
+  /** Zeroes deploy arm encoder at current position without motion. Runs while disabled. */
+  public Command getDeployArmCalibrateInPlaceCmd() {
+    return m_deployArm.calibrateInPlace().ignoringDisable(true);
+  }
+
+  // ---------------------------------------------------------------------------
   // Accessors for sub-subsystems (for direct control if needed)
   // ---------------------------------------------------------------------------
 

@@ -196,10 +196,9 @@ public class OperatorControls {
     SmartDashboard.putData("Calibration/Hood Zero", shooter.getHoodZeroCmd());
 
     SmartDashboard.putData(
-        "Calibration/Intake Arm Home & Calibrate", intake.getDeployArm().homeAndCalibrate());
+        "Calibration/Intake Arm Home & Calibrate", intake.getDeployArmHomeAndCalibrateCmd());
     SmartDashboard.putData(
-        "Calibration/Intake Arm Calibrate In Place",
-        intake.getDeployArm().calibrateInPlace().ignoringDisable(true));
+        "Calibration/Intake Arm Calibrate In Place", intake.getDeployArmCalibrateInPlaceCmd());
 
     SmartDashboard.putData("Calibration/Climb Home & Calibrate", climbElevator.homeAndCalibrate());
     SmartDashboard.putData(
