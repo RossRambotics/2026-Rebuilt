@@ -129,7 +129,14 @@ public class Turret extends SubsystemBase {
   /** Schedules homeAndCalibrate() on enable if the encoder has not yet been zeroed. */
   private void ensureCalibrated() {
     if (!m_isCalibrated) {
-      CommandScheduler.getInstance().schedule(homeAndCalibrate());
+      // TODO: Once a physical hard stop is installed, uncomment this and remove the temporary block below.
+      // CommandScheduler.getInstance().schedule(homeAndCalibrate());
+
+      // No hard stop yet — assume turret starts at center (0°) and mark calibrated in place.
+      if (turretMotor != null) {
+        turretMotor.setPosition(Degrees.of(0));
+      }
+      m_isCalibrated = true;
     }
   }
 
