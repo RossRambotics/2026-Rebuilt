@@ -9,9 +9,9 @@
         "containers": [
           {
             "title": "Hub Alliance",
-            "x": 896.0,
+            "x": 576.0,
             "y": 320.0,
-            "width": 320.0,
+            "width": 384.0,
             "height": 192.0,
             "type": "Command",
             "properties": {
@@ -23,7 +23,7 @@
           },
           {
             "title": "Alliance Trench Left",
-            "x": 576.0,
+            "x": 128.0,
             "y": 320.0,
             "width": 320.0,
             "height": 192.0,
@@ -37,7 +37,7 @@
           },
           {
             "title": "Alliance Trench Right",
-            "x": 1216.0,
+            "x": 1088.0,
             "y": 320.0,
             "width": 320.0,
             "height": 192.0,
@@ -51,7 +51,7 @@
           },
           {
             "title": "Opponent Trench Right",
-            "x": 1216.0,
+            "x": 1088.0,
             "y": 128.0,
             "width": 320.0,
             "height": 192.0,
@@ -65,7 +65,7 @@
           },
           {
             "title": "Opponent Trench Left",
-            "x": 576.0,
+            "x": 128.0,
             "y": 128.0,
             "width": 320.0,
             "height": 192.0,
@@ -79,9 +79,9 @@
           },
           {
             "title": "Hub Neutral",
-            "x": 896.0,
+            "x": 576.0,
             "y": 128.0,
-            "width": 320.0,
+            "width": 384.0,
             "height": 192.0,
             "type": "Command",
             "properties": {
@@ -93,7 +93,7 @@
           },
           {
             "title": "Climb Left",
-            "x": 576.0,
+            "x": 128.0,
             "y": 512.0,
             "width": 320.0,
             "height": 192.0,
@@ -107,7 +107,7 @@
           },
           {
             "title": "Climb Right",
-            "x": 1216.0,
+            "x": 1088.0,
             "y": 512.0,
             "width": 320.0,
             "height": 192.0,
@@ -121,9 +121,9 @@
           },
           {
             "title": "Climb Center",
-            "x": 896.0,
+            "x": 576.0,
             "y": 512.0,
-            "width": 320.0,
+            "width": 384.0,
             "height": 192.0,
             "type": "Command",
             "properties": {
@@ -135,10 +135,10 @@
           },
           {
             "title": "Clear Selection",
-            "x": 256.0,
-            "y": 320.0,
-            "width": 320.0,
-            "height": 192.0,
+            "x": 192.0,
+            "y": 0.0,
+            "width": 1152.0,
+            "height": 128.0,
             "type": "Command",
             "properties": {
               "topic": "/Shuffleboard/SpotSelector/Clear Selection",
@@ -151,30 +151,16 @@
       }
     },
     {
-      "name": "Clime",
+      "name": "Climb",
       "grid_layout": {
         "layouts": [],
         "containers": [
           {
             "title": "Climb Center",
-            "x": 64.0,
-            "y": 192.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/Shuffleboard/SpotSelector/Climb Center",
-              "period": 0.06,
-              "show_type": true,
-              "maximize_button_space": false
-            }
-          },
-          {
-            "title": "Climb Center",
-            "x": 768.0,
-            "y": 192.0,
+            "x": 576.0,
+            "y": 384.0,
             "width": 320.0,
-            "height": 192.0,
+            "height": 256.0,
             "type": "Command",
             "properties": {
               "topic": "/Shuffleboard/SpotSelector/Climb Center",
@@ -185,10 +171,10 @@
           },
           {
             "title": "Climb Right",
-            "x": 1152.0,
-            "y": 192.0,
+            "x": 960.0,
+            "y": 384.0,
             "width": 320.0,
-            "height": 192.0,
+            "height": 256.0,
             "type": "Command",
             "properties": {
               "topic": "/Shuffleboard/SpotSelector/Climb Right",
@@ -199,10 +185,10 @@
           },
           {
             "title": "Climb Left",
-            "x": 384.0,
-            "y": 192.0,
+            "x": 192.0,
+            "y": 384.0,
             "width": 320.0,
-            "height": 192.0,
+            "height": 256.0,
             "type": "Command",
             "properties": {
               "topic": "/Shuffleboard/SpotSelector/Climb Left",
@@ -213,9 +199,9 @@
           },
           {
             "title": "Extend Arm",
-            "x": 576.0,
-            "y": 448.0,
-            "width": 320.0,
+            "x": 768.0,
+            "y": 64.0,
+            "width": 384.0,
             "height": 192.0,
             "type": "Command",
             "properties": {
@@ -227,9 +213,9 @@
           },
           {
             "title": "Retract Arm",
-            "x": 1024.0,
-            "y": 448.0,
-            "width": 320.0,
+            "x": 320.0,
+            "y": 64.0,
+            "width": 384.0,
             "height": 192.0,
             "type": "Command",
             "properties": {
@@ -249,9 +235,9 @@
         "containers": [
           {
             "title": "Normal Targeting",
-            "x": 384.0,
+            "x": 320.0,
             "y": 0.0,
-            "width": 320.0,
+            "width": 256.0,
             "height": 192.0,
             "type": "Command",
             "properties": {
@@ -263,9 +249,9 @@
           },
           {
             "title": "Predictive Targeting",
-            "x": 1024.0,
+            "x": 960.0,
             "y": 0.0,
-            "width": 320.0,
+            "width": 256.0,
             "height": 192.0,
             "type": "Command",
             "properties": {
@@ -277,10 +263,10 @@
           },
           {
             "title": "Target Neutral Left",
-            "x": 384.0,
+            "x": 320.0,
             "y": 384.0,
-            "width": 320.0,
-            "height": 192.0,
+            "width": 256.0,
+            "height": 128.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Shooter/Target Neutral Left",
@@ -291,10 +277,10 @@
           },
           {
             "title": "Target Neutral Right",
-            "x": 1024.0,
+            "x": 960.0,
             "y": 384.0,
-            "width": 320.0,
-            "height": 192.0,
+            "width": 256.0,
+            "height": 128.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Shooter/Target Neutral Right",
@@ -305,9 +291,9 @@
           },
           {
             "title": "Target Opposition Left",
-            "x": 384.0,
+            "x": 320.0,
             "y": 192.0,
-            "width": 320.0,
+            "width": 256.0,
             "height": 192.0,
             "type": "Command",
             "properties": {
@@ -319,9 +305,9 @@
           },
           {
             "title": "Target Opposition Right",
-            "x": 1024.0,
+            "x": 960.0,
             "y": 192.0,
-            "width": 320.0,
+            "width": 256.0,
             "height": 192.0,
             "type": "Command",
             "properties": {
@@ -333,9 +319,9 @@
           },
           {
             "title": "Target Hub",
-            "x": 704.0,
+            "x": 576.0,
             "y": 0.0,
-            "width": 320.0,
+            "width": 384.0,
             "height": 192.0,
             "type": "Command",
             "properties": {
@@ -347,9 +333,9 @@
           },
           {
             "title": "Auto Shoot",
-            "x": 704.0,
+            "x": 576.0,
             "y": 192.0,
-            "width": 320.0,
+            "width": 384.0,
             "height": 192.0,
             "type": "Command",
             "properties": {
@@ -361,13 +347,139 @@
           },
           {
             "title": "Retract Hood",
-            "x": 704.0,
+            "x": 576.0,
             "y": 384.0,
-            "width": 320.0,
-            "height": 192.0,
+            "width": 384.0,
+            "height": 128.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Shooter/Retract Hood",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Shot 1m",
+            "x": 256.0,
+            "y": 576.0,
+            "width": 320.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Shooter/Shot 1m",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Shot 2m",
+            "x": 576.0,
+            "y": 576.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Shooter/Shot 2m",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Shot 3m",
+            "x": 960.0,
+            "y": 576.0,
+            "width": 320.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Shooter/Shot 3m",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Turret Left 5deg",
+            "x": 1280.0,
+            "y": 448.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Shooter/Turret Left 5deg",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Turret Right 5deg",
+            "x": 1280.0,
+            "y": 64.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Shooter/Turret Right 5deg",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Turret Center",
+            "x": 1280.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Shooter/Turret Center",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "RPM +100",
+            "x": 0.0,
+            "y": 64.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Shooter/RPM +100",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "RPM -100",
+            "x": 0.0,
+            "y": 448.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Shooter/RPM -100",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "RPM Reset",
+            "x": 0.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Shooter/RPM Reset",
               "period": 0.06,
               "show_type": false,
               "maximize_button_space": true
@@ -381,20 +493,6 @@
       "grid_layout": {
         "layouts": [],
         "containers": [
-          {
-            "title": "Deploy",
-            "x": 0.0,
-            "y": 320.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/Intake/Deploy",
-              "period": 0.06,
-              "show_type": true,
-              "maximize_button_space": false
-            }
-          },
           {
             "title": "Deploy",
             "x": 1024.0,
@@ -517,10 +615,10 @@
         "containers": [
           {
             "title": "Hood Home & Calibrate",
-            "x": 640.0,
-            "y": 128.0,
-            "width": 256.0,
-            "height": 128.0,
+            "x": 576.0,
+            "y": 64.0,
+            "width": 320.0,
+            "height": 192.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Calibration/Hood Home & Calibrate",
@@ -531,10 +629,10 @@
           },
           {
             "title": "Turret Home & Calibrate",
-            "x": 320.0,
-            "y": 128.0,
-            "width": 256.0,
-            "height": 128.0,
+            "x": 256.0,
+            "y": 64.0,
+            "width": 320.0,
+            "height": 192.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Calibration/Turret Home & Calibrate",
@@ -545,10 +643,10 @@
           },
           {
             "title": "Turret Calibrate In Place",
-            "x": 320.0,
+            "x": 256.0,
             "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
+            "width": 320.0,
+            "height": 192.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Calibration/Turret Calibrate In Place",
@@ -559,10 +657,10 @@
           },
           {
             "title": "Hood Calibrate In Place",
-            "x": 640.0,
+            "x": 576.0,
             "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
+            "width": 320.0,
+            "height": 192.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Calibration/Hood Calibrate In Place",
@@ -573,10 +671,10 @@
           },
           {
             "title": "ResetZero",
-            "x": 640.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
+            "x": 512.0,
+            "y": 448.0,
+            "width": 320.0,
+            "height": 192.0,
             "type": "Command",
             "properties": {
               "topic": "/Shuffleboard/Hood/Hood/ResetZero",
@@ -587,10 +685,10 @@
           },
           {
             "title": "Climb Home & Calibrate",
-            "x": 960.0,
-            "y": 128.0,
-            "width": 256.0,
-            "height": 128.0,
+            "x": 896.0,
+            "y": 64.0,
+            "width": 320.0,
+            "height": 192.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Calibration/Climb Home & Calibrate",
@@ -601,10 +699,10 @@
           },
           {
             "title": "Climb Calibrate In Place",
-            "x": 960.0,
+            "x": 896.0,
             "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
+            "width": 320.0,
+            "height": 192.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Calibration/Climb Calibrate In Place",
@@ -615,10 +713,10 @@
           },
           {
             "title": "Intake Arm Calibrate In Place",
-            "x": 1280.0,
+            "x": 1216.0,
             "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
+            "width": 320.0,
+            "height": 192.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Calibration/Intake Arm Calibrate In Place",
@@ -629,10 +727,10 @@
           },
           {
             "title": "Intake Arm Home & Calibrate",
-            "x": 1280.0,
-            "y": 128.0,
-            "width": 256.0,
-            "height": 128.0,
+            "x": 1216.0,
+            "y": 64.0,
+            "width": 320.0,
+            "height": 192.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Calibration/Intake Arm Home & Calibrate",
