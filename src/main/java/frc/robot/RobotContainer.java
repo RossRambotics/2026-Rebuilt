@@ -247,8 +247,21 @@ public class RobotContainer {
     // () -> -controller.getLeftX(),
     // () -> Rotation2d.kZero));
 
-    controller.a().whileTrue(Commands.runOnce(() -> m_shooter.launchFuelSim()));
-    controller.b().whileTrue(m_shooter.getAutoShootCmd());
+    // Left trigger (hold): deploy intake arm and run intake roller
+    controller
+        .leftTrigger()
+        .whileTrue(m_intake.getDeployCmd().alongWith(m_intake.getRollerOnCmd()));
+
+    // Left bumper: retract intake arm
+    controller.leftBumper().onTrue(m_intake.getRetractCmd());
+
+    // Right trigger (hold): auto shoot — predictive targeting mode
+    // Hood and flywheel override their idle defaults; kicker and spindexer engage once ready.
+    controller.rightTrigger().whileTrue(m_shooter.getAutoShootCmd());
+
+    // Right bumper (hold): manual shoot — kicker and spindexer only
+    // Assumes turret, hood, and flywheel are already at the correct setpoints.
+    controller.rightBumper().whileTrue(m_shooter.getManualShootCmd());
 
     // Y button: drive to the currently selected field spot via PathPlanner
     // on-the-fly pathfinding.

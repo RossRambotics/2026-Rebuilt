@@ -152,6 +152,7 @@ public class OperatorControls {
         shooter.getSetTargetCmd(ShootingTarget.OPPOSITION_RIGHT));
 
     SmartDashboard.putData("Shooter/Auto Shoot", shooter.getAutoShootCmd());
+    SmartDashboard.putData("Shooter/Off", shooter.getOffCmd());
     SmartDashboard.putData("Shooter/Retract Hood", shooter.getRetractHoodCmd("ButtonBox"));
 
     SmartDashboard.putData("Shooter/Shot 1m", shooter.getFixedShot1mCmd());
@@ -232,7 +233,8 @@ public class OperatorControls {
   // while held, and when it ends, the default command resumes.
   // ========================================================================
   private void configureHoodRetraction() {
-    controller.y().whileTrue(shooter.getRetractHoodCmd("YButton"));
+    // Y button is reserved for DriveToSpot (RobotContainer). Hood retraction is
+    // available via the button box ("Shooter/Retract Hood") instead.
   }
 
   // ========================================================================
@@ -337,14 +339,8 @@ public class OperatorControls {
   // );
   // ========================================================================
   private void configureBumpTraversal() {
-    controller
-        .rightBumper()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(), // forward/backward
-                () -> -controller.getLeftX(), // left/right
-                () -> Rotation2d.fromDegrees(45)));
+    // Right bumper is reserved for manual shoot (RobotContainer). The zone-based
+    // auto-tilt triggers below still apply without a button binding.
 
     Rectangle2d rampZoneBL =
         new Rectangle2d(

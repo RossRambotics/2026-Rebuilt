@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.ShootingTarget;
 import frc.robot.subsystems.Spindexer;
@@ -106,6 +107,11 @@ public class Shooter extends SubsystemBase {
   private static final double MANUAL_FLYWHEEL_RATE_RPM_PER_SEC = 1000.0;
   private static final double MANUAL_FLYWHEEL_MAX_RPM = 6000.0;
 
+  // Idle flywheel speed — pre-spun for fast response when shooting starts
+  public static final double IDLE_FLYWHEEL_RPM = 2000.0;
+  // Kicker speed during shooting. TODO: tune on hardware.
+  private static final double KICKER_SHOOT_RPM = 500.0;
+
   // Readiness flags
   private boolean m_isShooterReady = false;
   private boolean m_isTurretReady = false;
@@ -133,14 +139,22 @@ public class Shooter extends SubsystemBase {
     m_targetHoodAngleDegEntry = table.getDoubleTopic("TargetHoodAngleDeg").getEntry(0.0);
     m_targetHoodAngleDegEntry.set(HoodConstants.HOOD_DEGREES_MIN);
 
-    // Set default command to aim turret at target (normal targeting)
+    // Set default commands:
+    //   Turret  — always tracks predictively (same in IDLE and PREDICTIVE TARGETING modes)
+    //   Hood    — idle: retracted to HOOD_DEGREES_MIN (safe for driving)
+    //   Flywheel — idle: pre-spun at IDLE_FLYWHEEL_RPM (fast response on trigger)
+    //   Kicker  — stop: ensures zero output when not commanded
+    //   Spindexer — stop: ensures zero output when not commanded
     m_turret.setDefaultCommand(getPredictiveTargetingCommand());
-    m_bottomFlyWheel.setDefaultCommand(getDynamicFlywheelCommand());
-    m_hood.setDefaultCommand(getDynamicHoodCommand());
+    m_hood.setDefaultCommand(getIdleHoodCmd());
+    m_bottomFlyWheel.setDefaultCommand(getIdleFlywheelCmd());
+    m_kicker.setDefaultCommand(m_kicker.stop());
+    m_spindexer.setDefaultCommand(m_spindexer.stop());
 
     // Add Shuffleboard commands to switch between targeting modes
     Shuffleboard.getTab("Shooter").add(getEnableNormalTargetingModeCmd());
     Shuffleboard.getTab("Shooter").add(getEnablePredictiveTargetingModeCmd());
+    Shuffleboard.getTab("Shooter").add(getOffCmd());
 
     Shuffleboard.getTab("YAMS_SysID").add(m_hood.sysId());
 
@@ -262,7 +276,7 @@ public class Shooter extends SubsystemBase {
               if (m_lastFiringSolution != null && m_isTurretActive) {
                 return Radians.of(m_lastFiringSolution.hoodMechAngleRad);
               }
-              return Degrees.of(0);
+              return Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
             });
     c.addRequirements(m_hood);
     return c;
@@ -274,8 +288,19 @@ public class Shooter extends SubsystemBase {
           if (m_lastFiringSolution != null && m_isTurretActive) {
             return RPM.of(m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm);
           }
-          return RPM.of(2000 + m_rpmTrimOffsetRpm);
+          return RPM.of(IDLE_FLYWHEEL_RPM + m_rpmTrimOffsetRpm);
         });
+  }
+
+  /** Default/idle hood command: retracted to minimum angle, safe for driving. */
+  private Command getIdleHoodCmd() {
+    return m_hood.setAngle(Degrees.of(HoodConstants.HOOD_DEGREES_MIN)).withName("Hood/Idle");
+  }
+
+  /** Default/idle flywheel command: pre-spun at idle RPM for fast spinup. */
+  private Command getIdleFlywheelCmd() {
+    // RPM trim is a shot-accuracy adjustment — do not apply it to the idle pre-spin speed.
+    return m_bottomFlyWheel.setVelocity(() -> RPM.of(IDLE_FLYWHEEL_RPM)).withName("Flywheel/Idle");
   }
 
   /** Returns a Shuffleboard/instant command that sets the turret default to normal targeting. */
@@ -625,9 +650,10 @@ public class Shooter extends SubsystemBase {
               && Math.abs(m_lastTurretErrorRobotAngle.in(Degrees)) < TURRET_ANGLE_TOLERANCE_DEG;
       m_isTurretReady = m_turretReadyDebouncer.calculate(rawTurretReady);
 
-      // Bottom flywheel readiness: compare current RPM to target RPM
+      // Bottom flywheel readiness: compare current RPM to the trimmed target (the actual
+      // commanded speed includes the trim offset, so the target must too).
       double currentBottomRpm = m_bottomFlyWheel.getVelocity().in(RPM);
-      double targetBottomRpm = m_lastFiringSolution.flywheelRPM;
+      double targetBottomRpm = m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm;
       boolean rawBottomReady =
           Math.abs(currentBottomRpm - targetBottomRpm) < BOTTOM_FLYWHEEL_RPM_TOLERANCE;
       m_isBottomFlyWheelReady = m_bottomFlywheelReadyDebouncer.calculate(rawBottomReady);
@@ -707,7 +733,7 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput(
           "Shooter/HoodTargetAngleDeg", Radians.of(solution.hoodMechAngleRad).in(Degrees));
       Logger.recordOutput("Shooter/HoodActualAngleDeg", m_hood.getAngle().in(Degrees));
-      Logger.recordOutput("Shooter/FlyWheelTargetRPM", solution.flywheelRPM);
+      Logger.recordOutput("Shooter/FlyWheelTargetRPM", solution.flywheelRPM + m_rpmTrimOffsetRpm);
       Logger.recordOutput(
           "Shooter/CalculatedTurretAngleDeg", Radians.of(solution.turretAngleRad).in(Degrees));
 
@@ -1029,23 +1055,53 @@ public class Shooter extends SubsystemBase {
             });
   }
 
+  /**
+   * PREDICTIVE TARGETING mode — triggered by right trigger.
+   *
+   * <p>Overrides the hood and flywheel idle defaults with targeting-derived setpoints from the
+   * firing solution, then gates the kicker and spindexer on {@link #isReady()}. When the trigger is
+   * released, hood and flywheel default commands (idle) resume and kicker/spindexer default
+   * commands (stop) resume automatically.
+   *
+   * <p>In SIM mode, also spawns FuelSim projectiles on the {@link #AUTO_SHOOT_INTERVAL_SEC} timer
+   * once the shooter is ready (same behaviour as the original sim-only implementation).
+   */
   public Command getAutoShootCmd() {
+    // Build the feed command: in SIM also launch fuel projectiles on a timer.
     final double[] lastLaunchTimeSec = {0.0};
-    Command c =
-        Commands.run(
-                () -> {
-                  if (m_isShooterReady) {
+    Command feedCmd =
+        m_kicker.setVelocity(RPM.of(KICKER_SHOOT_RPM)).alongWith(m_spindexer.getRunCmd());
+    if (Constants.currentMode == Constants.Mode.SIM) {
+      feedCmd =
+          feedCmd.alongWith(
+              Commands.run(
+                  () -> {
                     double nowSec = Timer.getFPGATimestamp();
                     if (nowSec - lastLaunchTimeSec[0] >= AUTO_SHOOT_INTERVAL_SEC) {
                       launchFuelSim();
                       lastLaunchTimeSec[0] = nowSec;
                     }
-                  }
-                })
-            .beforeStarting(() -> m_isShooting = true)
-            .finallyDo(() -> m_isShooting = false);
-    c.setName("AutoShoot");
-    return c;
+                  }));
+    }
+
+    return Commands.parallel(
+            // Override hood idle default: command targeting angle from firing solution
+            m_hood.setAngle(
+                () ->
+                    m_lastFiringSolution != null
+                        ? Radians.of(m_lastFiringSolution.hoodMechAngleRad)
+                        : Degrees.of(HoodConstants.HOOD_DEGREES_MIN)),
+            // Override flywheel idle default: command targeting RPM from firing solution
+            m_bottomFlyWheel.setVelocity(
+                () ->
+                    m_lastFiringSolution != null
+                        ? RPM.of(m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm)
+                        : RPM.of(IDLE_FLYWHEEL_RPM + m_rpmTrimOffsetRpm)),
+            // Kicker + spindexer (+ sim fuel launch): wait until ready, then feed
+            Commands.sequence(Commands.waitUntil(() -> m_isShooterReady), feedCmd))
+        .beforeStarting(() -> m_isShooting = true)
+        .finallyDo(() -> m_isShooting = false)
+        .withName("AutoShoot");
   }
 
   public boolean isShooting() {
@@ -1058,6 +1114,37 @@ public class Shooter extends SubsystemBase {
    */
   public boolean isReady() {
     return m_isShooterReady;
+  }
+
+  /**
+   * MANUAL mode — triggered by right bumper.
+   *
+   * <p>Runs the kicker and spindexer at shooting speed. Assumes the turret, hood, and flywheel are
+   * already at the correct setpoints (positioned by the operator or a prior auto-aim sequence).
+   * Does not require Hood or BottomFlyWheel — whatever command is running them continues
+   * uninterrupted. When the bumper is released, the kicker and spindexer default commands (stop)
+   * resume.
+   */
+  public Command getManualShootCmd() {
+    return m_kicker
+        .setVelocity(RPM.of(KICKER_SHOOT_RPM))
+        .alongWith(m_spindexer.getRunCmd())
+        .withName("ManualShoot");
+  }
+
+  /**
+   * OFF mode — stops all shooter mechanisms. Not driver-bound; triggered from Elastic/Shuffleboard.
+   * Uses {@code setDutyCycle(0.0)} for positional mechanisms (Hood, Turret) since they have no raw
+   * {@code set()} equivalent.
+   */
+  public Command getOffCmd() {
+    return Commands.parallel(
+            m_turret.setDutyCycle(0.0),
+            m_hood.setDutyCycle(0.0),
+            m_bottomFlyWheel.set(0),
+            m_kicker.stop(),
+            m_spindexer.stop())
+        .withName("Shooter/Off");
   }
 
   /**

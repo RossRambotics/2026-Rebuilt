@@ -296,8 +296,6 @@ After all imaging, firmware upgrades, and camera configuration:
 
 Open **Phoenix Tuner X** and connect to the robot. Every device in the table below must appear, respond to blink/identify, and show no faults before proceeding to any subsystem testing.
 
-> **All devices are on the RoboRIO native CAN bus. No CANivore is configured.**
-
 ### Complete CAN Device Inventory
 
 | CAN ID | Device | Type | Subsystem | Verified |
