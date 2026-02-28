@@ -78,8 +78,9 @@ public final class ClimbCommands {
             // Phase 4: Stop the drive unconditionally.
             Commands.runOnce(drive::stop, drive),
 
-            // Phase 5: Retract (winch) if tilt hooked; hold arm if drive finished first.
-            Commands.either(climb.getRetractCmd(), Commands.none(), () -> tiltHooked[0]))
+            // Phase 5: Robot climb (lift off ground) if tilt hooked; hold arm if drive finished
+            // first.
+            Commands.either(climb.getRobotClimbCmd(), Commands.none(), () -> tiltHooked[0]))
         .withName("SuperFastClimb/" + approachSpot.displayName);
   }
 

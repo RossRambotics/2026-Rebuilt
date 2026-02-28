@@ -128,6 +128,9 @@ public class ClimbElevator extends SubsystemBase {
       elevator = new Elevator(elevatorConfig);
     }
 
+    // When no other command owns the elevator, hold position via brake mode.
+    setDefaultCommand(setDutyCycle(0.0).withName("Climb/Idle"));
+
     // Auto-calibrate on the first enable if the encoder has not been zeroed yet.
     new Trigger(RobotState::isEnabled).onTrue(Commands.runOnce(this::ensureCalibrated));
   }
@@ -189,6 +192,12 @@ public class ClimbElevator extends SubsystemBase {
   /** Retract elevator to the minimum (home) height. */
   public Command getRetractCmd() {
     return setHeight(Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M)).withName("Climb/Retract");
+  }
+
+  /** Retract elevator to the robot-climb height, lifting the robot off the ground. */
+  public Command getRobotClimbCmd() {
+    return setHeight(Meters.of(ClimbElevatorConstants.ROBOT_CLIMB_HEIGHT_M))
+        .withName("Climb/RobotClimb");
   }
 
   /**

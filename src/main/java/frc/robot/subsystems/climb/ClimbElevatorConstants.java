@@ -11,6 +11,9 @@ public final class ClimbElevatorConstants {
   public static final double MIN_HEIGHT_M = 0.0;
   public static final double MAX_HEIGHT_M = 0.5;
 
+  // TODO: Tune robot-climb height on hardware (meters) — high enough to lift robot off the ground
+  public static final double ROBOT_CLIMB_HEIGHT_M = 0.3;
+
   // TODO: Tune gear reduction on hardware
   public static final double GEAR_REDUCTION = 20.0;
 

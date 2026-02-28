@@ -60,13 +60,13 @@ to a button box button).
               │ tiltHooked == true?     │
          YES  │                    NO   │
               ▼                         ▼
-   ┌──────────────────┐     ┌──────────────────────┐
-   │ Phase 5a         │     │ Phase 5b             │
-   │ getRetractCmd()  │     │ Commands.none()      │
-   │ (winch robot up) │     │ Arm holds at max     │
-   └──────────────────┘     │ height — driver      │
-                            │ decides next action  │
-                            └──────────────────────┘
+   ┌──────────────────────┐     ┌──────────────────────┐
+   │ Phase 5a             │     │ Phase 5b             │
+   │ getRobotClimbCmd()   │     │ Commands.none()      │
+   │ (lift robot off      │     │ Arm holds at max     │
+   │  ground safely)      │     │ height — driver      │
+   └──────────────────────┘     │ decides next action  │
+                                └──────────────────────┘
 ```
 
 ### Phase 3 race winner determines outcome
@@ -74,7 +74,7 @@ to a button box button).
 | Race winner | `tiltHooked` | Phase 5 action |
 |-------------|:------------:|----------------|
 | Pass drive (1m reached, no tilt) | `false` | Hold arm at max; driver decides |
-| Tilt sentinel (tilt threshold crossed) | `true` | Retract arm → winch robot up |
+| Tilt sentinel (tilt threshold crossed) | `true` | `getRobotClimbCmd()` → lift robot off ground (stops at `ROBOT_CLIMB_HEIGHT_M`, not full retract — avoids damaging side panels) |
 
 The tilt sentinel uses `Commands.waitUntil()`, which ends **naturally** (not interrupted) when its
 condition becomes true. Its `finallyDo` only sets `tiltHooked = true` when it is NOT interrupted,
@@ -143,12 +143,36 @@ through the tower). The same `flipIfRed()` is applied before the transform.
 
 ---
 
+## Primary Operator Commands
+
+These three commands are the normal teleop controls for the elevator, available on the button box
+under the `Climb/` group.
+
+| Button box key | Method | Target height | Behavior on cancel |
+|----------------|--------|:-------------:|--------------------|
+| `Climb/Extend Arm` | `getExtendCmd()` | `MAX_HEIGHT_M` | Motor stops; brake holds position |
+| `Climb/Retract Arm` | `getRetractCmd()` | `MIN_HEIGHT_M` | Motor stops; brake holds position |
+| `Climb/Robot Climb` | `getRobotClimbCmd()` | `ROBOT_CLIMB_HEIGHT_M` | Motor stops; brake holds position |
+
+### Cancel / interrupt behavior
+
+When any of these commands is interrupted (button released, another command takes over, or the
+sequence ends), the elevator's **default command** (`Climb/Idle`) immediately runs. The default
+command sends duty-cycle 0, which stops active motor output. The TalonFX `BRAKE` idle mode then
+shorts the motor phases, and the 20:1 gear reduction makes back-driving the mechanism extremely
+difficult — the elevator holds its position without active closed-loop control.
+
+---
+
 ## Constants
 
 All tunable values live in `ClimbElevatorConstants.java`.
 
 | Constant | Default | Description |
 |----------|--------:|-------------|
+| `MIN_HEIGHT_M` | `0.0` | Bottom hard-stop height (meters) |
+| `MAX_HEIGHT_M` | `0.5` | Full extension height (meters) — TODO: tune on hardware |
+| `ROBOT_CLIMB_HEIGHT_M` | `0.3` | Height that lifts the robot off the ground (meters) — TODO: tune on hardware |
 | `TILT_HOOK_THRESHOLD_RAD` | `Math.toRadians(10.0)` | Tilt magnitude that triggers winch |
 | `CLIMB_PASS_DISTANCE_M` | `1.0` | Meters to drive past approach pose |
 | `CLIMB_EXTEND_TIMEOUT_SEC` | `3.0` | Max seconds to wait for arm to reach MAX_HEIGHT |
@@ -202,8 +226,8 @@ buttonBoxButton.whileTrue(
 ```
 
 **Restart behavior:** releasing the button cancels the command mid-sequence. Pressing it again
-restarts from Phase 1 (approach). The robot remains in whatever state it was in when cancelled —
-if the arm was extended, it will stay extended until another command takes control.
+restarts from Phase 1 (approach). When cancelled, the elevator's default command (`Climb/Idle`)
+immediately runs — the motor stops and brake mode holds the arm at its current height.
 
 ---
 
@@ -229,7 +253,7 @@ All keys are visible in AdvantageScope.
 |------|---------|
 | `src/main/java/frc/robot/commands/ClimbCommands.java` | `superFastClimb()` factory and all phase helpers |
 | `src/main/java/frc/robot/commands/FieldSpot.java` | Approach poses, `FIELD_LENGTH_M`, `FIELD_WIDTH_M`, `flipIfRed()` |
-| `src/main/java/frc/robot/subsystems/climb/ClimbElevator.java` | `getExtendCmd()`, `getRetractCmd()`, `getHeight()` |
+| `src/main/java/frc/robot/subsystems/climb/ClimbElevator.java` | `getExtendCmd()`, `getRetractCmd()`, `getRobotClimbCmd()`, `getHeight()`; default command `Climb/Idle` |
 | `src/main/java/frc/robot/subsystems/climb/ClimbElevatorConstants.java` | All climb command constants |
 | `src/main/java/frc/robot/subsystems/drive/GyroIO.java` | `rollRobotRad`, `pitchRobotRad` in `GyroIOInputs` |
 | `src/main/java/frc/robot/subsystems/drive/GyroIOPigeon2.java` | Pigeon2 roll/pitch StatusSignals at 50 Hz |

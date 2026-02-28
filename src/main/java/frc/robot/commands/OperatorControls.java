@@ -141,6 +141,7 @@ public class OperatorControls {
         "Climb/Right", ClimbCommands.superFastClimb(drive, climbElevator, FieldSpot.CLIMB_RIGHT));
     SmartDashboard.putData("Climb/Extend Arm", climbElevator.getExtendCmd());
     SmartDashboard.putData("Climb/Retract Arm", climbElevator.getRetractCmd());
+    SmartDashboard.putData("Climb/Robot Climb", climbElevator.getRobotClimbCmd());
 
     // ── Shooter ──────────────────────────────────────────────────────────────
     SmartDashboard.putData("Shooter/Normal Targeting", shooter.getEnableNormalTargetingModeCmd());
