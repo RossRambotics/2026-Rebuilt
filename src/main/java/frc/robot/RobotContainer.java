@@ -41,8 +41,10 @@ import frc.robot.subsystems.SpotSelector;
 import frc.robot.subsystems.climb.ClimbElevator;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.Shooter;
@@ -102,21 +104,21 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
         // a CANcoder
-        // drive =
-        // new Drive(
-        // new GyroIOPigeon2(),
-        // new ModuleIOTalonFX(TunerConstants.FrontLeft),
-        // new ModuleIOTalonFX(TunerConstants.FrontRight),
-        // new ModuleIOTalonFX(TunerConstants.BackLeft),
-        // new ModuleIOTalonFX(TunerConstants.BackRight));
-
         drive =
             new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+                new GyroIOPigeon2(),
+                new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                new ModuleIOTalonFX(TunerConstants.FrontRight),
+                new ModuleIOTalonFX(TunerConstants.BackLeft),
+                new ModuleIOTalonFX(TunerConstants.BackRight));
+
+        // drive =
+        // new Drive(
+        // new GyroIO() {},
+        // new ModuleIOSim(TunerConstants.FrontLeft),
+        // new ModuleIOSim(TunerConstants.FrontRight),
+        // new ModuleIOSim(TunerConstants.BackLeft),
+        // new ModuleIOSim(TunerConstants.BackRight));
 
         vision =
             new Vision(
