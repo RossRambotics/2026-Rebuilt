@@ -128,11 +128,11 @@ public class Shooter extends SubsystemBase {
 
   /** Creates a new Shooter. */
   public Shooter(boolean isReal) {
-    m_turret = new Turret(false);
+    m_turret = new Turret(true);
     m_hood = new Hood(isReal);
-    m_bottomFlyWheel = new BottomFlyWheel(isReal);
-    m_kicker = new Kicker(isReal);
-    m_spindexer = new Spindexer(isReal);
+    m_bottomFlyWheel = new BottomFlyWheel(false);
+    m_kicker = new Kicker(false);
+    m_spindexer = new Spindexer(false);
 
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable table = inst.getTable("Shooter");
@@ -140,11 +140,12 @@ public class Shooter extends SubsystemBase {
     m_targetHoodAngleDegEntry.set(HoodConstants.HOOD_DEGREES_MIN);
 
     // Set default commands:
-    //   Turret  — always tracks predictively (same in IDLE and PREDICTIVE TARGETING modes)
-    //   Hood    — idle: retracted to HOOD_DEGREES_MIN (safe for driving)
-    //   Flywheel — idle: pre-spun at IDLE_FLYWHEEL_RPM (fast response on trigger)
-    //   Kicker  — stop: ensures zero output when not commanded
-    //   Spindexer — stop: ensures zero output when not commanded
+    // Turret — always tracks predictively (same in IDLE and PREDICTIVE TARGETING
+    // modes)
+    // Hood — idle: retracted to HOOD_DEGREES_MIN (safe for driving)
+    // Flywheel — idle: pre-spun at IDLE_FLYWHEEL_RPM (fast response on trigger)
+    // Kicker — stop: ensures zero output when not commanded
+    // Spindexer — stop: ensures zero output when not commanded
     m_turret.setDefaultCommand(getPredictiveTargetingCommand());
     m_hood.setDefaultCommand(getIdleHoodCmd());
     m_bottomFlyWheel.setDefaultCommand(getIdleFlywheelCmd());
@@ -303,7 +304,8 @@ public class Shooter extends SubsystemBase {
 
   /** Default/idle flywheel command: pre-spun at idle RPM for fast spinup. */
   private Command getIdleFlywheelCmd() {
-    // RPM trim is a shot-accuracy adjustment — do not apply it to the idle pre-spin speed.
+    // RPM trim is a shot-accuracy adjustment — do not apply it to the idle pre-spin
+    // speed.
     return m_bottomFlyWheel.setVelocity(() -> RPM.of(IDLE_FLYWHEEL_RPM)).withName("Flywheel/Idle");
   }
 
@@ -413,7 +415,8 @@ public class Shooter extends SubsystemBase {
     // --- Turret angle (robot-relative) ---
     Translation2d delta = targetFieldPos.minus(shooterFieldPos);
 
-    // MathUtil.angleModulus normalizes to (-π, π], preventing wrap errors near ±180°
+    // MathUtil.angleModulus normalizes to (-π, π], preventing wrap errors near
+    // ±180°
     double rawTurretAngleRad =
         MathUtil.angleModulus(
             Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians());
@@ -495,7 +498,8 @@ public class Shooter extends SubsystemBase {
     // --- Velocity compensation for turret ---
     Translation2d delta = targetFieldPos.minus(shooterFieldPos);
 
-    // MathUtil.angleModulus normalizes to (-π, π], preventing wrap errors near ±180°
+    // MathUtil.angleModulus normalizes to (-π, π], preventing wrap errors near
+    // ±180°
     double rawTurretAngleRad =
         MathUtil.angleModulus(
             Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians());
@@ -658,7 +662,8 @@ public class Shooter extends SubsystemBase {
               && Math.abs(m_lastTurretErrorRobotAngle.in(Degrees)) < TURRET_ANGLE_TOLERANCE_DEG;
       m_isTurretReady = m_turretReadyDebouncer.calculate(rawTurretReady);
 
-      // Bottom flywheel readiness: compare current RPM to the trimmed target (the actual
+      // Bottom flywheel readiness: compare current RPM to the trimmed target (the
+      // actual
       // commanded speed includes the trim offset, so the target must too).
       double currentBottomRpm = m_bottomFlyWheel.getVelocity().in(RPM);
       double targetBottomRpm = m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm;

@@ -42,7 +42,8 @@ public class Turret extends SubsystemBase {
   public static final int TURRET_DEGREES_MAX = 90;
 
   // TODO: Tune homing speed and hard-stop detection thresholds on hardware.
-  // Negative duty cycle drives the turret toward TURRET_DEGREES_MIN (left hard stop).
+  // Negative duty cycle drives the turret toward TURRET_DEGREES_MIN (left hard
+  // stop).
   private static final double HOME_DUTY_CYCLE = -0.1;
   private static final double HOME_STALL_VELOCITY_RPS = 0.5;
   private static final double HOME_STALL_CURRENT_AMPS = 20.0;
@@ -95,7 +96,7 @@ public class Turret extends SubsystemBase {
                   4, 0, 0, DegreesPerSecond.of(360), DegreesPerSecondPerSecond.of(900))
               .withSimClosedLoopController(
                   25, 0, 0, DegreesPerSecond.of(360), DegreesPerSecondPerSecond.of(900))
-              .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+              .withGearing(new MechanismGearing(GearBox.fromReductionStages(38.4)))
               .withIdleMode(MotorMode.BRAKE)
               .withMotorInverted(false)
               .withTelemetry("TurretMotor", TelemetryVerbosity.HIGH)
@@ -128,11 +129,13 @@ public class Turret extends SubsystemBase {
   /** Schedules homeAndCalibrate() on enable if the encoder has not yet been zeroed. */
   private void ensureCalibrated() {
     if (!m_isCalibrated) {
-      // TODO: Once a physical hard stop is installed, uncomment this and remove the temporary block
+      // TODO: Once a physical hard stop is installed, uncomment this and remove the
+      // temporary block
       // below.
       // CommandScheduler.getInstance().schedule(homeAndCalibrate());
 
-      // No hard stop yet — assume turret starts at center (0°) and mark calibrated in place.
+      // No hard stop yet — assume turret starts at center (0°) and mark calibrated in
+      // place.
       if (turretMotor != null) {
         turretMotor.setPosition(Degrees.of(0));
       }

@@ -34,9 +34,6 @@
           "open": true
         }
       },
-      "Shooter": {
-        "open": true
-      },
       "Shuffleboard": {
         "Hood": {
           "open": true
@@ -60,7 +57,20 @@
             "open": true
           },
           "open": true
-        }
+        },
+        "HoodMech": {
+          "HoodMotor": {
+            "closedloop": {
+              "feedback": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
       }
     },
     "types": {
@@ -86,6 +96,7 @@
       "/Shuffleboard/Kicker/Kicker/Kicker Dynamic": "Command",
       "/Shuffleboard/Shooter/NormalTargeting": "Command",
       "/Shuffleboard/Shooter/PredictiveTargeting": "Command",
+      "/Shuffleboard/Shooter/Shooter/Off": "Command",
       "/Shuffleboard/Shooter/Target/Blue Hub": "Command",
       "/Shuffleboard/Shooter/Target/Blue Neutral Target Left": "Command",
       "/Shuffleboard/Shooter/Target/Blue Neutral Target Right": "Command",
@@ -103,11 +114,38 @@
       "/Shuffleboard/SpotSelector/Hub Neutral": "Command",
       "/Shuffleboard/SpotSelector/Opponent Trench Left": "Command",
       "/Shuffleboard/SpotSelector/Opponent Trench Right": "Command",
+      "/Shuffleboard/YAMS_SysID/Hood SysId": "Command",
       "/Shuffleboard/YAMS_SysID/InstantCommand": "Command",
       "/SmartDashboard/Alerts": "Alerts",
       "/SmartDashboard/Auto Choices": "String Chooser",
+      "/SmartDashboard/Calibration/Climb Calibrate In Place": "Command",
+      "/SmartDashboard/Calibration/Climb Home & Calibrate": "Command",
+      "/SmartDashboard/Calibration/Enable Normal Gyro": "Command",
+      "/SmartDashboard/Calibration/Enable Vision Gyro": "Command",
+      "/SmartDashboard/Calibration/Hood Calibrate In Place": "Command",
+      "/SmartDashboard/Calibration/Hood Home & Calibrate": "Command",
+      "/SmartDashboard/Calibration/Hood Zero": "Command",
+      "/SmartDashboard/Calibration/Intake Arm Calibrate In Place": "Command",
+      "/SmartDashboard/Calibration/Intake Arm Home & Calibrate": "Command",
+      "/SmartDashboard/Calibration/Reseed from Vision": "Command",
+      "/SmartDashboard/Calibration/Reset Gyro": "Command",
+      "/SmartDashboard/Calibration/Turret Calibrate In Place": "Command",
+      "/SmartDashboard/Calibration/Turret Home & Calibrate": "Command",
+      "/SmartDashboard/Climb/Center": "Command",
+      "/SmartDashboard/Climb/Extend Arm": "Command",
+      "/SmartDashboard/Climb/Left": "Command",
+      "/SmartDashboard/Climb/Retract Arm": "Command",
+      "/SmartDashboard/Climb/Right": "Command",
       "/SmartDashboard/Enable Normal Gyro": "Command",
       "/SmartDashboard/Enable Vision Gyro": "Command",
+      "/SmartDashboard/Intake/Deploy": "Command",
+      "/SmartDashboard/Intake/Eject": "Command",
+      "/SmartDashboard/Intake/Retract": "Command",
+      "/SmartDashboard/Intake/Reverse Spindexer": "Command",
+      "/SmartDashboard/Intake/Roller Off": "Command",
+      "/SmartDashboard/Intake/Roller On": "Command",
+      "/SmartDashboard/Intake/Run Spindexer": "Command",
+      "/SmartDashboard/Intake/Stop Spindexer": "Command",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheel/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/Up": "Command",
@@ -132,10 +170,40 @@
       "/SmartDashboard/Mechanisms/Commands/TurretMotor/Up": "Command",
       "/SmartDashboard/Mechanisms/Commands/TurretMotor/ZeroEncoder": "Command",
       "/SmartDashboard/PathPlanner": "Alerts",
-      "/SmartDashboard/Reseed Gyro From Vision": "Command"
+      "/SmartDashboard/Reseed Gyro From Vision": "Command",
+      "/SmartDashboard/Shooter/Auto Shoot": "Command",
+      "/SmartDashboard/Shooter/Normal Targeting": "Command",
+      "/SmartDashboard/Shooter/Off": "Command",
+      "/SmartDashboard/Shooter/Predictive Targeting": "Command",
+      "/SmartDashboard/Shooter/RPM +100": "Command",
+      "/SmartDashboard/Shooter/RPM -100": "Command",
+      "/SmartDashboard/Shooter/RPM Reset": "Command",
+      "/SmartDashboard/Shooter/Retract Hood": "Command",
+      "/SmartDashboard/Shooter/Shot 1m": "Command",
+      "/SmartDashboard/Shooter/Shot 2m": "Command",
+      "/SmartDashboard/Shooter/Shot 3m": "Command",
+      "/SmartDashboard/Shooter/Target Enable Auto": "Command",
+      "/SmartDashboard/Shooter/Target Hub": "Command",
+      "/SmartDashboard/Shooter/Target Neutral Left": "Command",
+      "/SmartDashboard/Shooter/Target Neutral Right": "Command",
+      "/SmartDashboard/Shooter/Target Opposition Left": "Command",
+      "/SmartDashboard/Shooter/Target Opposition Right": "Command",
+      "/SmartDashboard/Shooter/Turret Center": "Command",
+      "/SmartDashboard/Shooter/Turret Left 5deg": "Command",
+      "/SmartDashboard/Shooter/Turret Right 5deg": "Command",
+      "/SmartDashboard/Spots/Alliance Trench Left": "Command",
+      "/SmartDashboard/Spots/Alliance Trench Right": "Command",
+      "/SmartDashboard/Spots/Clear Selection": "Command",
+      "/SmartDashboard/Spots/Climb Center": "Command",
+      "/SmartDashboard/Spots/Climb Left": "Command",
+      "/SmartDashboard/Spots/Climb Right": "Command",
+      "/SmartDashboard/Spots/Hub Alliance": "Command",
+      "/SmartDashboard/Spots/Hub Neutral": "Command",
+      "/SmartDashboard/Spots/Opponent Trench Left": "Command",
+      "/SmartDashboard/Spots/Opponent Trench Right": "Command"
     },
     "windows": {
-      "/SmartDashboard/Auto Choices": {
+      "/SmartDashboard/Calibration/Turret Calibrate In Place": {
         "window": {
           "visible": true
         }

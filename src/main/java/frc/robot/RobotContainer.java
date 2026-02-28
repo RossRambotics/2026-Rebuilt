@@ -41,10 +41,8 @@ import frc.robot.subsystems.SpotSelector;
 import frc.robot.subsystems.climb.ClimbElevator;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
-import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.Shooter;
@@ -104,21 +102,21 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
         // a CANcoder
-        drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
-
         // drive =
         // new Drive(
-        // new GyroIO() {},
-        // new ModuleIOSim(TunerConstants.FrontLeft),
-        // new ModuleIOSim(TunerConstants.FrontRight),
-        // new ModuleIOSim(TunerConstants.BackLeft),
-        // new ModuleIOSim(TunerConstants.BackRight));
+        // new GyroIOPigeon2(),
+        // new ModuleIOTalonFX(TunerConstants.FrontLeft),
+        // new ModuleIOTalonFX(TunerConstants.FrontRight),
+        // new ModuleIOTalonFX(TunerConstants.BackLeft),
+        // new ModuleIOTalonFX(TunerConstants.BackRight));
+
+        drive =
+            new Drive(
+                new GyroIO() {},
+                new ModuleIOSim(TunerConstants.FrontLeft),
+                new ModuleIOSim(TunerConstants.FrontRight),
+                new ModuleIOSim(TunerConstants.BackLeft),
+                new ModuleIOSim(TunerConstants.BackRight));
 
         vision =
             new Vision(
@@ -218,7 +216,8 @@ public class RobotContainer {
     // Publish spot-selection commands to Shuffleboard
     configureSpotSelectorDashboard();
 
-    // Vision/gyro calibration commands are published by OperatorControls.configureButtonBox().
+    // Vision/gyro calibration commands are published by
+    // OperatorControls.configureButtonBox().
 
     // Configure FuelSim for sim
     if (Constants.currentMode == Constants.Mode.SIM) {
@@ -262,7 +261,8 @@ public class RobotContainer {
     controller.leftBumper().onTrue(m_intake.getRetractCmd());
 
     // Right trigger (hold): auto shoot — predictive targeting mode
-    // Hood and flywheel override their idle defaults; kicker and spindexer engage once ready.
+    // Hood and flywheel override their idle defaults; kicker and spindexer engage
+    // once ready.
     controller.rightTrigger().whileTrue(m_shooter.getAutoShootCmd());
 
     // Right bumper (hold): manual shoot — kicker and spindexer only
@@ -300,8 +300,10 @@ public class RobotContainer {
     // // () -> -controller.getRawAxis(2)));
     // () -> -controller.getRawAxis(4)));
 
-    // AutoTargetSelector is the default command: selects the correct ShootingTarget based on
-    // the robot's field zone. Manual operator selections override it until re-engaged.
+    // AutoTargetSelector is the default command: selects the correct ShootingTarget
+    // based on
+    // the robot's field zone. Manual operator selections override it until
+    // re-engaged.
     m_targetSelector.setDefaultCommand(new AutoTargetSelector(m_targetSelector, drive));
 
     // Student-owned operator controls (hood retraction, bump traversal, passing
