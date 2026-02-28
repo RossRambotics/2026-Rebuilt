@@ -14,7 +14,6 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-import java.util.Optional;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -54,6 +53,7 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.FuelSim;
+import java.util.Optional;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -364,7 +364,7 @@ public class RobotContainer {
   public Optional<Pose2d> getSelectedAutoStartPose() {
     Command selected = autoChooser.get();
     if (selected instanceof PathPlannerAuto auto) {
-      return auto.getStartingPose();
+      return Optional.ofNullable(auto.getStartingPose());
     }
     return Optional.empty();
   }
@@ -372,13 +372,13 @@ public class RobotContainer {
   /**
    * During disabled, keeps the SpotSelector pointed at the selected auto's starting pose so the
    * Field widget shows a green X for prematch alignment. If no auto start pose is available (e.g.,
-   * a SysId routine is selected), the selection is cleared.
+   * "None" or a SysId routine is selected), falls back to the robot's current pose so the green X
+   * sits on the robot and effectively disappears without changing the key's data type.
    */
   public void updatePrematchAutoStartPose() {
-    getSelectedAutoStartPose()
-        .ifPresentOrElse(
-            startPose -> m_spotSelector.selectCustomPose(startPose, "Auto Start"),
-            m_spotSelector::clearSelection);
+    Optional<Pose2d> autoStart = getSelectedAutoStartPose();
+    m_spotSelector.selectCustomPose(
+        autoStart.orElse(drive.getPose()), autoStart.isPresent() ? "Auto Start" : "Robot");
   }
 
   /** Clears the prematch auto-start-pose visualization when teleop begins. */
