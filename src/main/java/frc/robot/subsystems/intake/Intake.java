@@ -37,7 +37,7 @@ public class Intake extends SubsystemBase {
    * Deploy the intake arm and run the roller.
    *
    * <p>Phase 1: position-control the arm to the deploy angle while starting the roller. Ends when
-   * the arm reaches the deploy angle (within tolerance) or after a 3-second safety timeout.
+   * the arm reaches the deploy angle (within tolerance) or after a safety timeout.
    *
    * <p>Phase 2: release arm to coast (duty-cycle 0) while the roller continues running. This allows
    * the arm to fold back freely if struck by another robot.
@@ -53,7 +53,7 @@ public class Intake extends SubsystemBase {
                         m_deployArm.isNearAngle(
                             Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG),
                             Degrees.of(IntakeConstants.AT_ANGLE_TOLERANCE_DEG)))
-                .withTimeout(3.0),
+                .withTimeout(0.5),
             // Phase 2 — coast arm, keep roller running
             Commands.parallel(
                 m_deployArm.setDutyCycle(0.0),
