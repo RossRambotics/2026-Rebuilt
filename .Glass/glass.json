@@ -136,6 +136,7 @@
       "/SmartDashboard/Climb/Left": "Command",
       "/SmartDashboard/Climb/Retract Arm": "Command",
       "/SmartDashboard/Climb/Right": "Command",
+      "/SmartDashboard/Climb/Robot Climb": "Command",
       "/SmartDashboard/Enable Normal Gyro": "Command",
       "/SmartDashboard/Enable Vision Gyro": "Command",
       "/SmartDashboard/Intake/Deploy": "Command",

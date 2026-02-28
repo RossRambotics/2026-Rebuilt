@@ -80,7 +80,7 @@ public class Spindexer extends SubsystemBase {
   }
 
   /** Forward feed speed toward the shooter. TODO: tune on hardware. */
-  private static final double RUN_RPM = 500.0;
+  private static final double RUN_RPM = 4000.0;
 
   /** Reverse speed for clearing jams. TODO: tune on hardware. */
   private static final double REVERSE_RPM = -500.0;

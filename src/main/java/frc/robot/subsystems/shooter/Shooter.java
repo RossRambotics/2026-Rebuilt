@@ -94,12 +94,12 @@ public class Shooter extends SubsystemBase {
 
   // ── Fixed-distance shot constants ────────────────────────────────────────
   // TODO: tune all six values by shooting from measured distances on the field.
-  private static final double FIXED_SHOT_1M_HOOD_DEG = 40.0; // TODO: tune
-  private static final double FIXED_SHOT_1M_RPM = 2000.0; // TODO: tune
+  private static final double FIXED_SHOT_1M_HOOD_DEG = 15.0; // TODO: tune
+  private static final double FIXED_SHOT_1M_RPM = 2200.0; // TODO: tune
   private static final double FIXED_SHOT_2M_HOOD_DEG = 30.0; // TODO: tune
-  private static final double FIXED_SHOT_2M_RPM = 3000.0; // TODO: tune
-  private static final double FIXED_SHOT_3M_HOOD_DEG = 25.0; // TODO: tune
-  private static final double FIXED_SHOT_3M_RPM = 4000.0; // TODO: tune
+  private static final double FIXED_SHOT_2M_RPM = 2250.0; // TODO: tune
+  private static final double FIXED_SHOT_3M_HOOD_DEG = 35.0; // TODO: tune
+  private static final double FIXED_SHOT_3M_RPM = 2450.0; // TODO: tune
 
   // Manual control rates (tunable — degrees or RPM per second)
   private static final double MANUAL_TURRET_RATE_DEG_PER_SEC = 180.0;
@@ -110,7 +110,7 @@ public class Shooter extends SubsystemBase {
   // Idle flywheel speed — pre-spun for fast response when shooting starts
   public static final double IDLE_FLYWHEEL_RPM = 2000.0;
   // Kicker speed during shooting. TODO: tune on hardware.
-  private static final double KICKER_SHOOT_RPM = 500.0;
+  private static final double KICKER_SHOOT_RPM = 6000.0;
 
   // Readiness flags
   private boolean m_isShooterReady = false;
@@ -130,9 +130,9 @@ public class Shooter extends SubsystemBase {
   public Shooter(boolean isReal) {
     m_turret = new Turret(false);
     m_hood = new Hood(isReal);
-    m_bottomFlyWheel = new BottomFlyWheel(false);
-    m_kicker = new Kicker(false);
-    m_spindexer = new Spindexer(false);
+    m_bottomFlyWheel = new BottomFlyWheel(isReal);
+    m_kicker = new Kicker(isReal);
+    m_spindexer = new Spindexer(isReal);
 
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable table = inst.getTable("Shooter");
