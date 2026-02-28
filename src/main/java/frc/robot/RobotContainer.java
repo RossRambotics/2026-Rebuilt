@@ -13,6 +13,8 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import java.util.Optional;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -353,6 +355,35 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  /**
+   * Returns the starting pose of the currently selected PathPlanner auto, if the selected auto is a
+   * {@link PathPlannerAuto}. Returns empty for SysId routines and other non-path commands.
+   */
+  public Optional<Pose2d> getSelectedAutoStartPose() {
+    Command selected = autoChooser.get();
+    if (selected instanceof PathPlannerAuto auto) {
+      return auto.getStartingPose();
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * During disabled, keeps the SpotSelector pointed at the selected auto's starting pose so the
+   * Field widget shows a green X for prematch alignment. If no auto start pose is available (e.g.,
+   * a SysId routine is selected), the selection is cleared.
+   */
+  public void updatePrematchAutoStartPose() {
+    getSelectedAutoStartPose()
+        .ifPresentOrElse(
+            startPose -> m_spotSelector.selectCustomPose(startPose, "Auto Start"),
+            m_spotSelector::clearSelection);
+  }
+
+  /** Clears the prematch auto-start-pose visualization when teleop begins. */
+  public void clearPrematchAutoStartPose() {
+    m_spotSelector.clearSelection();
   }
 
   public Pose2d getRobotPose2d() {

@@ -55,7 +55,7 @@ The button box displays a live field map. The operator should monitor this throu
 |-----------|--------------|
 | **Green square** | Robot's current estimated position on the field |
 | **Yellow circle (fuel icon)** | Where the shooter is currently targeting |
-| **Green X** | Where the auto-drive (SpotSelector) is navigating to |
+| **Green X** | **During disabled:** selected auto's starting pose — use this for pre-match alignment. **During teleop:** the auto-drive (SpotSelector) destination. |
 
 **The Field widget is your primary odometry health check.** If the green square does not match where the robot physically is on the field, the pose estimate is wrong and shooting and auto-drive will both be unreliable. See [Diagnosing Problems](#4-diagnosing-problems-during-a-match) for how to correct this.
 
@@ -356,6 +356,17 @@ Operator press **Shooter / Off** to completely stop all shooter mechanisms (turr
 2. You can change the selection while disabled — it takes effect at auto start.
 3. Do not change selection after the match starts.
 
+### Verifying Start Position with the Field Widget
+
+When the robot is disabled, the **green X on the Field widget automatically moves to the selected auto's starting pose**. Use this to verify robot placement before the match:
+
+- Place the robot on the field, then check the Field widget.
+- The **green square** (robot's current pose) should overlap the **green X** (auto start pose).
+- If they don't overlap, either the robot is in the wrong physical position, or the pose estimate is wrong.
+  - If the robot is misplaced: physically move the robot to match the green X.
+  - If the pose estimate is wrong: confirm top LEDs are **GREEN**, then use **Calibration / Reseed from Vision** to correct heading.
+- Changing the auto chooser selection will immediately move the green X to reflect the new routine's starting pose.
+
 ### Available Auto Routines
 
 ** TODO ** Section needs updated.
@@ -414,7 +425,8 @@ Complete this before every match.
 ### Autonomous
 
 - [ ] Correct auto routine selected on dashboard
-- [ ] Drive coach confirms auto start position matches robot placement
+- [ ] **Field widget green X matches the robot's physical starting position** — the green X shows the selected auto's start pose; the green square shows the robot's current pose. They should overlap.
+- [ ] If they don't overlap: either physically move the robot to match the green X, or fix the pose estimate (Reseed from Vision) until they agree
 
 ### Communication
 

@@ -188,6 +188,11 @@ public class OperatorControls {
     SmartDashboard.putData("Intake/Reverse Spindexer", shooter.getSpindexerReverseCmd());
 
     // ── Calibration ──────────────────────────────────────────────────────────
+    // TODO: Add prematch alignment readouts to the Calibration page on the button box.
+    // During disabled, the Field widget already shows a green X at the selected auto's starting
+    // pose (via SpotSelector/SelectedPose). For a text summary on the Calibration page, add
+    // SmartDashboard entries showing position error (m) and heading error (deg) between the
+    // robot's current pose and the auto start pose so drivers get a pass/fail at a glance.
     SmartDashboard.putData(
         "Calibration/Reset Gyro",
         Commands.runOnce(
