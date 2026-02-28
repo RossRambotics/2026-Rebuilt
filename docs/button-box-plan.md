@@ -85,16 +85,22 @@ Click to start; click again to cancel and restart from Phase 1 on next press.
 
 ### Target Selection
 
-| Button label | Command |
-|---|---|
-| Hub | `shooter.getSetTargetCmd(ShootingTarget.HUB)` |
-| Neutral Left | `shooter.getSetTargetCmd(ShootingTarget.NEUTRAL_LEFT)` |
-| Neutral Right | `shooter.getSetTargetCmd(ShootingTarget.NEUTRAL_RIGHT)` |
-| Opposition Left | `shooter.getSetTargetCmd(ShootingTarget.OPPOSITION_LEFT)` |
-| Opposition Right | `shooter.getSetTargetCmd(ShootingTarget.OPPOSITION_RIGHT)` |
+`ShooterTargetSelector` owns the active target. Its default command (`AutoTargetSelector`) picks
+the correct target automatically based on the robot's field zone — no button press required in
+normal play. These buttons override auto-selection for manual control; auto resumes on **Enable Auto**.
+
+| Button label | Command | Notes |
+|---|---|---|
+| Hub | `targetSelector.cmdSelectManual(ShootingTarget.HUB)` | Disables auto-select |
+| Neutral Left | `targetSelector.cmdSelectManual(ShootingTarget.NEUTRAL_LEFT)` | Disables auto-select |
+| Neutral Right | `targetSelector.cmdSelectManual(ShootingTarget.NEUTRAL_RIGHT)` | Disables auto-select |
+| Opposition Left | `targetSelector.cmdSelectManual(ShootingTarget.OPPOSITION_LEFT)` | Disables auto-select |
+| Opposition Right | `targetSelector.cmdSelectManual(ShootingTarget.OPPOSITION_RIGHT)` | Disables auto-select |
+| Enable Auto | `targetSelector.cmdEnableAuto()` | Resumes zone-based auto-selection |
 
 All poses are Blue-alliance coordinates in `ShootingTarget`; `getFieldPose3d()` flips to Red at
-runtime. Target preset buttons have been removed from Shuffleboard — publish via `OperatorControls.configureButtonBox()`.
+runtime. Zone boundaries (Blue-alliance coords): alliance zone x < 4.6 m, neutral 4.6–11.9 m,
+opposition x > 11.9 m; left/right split at field-center y (4.035 m).
 
 ### Shooter Actions
 
@@ -279,10 +285,11 @@ All four positional subsystems (Turret, Hood, IntakeDeployArm, ClimbElevator) fo
 
 ### Shooter Tab
 - [x] Targeting mode buttons published
-- [x] All 5 target selection buttons published via `shooter.getSetTargetCmd(ShootingTarget.*)`
+- [x] All 5 target selection buttons published via `targetSelector.cmdSelectManual(ShootingTarget.*)`
+- [x] **Enable Auto** button published (`targetSelector.cmdEnableAuto()`) — re-engages zone-based auto-selection after a manual override
 - [x] `getAutoShootCmd()` and `getRetractHoodCmd("ButtonBox")` published
-- [x] **Refactor shooting targets** — `ShootingTarget` enum with Blue-alliance Pose3d values,
-      `flipIfRed3d()`, and `getSetTargetCmd(ShootingTarget)` — done; Shuffleboard entries removed
+- [x] **Refactor shooting targets** — `ShootingTarget` enum with Blue-alliance Pose3d values and `flipIfRed3d()` — done
+- [x] **`ShooterTargetSelector` subsystem** — owns active target state; `AutoTargetSelector` default command selects by field zone; manual buttons override until **Enable Auto** is pressed
 - [x] **Implement `Shooter.getFixedShotCmd(Angle hoodAngle, double rpm)`** — locks turret to 0°
       robot frame, sets fixed hood angle and RPM, holds until cancelled
 - [x] Add 6 fixed shot constants to `Shooter` (hood deg + RPM for 1 m, 2 m, 3 m) — all TODO: tune

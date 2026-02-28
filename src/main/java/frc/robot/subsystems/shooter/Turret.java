@@ -20,7 +20,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -129,7 +128,8 @@ public class Turret extends SubsystemBase {
   /** Schedules homeAndCalibrate() on enable if the encoder has not yet been zeroed. */
   private void ensureCalibrated() {
     if (!m_isCalibrated) {
-      // TODO: Once a physical hard stop is installed, uncomment this and remove the temporary block below.
+      // TODO: Once a physical hard stop is installed, uncomment this and remove the temporary block
+      // below.
       // CommandScheduler.getInstance().schedule(homeAndCalibrate());
 
       // No hard stop yet — assume turret starts at center (0°) and mark calibrated in place.

@@ -15,8 +15,8 @@ For shooter mode details (OFF / IDLE / Predictive Targeting / Manual) and the im
 | Right Thumbstick (axis 4) | Rotate | Implemented |
 | Left Trigger (hold) | Deploy intake + run intake roller | TODO |
 | Left Bumper | Retract intake | TODO |
-| Right Trigger (hold) | Auto shoot | TODO |
-| Right Bumper (hold) | Manual shoot (kicker + spindexer only) | TODO |
+| Right Trigger (hold) | Auto shoot | Implemented |
+| Right Bumper (hold) | Manual shoot (kicker + spindexer only) | Implemented |
 | Y | Auto-drive to selected spot | Implemented |
 | X | Lock wheels in X pattern | Implemented |
 | Back | Reset gyro heading | Implemented |
@@ -50,7 +50,7 @@ Enters **PREDICTIVE TARGETING** mode. Runs while the trigger is held.
 **`whileTrue`: `m_shooter.getAutoShootCmd()`**
 1. Overrides hood to firing solution angle; overrides flywheel to firing solution RPM.
 2. Turret was already tracking (predictive targeting is always running).
-3. Once `isReady()` is true (turret + hood + flywheel + speed all within tolerance, 100 ms debounce), engages kicker and spindexer to feed note.
+3. Once `isReady()` is true (turret + hood + flywheel + speed all within tolerance, 100 ms debounce), engages kicker and spindexer to feed fuel.
 
 **On release / interrupt:**
 1. Kicker → stopped.
@@ -58,11 +58,11 @@ Enters **PREDICTIVE TARGETING** mode. Runs while the trigger is held.
 3. Hood default command resumes → retracts to `HOOD_DEGREES_MIN`.
 4. Flywheel default command resumes → returns to idle RPM (2 000 default).
 
-> **TODO:** Implement the new `getAutoShootCmd()` per the plan in [`shooter-modes.md`](shooter-modes.md#step-4--rewrite-getautoshootcmd-predictive-targeting-mode).
+The shooter fires at whatever target is currently selected in `ShooterTargetSelector`. By default, `AutoTargetSelector` picks the target automatically based on field zone (see below). The operator can override via the button box before the trigger is pressed.
 
 #### Auto Pass
 Auto passing uses the **same command** as auto shoot.
-The only difference is the target pose passed to `Shooter.setTargetPose()`. Target selection is driven by `SpotSelector` or a separate mode toggle — TBD.
+The only difference is the active target in `ShooterTargetSelector`. When `AutoTargetSelector` is running (auto enabled), the correct neutral or opposition target is chosen automatically based on the robot's field position — no button box interaction needed. If the operator has overridden to manual mode, they select the desired passing target (e.g. **Neutral Left** or **Neutral Right**) via the Shooter tab before pressing the trigger.
 
 ---
 
@@ -73,8 +73,6 @@ Enters **MANUAL** mode. Assumes the hood, turret, and flywheel are already at th
 **On release**: Stop kicker and spindexer.
 
 > No targeting or flywheel control — this is a raw fire trigger. See [`shooter-modes.md`](shooter-modes.md#manual).
-
-> **TODO:** Implement `getManualShootCmd()` per [`shooter-modes.md`](shooter-modes.md#step-5--add-getmanualshootcmd-manual-mode).
 
 ---
 

@@ -79,6 +79,15 @@ Key files: `LEDSubsystem.java`, `LEDConstants.java`
 
 ---
 
+### ShooterTargetSelector
+Tracks the currently selected `ShootingTarget` (Hub, Neutral Left/Right, Opposition Left/Right). Its default command, `AutoTargetSelector`, continuously picks the correct target based on the robot's field zone using flipIfRed logic — no operator input needed during normal play. Operator button box buttons call `cmdSelectManual()` to override; `cmdEnableAuto()` re-enables zone-based selection. Pushes the active target to `Shooter.setTargetPose()` whenever the selection changes.
+
+Zone boundaries (Blue-alliance coords): alliance zone x < 4.6 m → Hub; neutral zone 4.6–11.9 m → Neutral Left/Right; opposition zone x > 11.9 m → Opposition Left/Right. Left/right split at field-center y (4.035 m).
+
+Key files: `subsystems/ShooterTargetSelector.java`, `commands/AutoTargetSelector.java`
+
+---
+
 ### SpeedNanny
 A pure logic subsystem. Monitors `Shooter.isShooting()` and dynamically reduces max translational speed (50%), angular rate (10%), and acceleration limits while shooting. `DriveCommands` applies these limits via slew rate limiters.
 

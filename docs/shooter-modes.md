@@ -25,13 +25,13 @@ See also: [`driver-controls.md`](driver-controls.md) for which controller button
                   ▼
             ┌──────────┐
             │   IDLE   │◄──────────────────────────────────────────┐
-            │ (default)│                                            │
-            └──────────┘                                            │
-              │      │                                              │
-  R-trigger   │      │  R-bumper (hold)        release R-trigger   │
-  (hold)      │      │  ─────────────────►  ┌────────────┐         │
-              │      │                      │   MANUAL   │─────────┘
-              │      └──────────────────►   └────────────┘   release
+            │ (default)│                                           │
+            └──────────┘                                           │
+              │      │                                             │
+  R-trigger   │      │  R-bumper (hold)                            │
+  (hold)      │      │                      ┌────────────┐         │
+              │      └──────────────────►   │   MANUAL   │─────────┘
+              │                             └────────────┘   release
               │                                                R-bumper
               ▼
        ┌──────────────────┐
@@ -94,7 +94,7 @@ Triggered by holding the **right trigger**. Overrides the hood and flywheel defa
 3. Hood default command resumes → hood retracts to `HOOD_DEGREES_MIN`
 4. Flywheel default command resumes → flywheel returns to `IDLE_FLYWHEEL_RPM`
 
-**Auto Pass:** Uses the same command. The only difference is the target pose passed to `Shooter.setTargetPose()`. Target selection is handled before or alongside engaging the trigger.
+**Auto Pass:** Uses the same command. The only difference is the active target in `ShooterTargetSelector`. When `AutoTargetSelector` is running, the neutral/opposition target is selected automatically from the robot's field zone. When auto is disabled (manual override), the operator selects the passing target via the button box before pulling the trigger.
 
 ---
 
@@ -282,4 +282,4 @@ Remove the temporary `controller.b().whileTrue(m_shooter.getAutoShootCmd())` and
 - [ ] Confirm turret force-stub is resolved before testing auto targeting (CAN 40 is currently force-stubbed in `Shooter.java`).
 - [ ] Tune `IDLE_FLYWHEEL_RPM` (starting default: 2 000 RPM) — adjust based on how long it takes to spool up from idle to target RPM.
 - [ ] Define `KICKER_RPM` and `SPINDEXER_RPM` constants (currently inferred from `getKickerRPMCmd` / `getSpindexerRPMCmd` defaults).
-- [ ] Decide auto pass target — which `ShootingTarget` pose is used for passing vs. scoring. Currently `ShootingTarget.HUB` is the default.
+- [x] Target selection architecture — `ShooterTargetSelector` subsystem with `AutoTargetSelector` default command handles zone-based selection automatically; button box buttons override when needed.

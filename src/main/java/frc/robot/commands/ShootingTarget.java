@@ -19,15 +19,15 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
  * <p>TODO: Replace placeholder Pose3d values with actual 2026 field coordinates once available.
  */
 public enum ShootingTarget {
-  HUB("Hub", new Pose3d(4.5, 4.1, 1.83, new Rotation3d())),
+  HUB("Hub", new Pose3d(4.6, 4.04, 1.83, new Rotation3d())),
 
-  NEUTRAL_LEFT("Neutral Left", new Pose3d(0.85, 1.5, 0.0, new Rotation3d())),
+  NEUTRAL_LEFT("Neutral Left", new Pose3d(2.2, 6.2, 0.0, new Rotation3d())),
 
-  NEUTRAL_RIGHT("Neutral Right", new Pose3d(0.85, 6.5, 0.0, new Rotation3d())),
+  NEUTRAL_RIGHT("Neutral Right", new Pose3d(2.2, 2.2, 0.0, new Rotation3d())),
 
-  OPPOSITION_LEFT("Opposition Left", new Pose3d(2.0, 2.0, 0.0, new Rotation3d())),
+  OPPOSITION_LEFT("Opposition Left", new Pose3d(4.0, 6.2, 0.0, new Rotation3d())),
 
-  OPPOSITION_RIGHT("Opposition Right", new Pose3d(2.0, 6.0, 0.0, new Rotation3d()));
+  OPPOSITION_RIGHT("Opposition Right", new Pose3d(4.0, 2.2, 0.0, new Rotation3d()));
 
   /** Human-readable name shown in telemetry and driver displays. */
   public final String displayName;

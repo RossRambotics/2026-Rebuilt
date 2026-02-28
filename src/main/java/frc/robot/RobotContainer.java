@@ -27,12 +27,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.AutoTargetSelector;
 import frc.robot.commands.ClimbCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToSpot;
 import frc.robot.commands.FieldSpot;
 import frc.robot.commands.OperatorControls;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.ShooterTargetSelector;
 import frc.robot.subsystems.SpeedNanny;
 import frc.robot.subsystems.SpotSelector;
 import frc.robot.subsystems.climb.ClimbElevator;
@@ -75,6 +77,8 @@ public class RobotContainer {
 
   public Shooter m_shooter = null;
 
+  public ShooterTargetSelector m_targetSelector = null;
+
   public Intake m_intake = null;
 
   public ClimbElevator m_climbElevator = null;
@@ -89,6 +93,7 @@ public class RobotContainer {
     instance = this;
 
     m_shooter = new Shooter(true);
+    m_targetSelector = new ShooterTargetSelector(m_shooter);
     m_intake = new Intake(false);
     m_climbElevator = new ClimbElevator(false);
 
@@ -248,9 +253,8 @@ public class RobotContainer {
     // () -> Rotation2d.kZero));
 
     // Left trigger (hold): deploy intake arm and run intake roller
-    controller
-        .leftTrigger()
-        .whileTrue(m_intake.getDeployCmd().alongWith(m_intake.getRollerOnCmd()));
+    // getDeployCmd() runs the roller internally — no .alongWith() needed.
+    controller.leftTrigger().whileTrue(m_intake.getDeployCmd());
 
     // Left bumper: retract intake arm
     controller.leftBumper().onTrue(m_intake.getRetractCmd());
@@ -294,9 +298,14 @@ public class RobotContainer {
     // // () -> -controller.getRawAxis(2)));
     // () -> -controller.getRawAxis(4)));
 
+    // AutoTargetSelector is the default command: selects the correct ShootingTarget based on
+    // the robot's field zone. Manual operator selections override it until re-engaged.
+    m_targetSelector.setDefaultCommand(new AutoTargetSelector(m_targetSelector, drive));
+
     // Student-owned operator controls (hood retraction, bump traversal, passing
     // mode, etc.)
-    new OperatorControls(m_subsystems, controller, m_spotSelector).configureControls();
+    new OperatorControls(m_subsystems, controller, m_spotSelector, m_targetSelector)
+        .configureControls();
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
