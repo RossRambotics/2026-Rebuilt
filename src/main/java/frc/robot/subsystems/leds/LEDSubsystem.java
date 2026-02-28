@@ -52,17 +52,9 @@ public class LEDSubsystem extends SubsystemBase {
   private final SolidColor m_solidGroup6 = new SolidColor(GROUP6_ACTIVE_START, GROUP6_ACTIVE_END);
 
   // Pre-allocated StrobeAnimation controls with fixed slot and frame-rate assignments
-  private final StrobeAnimation m_strobeGroup2 =
-      new StrobeAnimation(GROUP2_ACTIVE_START, GROUP2_ACTIVE_END)
-          .withSlot(SLOT_SHOOTER_LEFT)
-          .withFrameRate(STROBE_FRAME_RATE_HZ);
   private final StrobeAnimation m_strobeGroup3 =
       new StrobeAnimation(GROUP3_ACTIVE_START, GROUP3_ACTIVE_END)
           .withSlot(SLOT_GAMEPIECE_LEFT)
-          .withFrameRate(STROBE_FRAME_RATE_HZ);
-  private final StrobeAnimation m_strobeGroup5 =
-      new StrobeAnimation(GROUP5_ACTIVE_START, GROUP5_ACTIVE_END)
-          .withSlot(SLOT_SHOOTER_RIGHT)
           .withFrameRate(STROBE_FRAME_RATE_HZ);
   private final StrobeAnimation m_strobeGroup6 =
       new StrobeAnimation(GROUP6_ACTIVE_START, GROUP6_ACTIVE_END)
@@ -146,8 +138,9 @@ public class LEDSubsystem extends SubsystemBase {
    *
    * <ul>
    *   <li>Disabled → alliance color (or Maroon if undetermined)
-   *   <li>Enabled solid → Red = not ready, Green = ready
-   *   <li>Enabled strobing → StrobeAnimation when {@link Shooter#isShooting()} is true
+   *   <li>Idle (no shoot command active) → solid Amber
+   *   <li>Targeting, not ready → solid Red
+   *   <li>Targeting, ready → solid Green
    * </ul>
    */
   private void updateShooterGroups() {
@@ -156,28 +149,23 @@ public class LEDSubsystem extends SubsystemBase {
       setSolid(m_solidGroup2, allianceColor);
       setSolid(m_solidGroup5, allianceColor);
       Logger.recordOutput("LEDs/Group2/Color", colorName(allianceColor));
-      Logger.recordOutput("LEDs/Group2/Strobing", false);
       Logger.recordOutput("LEDs/Group5/Color", colorName(allianceColor));
-      Logger.recordOutput("LEDs/Group5/Strobing", false);
       return;
     }
 
-    boolean shooterReady = m_shooter.isReady();
     boolean isShooting = m_shooter.isShooting();
-    RGBWColor baseColor = shooterReady ? GREEN : RED;
+    RGBWColor color;
 
-    if (isShooting) {
-      setStrobe(m_strobeGroup2, baseColor);
-      setStrobe(m_strobeGroup5, baseColor);
+    if (!isShooting) {
+      color = AMBER;
     } else {
-      setSolid(m_solidGroup2, baseColor);
-      setSolid(m_solidGroup5, baseColor);
+      color = m_shooter.isReady() ? GREEN : RED;
     }
 
-    Logger.recordOutput("LEDs/Group2/Color", colorName(baseColor));
-    Logger.recordOutput("LEDs/Group2/Strobing", isShooting);
-    Logger.recordOutput("LEDs/Group5/Color", colorName(baseColor));
-    Logger.recordOutput("LEDs/Group5/Strobing", isShooting);
+    setSolid(m_solidGroup2, color);
+    setSolid(m_solidGroup5, color);
+    Logger.recordOutput("LEDs/Group2/Color", colorName(color));
+    Logger.recordOutput("LEDs/Group5/Color", colorName(color));
   }
 
   /**
@@ -277,6 +265,7 @@ public class LEDSubsystem extends SubsystemBase {
     if (color == BLUE) return "BLUE";
     if (color == WHITE) return "WHITE";
     if (color == YELLOW) return "YELLOW";
+    if (color == AMBER) return "AMBER";
     if (color == MAROON) return "MAROON";
     if (color == OFF) return "OFF";
     return "UNKNOWN";

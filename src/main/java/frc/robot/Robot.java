@@ -102,7 +102,11 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically when disabled. */
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    // Point the SpotSelector at the selected auto's starting pose so the Field widget shows a green
+    // X at the expected start location — drivers can visually verify robot alignment before enable.
+    robotContainer.updatePrematchAutoStartPose();
+  }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
@@ -131,6 +135,8 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    // Clear the prematch auto-start-pose green X so the Field widget doesn't show a stale target.
+    robotContainer.clearPrematchAutoStartPose();
   }
 
   /** This function is called periodically during operator control. */

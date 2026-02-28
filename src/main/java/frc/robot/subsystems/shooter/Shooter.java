@@ -215,6 +215,10 @@ public class Shooter extends SubsystemBase {
         Degrees.of(
             MathUtil.clamp(a.in(Degrees), Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX));
 
+    m_turretTargetRobotAngle = a;
+    double turretHeadingDeg = m_turret.getAngle().in(Degrees);
+    m_lastTurretErrorRobotAngle = Degrees.of(a.in(Degrees) - turretHeadingDeg);
+
     return a;
   }
 
@@ -409,8 +413,10 @@ public class Shooter extends SubsystemBase {
     // --- Turret angle (robot-relative) ---
     Translation2d delta = targetFieldPos.minus(shooterFieldPos);
 
+    // MathUtil.angleModulus normalizes to (-π, π], preventing wrap errors near ±180°
     double rawTurretAngleRad =
-        Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians();
+        MathUtil.angleModulus(
+            Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians());
 
     double rawTurretAngleDeg = Math.toDegrees(rawTurretAngleRad);
 
@@ -489,8 +495,10 @@ public class Shooter extends SubsystemBase {
     // --- Velocity compensation for turret ---
     Translation2d delta = targetFieldPos.minus(shooterFieldPos);
 
+    // MathUtil.angleModulus normalizes to (-π, π], preventing wrap errors near ±180°
     double rawTurretAngleRad =
-        Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians();
+        MathUtil.angleModulus(
+            Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians());
 
     double rawTurretAngleDeg = Math.toDegrees(rawTurretAngleRad);
 
@@ -730,8 +738,9 @@ public class Shooter extends SubsystemBase {
               .getDistance(solution.futurePose.getTranslation());
       Logger.recordOutput("Shooter/FutureRobotPoseDistanceMeters", predictedDistanceMeters);
       Logger.recordOutput("Shooter/TimeOfFlightSec", solution.tofSec);
-      Logger.recordOutput(
-          "Shooter/HoodTargetAngleDeg", Radians.of(solution.hoodMechAngleRad).in(Degrees));
+      double hoodTargetAngleDeg = Radians.of(solution.hoodMechAngleRad).in(Degrees);
+      Logger.recordOutput("Shooter/HoodTargetAngleDeg", hoodTargetAngleDeg);
+      m_targetHoodAngleDegEntry.set(hoodTargetAngleDeg);
       Logger.recordOutput("Shooter/HoodActualAngleDeg", m_hood.getAngle().in(Degrees));
       Logger.recordOutput("Shooter/FlyWheelTargetRPM", solution.flywheelRPM + m_rpmTrimOffsetRpm);
       Logger.recordOutput(

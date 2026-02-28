@@ -61,11 +61,11 @@ Groups 2 and 5 always show the same thing (left and right sides are mirrors).
 
 **While enabled:**
 
-| Color / Effect | Meaning |
-|----------------|---------|
-| Solid red | Shooter not ready |
-| Solid green | Shooter ready |
-| Strobing (red or green) | Shooter is actively shooting or passing |
+| Color | Meaning |
+|-------|---------|
+| Solid amber | Idle — no shoot command active (driver not holding RT) |
+| Solid red | Targeting — shoot command active, waiting for turret/hood/flywheel to align |
+| Solid green | Targeting — ready to fire (all subsystems on target) |
 
 "Ready" means all of: turret on target, hood on target, flywheel at speed, and robot speed under the SpeedNanny limit — all debounced for 100 ms.
 
@@ -105,7 +105,8 @@ Strobing only occurs during TeleOp. In Autonomous or practice mode (where `getMa
 | Color | R | G | B | Used for |
 |-------|---|---|---|---------|
 | Green | 0 | 217 | 0 | 2+ AprilTags, shooter ready, onboard |
-| Red | 217 | 0 | 0 | 0 AprilTags, shooter not ready, Red alliance |
+| Red | 217 | 0 | 0 | 0 AprilTags, shooter targeting not ready, Red alliance |
+| Amber | 217 | 120 | 0 | Shooter idle |
 | Blue | 0 | 0 | 217 | 1 AprilTag, Blue alliance |
 | White | 217 | 217 | 217 | No game piece |
 | Yellow | 217 | 183 | 0 | Game piece detected |
@@ -142,10 +143,8 @@ All `SolidColor` and `StrobeAnimation` control objects are pre-allocated as clas
 
 | Slot | Zone |
 |------|------|
-| 0 | Group 2 — shooter strobe (left) |
-| 1 | Group 5 — shooter strobe (right) |
-| 2 | Group 3 — game piece strobe (left) |
-| 3 | Group 6 — game piece strobe (right) |
+| 0 | Group 3 — game piece strobe (left) |
+| 1 | Group 6 — game piece strobe (right) |
 
 ### Dependencies injected via constructor
 `Vision` and `Shooter` are passed into `LEDSubsystem` at construction time in `RobotContainer`.
@@ -163,10 +162,8 @@ All LED state is recorded with `Logger.recordOutput()` and available in Advantag
 | `LEDs/Group1/Color` | string | Color name shown |
 | `LEDs/Group4/TagCount` | int | AprilTags seen by right limelight |
 | `LEDs/Group4/Color` | string | Color name shown |
-| `LEDs/Group2/Color` | string | Shooter color (left) |
-| `LEDs/Group2/Strobing` | boolean | Strobing while shooting |
-| `LEDs/Group5/Color` | string | Shooter color (right) |
-| `LEDs/Group5/Strobing` | boolean | Strobing while shooting |
+| `LEDs/Group2/Color` | string | Shooter color (left): AMBER / RED / GREEN |
+| `LEDs/Group5/Color` | string | Shooter color (right): AMBER / RED / GREEN |
 | `LEDs/Group3/Color` | string | Game piece color (left) |
 | `LEDs/Group3/Strobing` | boolean | Strobing during shift blink window |
 | `LEDs/Group6/Color` | string | Game piece color (right) |

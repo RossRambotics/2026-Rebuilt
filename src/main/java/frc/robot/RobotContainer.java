@@ -13,6 +13,7 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -27,12 +28,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.AutoTargetSelector;
 import frc.robot.commands.ClimbCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToSpot;
 import frc.robot.commands.FieldSpot;
 import frc.robot.commands.OperatorControls;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.ShooterTargetSelector;
 import frc.robot.subsystems.SpeedNanny;
 import frc.robot.subsystems.SpotSelector;
 import frc.robot.subsystems.climb.ClimbElevator;
@@ -50,6 +53,7 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.FuelSim;
+import java.util.Optional;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -75,6 +79,8 @@ public class RobotContainer {
 
   public Shooter m_shooter = null;
 
+  public ShooterTargetSelector m_targetSelector = null;
+
   public Intake m_intake = null;
 
   public ClimbElevator m_climbElevator = null;
@@ -89,6 +95,7 @@ public class RobotContainer {
     instance = this;
 
     m_shooter = new Shooter(true);
+    m_targetSelector = new ShooterTargetSelector(m_shooter);
     m_intake = new Intake(false);
     m_climbElevator = new ClimbElevator(false);
 
@@ -248,9 +255,8 @@ public class RobotContainer {
     // () -> Rotation2d.kZero));
 
     // Left trigger (hold): deploy intake arm and run intake roller
-    controller
-        .leftTrigger()
-        .whileTrue(m_intake.getDeployCmd().alongWith(m_intake.getRollerOnCmd()));
+    // getDeployCmd() runs the roller internally — no .alongWith() needed.
+    controller.leftTrigger().whileTrue(m_intake.getDeployCmd());
 
     // Left bumper: retract intake arm
     controller.leftBumper().onTrue(m_intake.getRetractCmd());
@@ -294,9 +300,14 @@ public class RobotContainer {
     // // () -> -controller.getRawAxis(2)));
     // () -> -controller.getRawAxis(4)));
 
+    // AutoTargetSelector is the default command: selects the correct ShootingTarget based on
+    // the robot's field zone. Manual operator selections override it until re-engaged.
+    m_targetSelector.setDefaultCommand(new AutoTargetSelector(m_targetSelector, drive));
+
     // Student-owned operator controls (hood retraction, bump traversal, passing
     // mode, etc.)
-    new OperatorControls(m_subsystems, controller, m_spotSelector).configureControls();
+    new OperatorControls(m_subsystems, controller, m_spotSelector, m_targetSelector)
+        .configureControls();
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -344,6 +355,35 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  /**
+   * Returns the starting pose of the currently selected PathPlanner auto, if the selected auto is a
+   * {@link PathPlannerAuto}. Returns empty for SysId routines and other non-path commands.
+   */
+  public Optional<Pose2d> getSelectedAutoStartPose() {
+    Command selected = autoChooser.get();
+    if (selected instanceof PathPlannerAuto auto) {
+      return Optional.ofNullable(auto.getStartingPose());
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * During disabled, keeps the SpotSelector pointed at the selected auto's starting pose so the
+   * Field widget shows a green X for prematch alignment. If no auto start pose is available (e.g.,
+   * "None" or a SysId routine is selected), falls back to the robot's current pose so the green X
+   * sits on the robot and effectively disappears without changing the key's data type.
+   */
+  public void updatePrematchAutoStartPose() {
+    Optional<Pose2d> autoStart = getSelectedAutoStartPose();
+    m_spotSelector.selectCustomPose(
+        autoStart.orElse(drive.getPose()), autoStart.isPresent() ? "Auto Start" : "Robot");
+  }
+
+  /** Clears the prematch auto-start-pose visualization when teleop begins. */
+  public void clearPrematchAutoStartPose() {
+    m_spotSelector.clearSelection();
   }
 
   public Pose2d getRobotPose2d() {

@@ -44,28 +44,30 @@ public class Kicker extends SubsystemBase {
     m_isReal = isReal;
 
     if (m_isReal) {
-      SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
-          .withControlMode(ControlMode.CLOSED_LOOP)
-          .withClosedLoopController(
-              0, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
-          .withSimClosedLoopController(
-              50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
-          .withFeedforward(new SimpleMotorFeedforward(0, .12, 0))
-          .withSimFeedforward(new SimpleMotorFeedforward(0, .52, .34))
-          .withTelemetry("Kicker", TelemetryVerbosity.HIGH)
-          .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
-          .withMotorInverted(true)
-          .withIdleMode(MotorMode.COAST)
-          .withStatorCurrentLimit(Amps.of(40));
+      SmartMotorControllerConfig smcConfig =
+          new SmartMotorControllerConfig(this)
+              .withControlMode(ControlMode.CLOSED_LOOP)
+              .withClosedLoopController(
+                  0, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
+              .withSimClosedLoopController(
+                  50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
+              .withFeedforward(new SimpleMotorFeedforward(0, .12, 0))
+              .withSimFeedforward(new SimpleMotorFeedforward(0, .52, .34))
+              .withTelemetry("Kicker", TelemetryVerbosity.HIGH)
+              .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
+              .withMotorInverted(true)
+              .withIdleMode(MotorMode.COAST)
+              .withStatorCurrentLimit(Amps.of(40));
 
       TalonFX kickerMotor = new TalonFX(38);
       var kickerController = new TalonFXWrapper(kickerMotor, DCMotor.getFalcon500(1), smcConfig);
 
-      FlyWheelConfig kickerConfig = new FlyWheelConfig(kickerController)
-          .withDiameter(Inches.of(4))
-          .withMass(Pounds.of(1))
-          .withUpperSoftLimit(RPM.of(1000))
-          .withTelemetry("KickerMech", TelemetryVerbosity.LOW);
+      FlyWheelConfig kickerConfig =
+          new FlyWheelConfig(kickerController)
+              .withDiameter(Inches.of(4))
+              .withMass(Pounds.of(1))
+              .withUpperSoftLimit(RPM.of(1000))
+              .withTelemetry("KickerMech", TelemetryVerbosity.LOW);
 
       kicker = new FlyWheel(kickerConfig);
     }
@@ -76,21 +78,15 @@ public class Kicker extends SubsystemBase {
     m_kickerTargetRPM.set(0.0);
   }
 
-  /**
-   * Run the kicker at a set speed (0.0 to 1.0). Positive usually feeds INTO the
-   * shooter.
-   */
+  /** Run the kicker at a set speed (0.0 to 1.0). Positive usually feeds INTO the shooter. */
   public Command runKicker(double percentOutput) {
-    if (kicker != null)
-      return kicker.set(percentOutput);
-    return Commands.run(() -> {
-    }, this);
+    if (kicker != null) return kicker.set(percentOutput);
+    return Commands.run(() -> {}, this);
   }
 
   /** Stop the kicker immediately. */
   public Command stop() {
-    if (kicker != null)
-      return kicker.set(0.0);
+    if (kicker != null) return kicker.set(0.0);
     return Commands.run(() -> m_stubbedVelocity = RPM.of(0), this);
   }
 
@@ -111,20 +107,17 @@ public class Kicker extends SubsystemBase {
   }
 
   public Command setVelocity(AngularVelocity speed) {
-    if (kicker != null)
-      return kicker.setSpeed(speed);
+    if (kicker != null) return kicker.setSpeed(speed);
     return Commands.run(() -> m_stubbedVelocity = speed, this);
   }
 
   public Command setVelocity() {
-    if (kicker != null)
-      return kicker.setSpeed(() -> RPM.of(m_kickerTargetRPM.getAsDouble()));
+    if (kicker != null) return kicker.setSpeed(() -> RPM.of(m_kickerTargetRPM.getAsDouble()));
     return Commands.run(() -> m_stubbedVelocity = RPM.of(m_kickerTargetRPM.getAsDouble()), this);
   }
 
   public AngularVelocity getVelocity() {
-    if (kicker != null)
-      return kicker.getSpeed();
+    if (kicker != null) return kicker.getSpeed();
     return m_stubbedVelocity;
   }
 

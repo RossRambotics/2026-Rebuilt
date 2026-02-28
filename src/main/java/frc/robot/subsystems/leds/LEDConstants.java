@@ -63,6 +63,7 @@ public final class LEDConstants {
   public static final RGBWColor BLUE = new RGBWColor(0, 0, 217, 0);
   public static final RGBWColor WHITE = new RGBWColor(217, 217, 217, 0);
   public static final RGBWColor YELLOW = new RGBWColor(217, 183, 0, 0);
+  public static final RGBWColor AMBER = new RGBWColor(217, 120, 0, 0);
   public static final RGBWColor MAROON = new RGBWColor(128, 0, 0, 0);
   public static final RGBWColor OFF = new RGBWColor(0, 0, 0, 0);
 
@@ -72,17 +73,11 @@ public final class LEDConstants {
   /** Strobe frame rate in Hz (number of on/off transitions per second). */
   public static final double STROBE_FRAME_RATE_HZ = 24.0;
 
-  /** CANdle animation slot for Groups 2 and 5 (shooter strobe, left). */
-  public static final int SLOT_SHOOTER_LEFT = 0;
-
-  /** CANdle animation slot for Groups 2 and 5 (shooter strobe, right). */
-  public static final int SLOT_SHOOTER_RIGHT = 1;
-
   /** CANdle animation slot for Groups 3 and 6 (game piece strobe, left). */
-  public static final int SLOT_GAMEPIECE_LEFT = 2;
+  public static final int SLOT_GAMEPIECE_LEFT = 0;
 
   /** CANdle animation slot for Groups 3 and 6 (game piece strobe, right). */
-  public static final int SLOT_GAMEPIECE_RIGHT = 3;
+  public static final int SLOT_GAMEPIECE_RIGHT = 1;
 
   // ------------------------------------------------------------------
   // TeleOp blink windows

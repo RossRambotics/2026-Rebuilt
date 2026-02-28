@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Subsystems;
+import frc.robot.subsystems.ShooterTargetSelector;
 import frc.robot.subsystems.SpotSelector;
 import frc.robot.subsystems.climb.ClimbElevator;
 import frc.robot.subsystems.drive.Drive;
@@ -67,9 +68,13 @@ public class OperatorControls {
   private final Vision vision;
   private final CommandXboxController controller;
   private final SpotSelector spotSelector;
+  private final ShooterTargetSelector targetSelector;
 
   public OperatorControls(
-      Subsystems subsystems, CommandXboxController controller, SpotSelector spotSelector) {
+      Subsystems subsystems,
+      CommandXboxController controller,
+      SpotSelector spotSelector,
+      ShooterTargetSelector targetSelector) {
     this.drive = subsystems.drive();
     this.shooter = subsystems.shooter();
     this.intake = subsystems.intake();
@@ -77,6 +82,7 @@ public class OperatorControls {
     this.vision = subsystems.vision();
     this.controller = controller;
     this.spotSelector = spotSelector;
+    this.targetSelector = targetSelector;
   }
 
   /**
@@ -86,9 +92,10 @@ public class OperatorControls {
    */
   public void configureControls() {
     // === WORKING EXAMPLES (study these first) ===
-    configureHoodRetraction(); // Y button — hold to retract hood
+    // configureHoodRetraction(); // Y button — hold to retract hood
     configureTrenchZoneAutoRetract(); // Automatic — retracts hood when robot enters zone
-    configureBumpTraversal(); // Right bumper — hold to lock heading to 45 degrees
+    // configureBumpTraversal(); // Right bumper — hold to lock heading to 45
+    // degrees
 
     // === YOUR TURN (uncomment as you complete each one) ===
     // configureBumpTraversal(); // Right bumper — hold to lock heading to 45
@@ -140,16 +147,20 @@ public class OperatorControls {
     SmartDashboard.putData(
         "Shooter/Predictive Targeting", shooter.getEnablePredictiveTargetingModeCmd());
 
-    SmartDashboard.putData("Shooter/Target Hub", shooter.getSetTargetCmd(ShootingTarget.HUB));
     SmartDashboard.putData(
-        "Shooter/Target Neutral Left", shooter.getSetTargetCmd(ShootingTarget.NEUTRAL_LEFT));
+        "Shooter/Target Hub", targetSelector.cmdSelectManual(ShootingTarget.HUB));
     SmartDashboard.putData(
-        "Shooter/Target Neutral Right", shooter.getSetTargetCmd(ShootingTarget.NEUTRAL_RIGHT));
+        "Shooter/Target Neutral Left", targetSelector.cmdSelectManual(ShootingTarget.NEUTRAL_LEFT));
     SmartDashboard.putData(
-        "Shooter/Target Opposition Left", shooter.getSetTargetCmd(ShootingTarget.OPPOSITION_LEFT));
+        "Shooter/Target Neutral Right",
+        targetSelector.cmdSelectManual(ShootingTarget.NEUTRAL_RIGHT));
+    SmartDashboard.putData(
+        "Shooter/Target Opposition Left",
+        targetSelector.cmdSelectManual(ShootingTarget.OPPOSITION_LEFT));
     SmartDashboard.putData(
         "Shooter/Target Opposition Right",
-        shooter.getSetTargetCmd(ShootingTarget.OPPOSITION_RIGHT));
+        targetSelector.cmdSelectManual(ShootingTarget.OPPOSITION_RIGHT));
+    SmartDashboard.putData("Shooter/Target Enable Auto", targetSelector.cmdEnableAuto());
 
     SmartDashboard.putData("Shooter/Auto Shoot", shooter.getAutoShootCmd());
     SmartDashboard.putData("Shooter/Off", shooter.getOffCmd());
@@ -177,6 +188,11 @@ public class OperatorControls {
     SmartDashboard.putData("Intake/Reverse Spindexer", shooter.getSpindexerReverseCmd());
 
     // ── Calibration ──────────────────────────────────────────────────────────
+    // TODO: Add prematch alignment readouts to the Calibration page on the button box.
+    // During disabled, the Field widget already shows a green X at the selected auto's starting
+    // pose (via SpotSelector/SelectedPose). For a text summary on the Calibration page, add
+    // SmartDashboard entries showing position error (m) and heading error (deg) between the
+    // robot's current pose and the auto start pose so drivers get a pass/fail at a glance.
     SmartDashboard.putData(
         "Calibration/Reset Gyro",
         Commands.runOnce(
@@ -366,8 +382,10 @@ public class OperatorControls {
             3.0, // 3 meters wide along X
             2.0 // 2.0 meters wide along Y
             );
-    // Suppress zone triggers during autonomous and while DriveToSpot is actively pathfinding.
-    // DriverStation.isTeleop() handles the autonomous period; spotSelector.isAutoDriving()
+    // Suppress zone triggers during autonomous and while DriveToSpot is actively
+    // pathfinding.
+    // DriverStation.isTeleop() handles the autonomous period;
+    // spotSelector.isAutoDriving()
     // handles teleop pathfinding via the Y button.
     Trigger notAutoDriving =
         new Trigger(() -> DriverStation.isTeleop() && !spotSelector.isAutoDriving());
