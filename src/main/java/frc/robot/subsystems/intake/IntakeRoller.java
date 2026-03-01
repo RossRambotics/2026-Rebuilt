@@ -44,24 +44,40 @@ public class IntakeRoller extends SubsystemBase {
           new SmartMotorControllerConfig(this)
               .withControlMode(ControlMode.CLOSED_LOOP)
               .withClosedLoopController(
-                  0, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
+                  IntakeConstants.ROLLER_KP,
+                  IntakeConstants.ROLLER_KI,
+                  IntakeConstants.ROLLER_KD,
+                  RotationsPerSecond.of(IntakeConstants.ROLLER_MAX_VEL_RPS),
+                  RotationsPerSecondPerSecond.of(IntakeConstants.ROLLER_MAX_ACCEL_RPS_SQ))
               .withSimClosedLoopController(
-                  50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
-              .withFeedforward(new SimpleMotorFeedforward(0, .12, 0))
-              .withSimFeedforward(new SimpleMotorFeedforward(0, .52, .34))
+                  IntakeConstants.ROLLER_SIM_KP,
+                  IntakeConstants.ROLLER_KI,
+                  IntakeConstants.ROLLER_KD,
+                  RotationsPerSecond.of(IntakeConstants.ROLLER_MAX_VEL_RPS),
+                  RotationsPerSecondPerSecond.of(IntakeConstants.ROLLER_MAX_ACCEL_RPS_SQ))
+              .withFeedforward(
+                  new SimpleMotorFeedforward(
+                      IntakeConstants.ROLLER_FF_KS,
+                      IntakeConstants.ROLLER_FF_KV,
+                      IntakeConstants.ROLLER_FF_KA))
+              .withSimFeedforward(
+                  new SimpleMotorFeedforward(
+                      IntakeConstants.ROLLER_SIM_FF_KS,
+                      IntakeConstants.ROLLER_SIM_FF_KV,
+                      IntakeConstants.ROLLER_SIM_FF_KA))
               .withTelemetry("IntakeRoller", TelemetryVerbosity.HIGH)
               .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
               .withMotorInverted(true)
               .withIdleMode(MotorMode.COAST)
-              .withStatorCurrentLimit(Amps.of(40));
+              .withStatorCurrentLimit(Amps.of(IntakeConstants.ROLLER_STATOR_CURRENT_LIMIT_AMPS));
 
-      TalonFX rollerMotor = new TalonFX(42);
+      TalonFX rollerMotor = new TalonFX(IntakeConstants.ROLLER_CAN_ID);
       var rollerController = new TalonFXWrapper(rollerMotor, DCMotor.getKrakenX60(1), smcConfig);
 
       FlyWheelConfig rollerConfig =
           new FlyWheelConfig(rollerController)
-              .withDiameter(Inches.of(2))
-              .withMass(Pounds.of(0.5))
+              .withDiameter(Inches.of(IntakeConstants.ROLLER_DIAMETER_IN))
+              .withMass(Pounds.of(IntakeConstants.ROLLER_MASS_LBS))
               .withTelemetry("IntakeRollerMech", TelemetryVerbosity.LOW);
 
       roller = new FlyWheel(rollerConfig);

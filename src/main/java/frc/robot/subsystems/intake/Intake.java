@@ -53,7 +53,7 @@ public class Intake extends SubsystemBase {
                         m_deployArm.isNearAngle(
                             Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG),
                             Degrees.of(IntakeConstants.AT_ANGLE_TOLERANCE_DEG)))
-                .withTimeout(0.5),
+                .withTimeout(IntakeConstants.DEPLOY_PHASE1_TIMEOUT_SEC),
             // Phase 2 — coast arm, keep roller running
             Commands.parallel(
                 m_deployArm.setDutyCycle(0.0),
@@ -70,7 +70,10 @@ public class Intake extends SubsystemBase {
   public Command getRetractCmd() {
     return Commands.sequence(
             Commands.runOnce(() -> {}, m_roller), // interrupt any running roller command
-            m_roller.stop().withTimeout(0.1), // brief stop to settle roller
+            m_roller
+                .stop()
+                .withTimeout(
+                    IntakeConstants.RETRACT_ROLLER_STOP_TIMEOUT_SEC), // brief stop to settle roller
             m_deployArm.setAngle(Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG)))
         .withName("Intake/Retract");
   }

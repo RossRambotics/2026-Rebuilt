@@ -43,13 +43,6 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class IntakeDeployArm extends SubsystemBase {
 
-  // TODO: Tune homing speed and hard-stop detection thresholds on hardware.
-  // Direction must be verified: positive duty cycle should drive the arm toward
-  // RETRACT_ANGLE_DEG (the retracted hard stop).
-  private static final double HOME_DUTY_CYCLE = 0.25;
-  private static final double HOME_STALL_VELOCITY_RPS = 0.5;
-  private static final double HOME_STALL_CURRENT_AMPS = 20.0;
-
   private final boolean m_isReal;
   private TalonFX armMotor;
   private Arm arm;
@@ -59,7 +52,7 @@ public class IntakeDeployArm extends SubsystemBase {
   // Calibration request bypasses both hardware and software limits so the arm
   // can drive all the way to its mechanical hard stop.
   private final DutyCycleOut armCalibrationRequest =
-      new DutyCycleOut(HOME_DUTY_CYCLE)
+      new DutyCycleOut(IntakeConstants.ARM_HOME_DUTY_CYCLE)
           .withIgnoreHardwareLimits(true)
           .withIgnoreSoftwareLimits(true);
 
@@ -70,25 +63,26 @@ public class IntakeDeployArm extends SubsystemBase {
 
   /**
    * Fires when the intake arm has stalled against its retracted hard stop: velocity drops below
-   * HOME_STALL_VELOCITY_RPS and stator current exceeds HOME_STALL_CURRENT_AMPS for 100 ms.
+   * ARM_HOME_STALL_VELOCITY_RPS and stator current exceeds ARM_HOME_STALL_CURRENT_AMPS for
+   * ARM_HOME_STALL_DEBOUNCE_SEC.
    */
   public final Trigger isHardStop =
       new Trigger(
               () -> {
                 if (armMotorVelocity == null) return false;
                 return Math.abs(armMotorVelocity.refresh().getValue().in(RotationsPerSecond))
-                        < HOME_STALL_VELOCITY_RPS
+                        < IntakeConstants.ARM_HOME_STALL_VELOCITY_RPS
                     && Math.abs(armMotorTorqueCurrent.refresh().getValue().in(Amps))
-                        > HOME_STALL_CURRENT_AMPS;
+                        > IntakeConstants.ARM_HOME_STALL_CURRENT_AMPS;
               })
-          .debounce(0.1);
+          .debounce(IntakeConstants.ARM_HOME_STALL_DEBOUNCE_SEC);
 
   /** Creates a new IntakeDeployArm. */
   public IntakeDeployArm(boolean isReal) {
     m_isReal = isReal;
 
     if (m_isReal) {
-      armMotor = new TalonFX(41);
+      armMotor = new TalonFX(IntakeConstants.ARM_CAN_ID);
       armMotorVelocity = armMotor.getVelocity();
       armMotorTorqueCurrent = armMotor.getTorqueCurrent();
 
@@ -96,11 +90,24 @@ public class IntakeDeployArm extends SubsystemBase {
           new SmartMotorControllerConfig(this)
               .withControlMode(ControlMode.CLOSED_LOOP)
               .withClosedLoopController(
-                  75, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(360))
+                  IntakeConstants.ARM_KP,
+                  IntakeConstants.ARM_KI,
+                  IntakeConstants.ARM_KD,
+                  DegreesPerSecond.of(IntakeConstants.ARM_MAX_VEL_DEG_PER_SEC),
+                  DegreesPerSecondPerSecond.of(IntakeConstants.ARM_MAX_ACCEL_DEG_PER_SEC_SQ))
               .withSimClosedLoopController(
-                  50, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(360))
+                  IntakeConstants.ARM_SIM_KP,
+                  IntakeConstants.ARM_KI,
+                  IntakeConstants.ARM_KD,
+                  DegreesPerSecond.of(IntakeConstants.ARM_MAX_VEL_DEG_PER_SEC),
+                  DegreesPerSecondPerSecond.of(IntakeConstants.ARM_MAX_ACCEL_DEG_PER_SEC_SQ))
               // TODO: Tune feedforward (ks, kg, kv, ka) on hardware
-              .withFeedforward(new ArmFeedforward(0.1, 0.1, 0.2, 0.0))
+              .withFeedforward(
+                  new ArmFeedforward(
+                      IntakeConstants.ARM_FF_KS,
+                      IntakeConstants.ARM_FF_KG,
+                      IntakeConstants.ARM_FF_KV,
+                      IntakeConstants.ARM_FF_KA))
               .withGearing(
                   new MechanismGearing(
                       GearBox.fromReductionStages(IntakeConstants.ARM_GEAR_REDUCTION)))
@@ -108,7 +115,7 @@ public class IntakeDeployArm extends SubsystemBase {
               .withIdleMode(MotorMode.COAST)
               .withMotorInverted(false)
               .withTelemetry("IntakeDeployArmMotor", TelemetryVerbosity.HIGH)
-              .withStatorCurrentLimit(Amps.of(40));
+              .withStatorCurrentLimit(Amps.of(IntakeConstants.ARM_STATOR_CURRENT_LIMIT_AMPS));
 
       var armSMC = new TalonFXWrapper(armMotor, DCMotor.getKrakenX60(1), motorConfig);
 
@@ -123,8 +130,8 @@ public class IntakeDeployArm extends SubsystemBase {
                   Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG))
               .withTelemetry("IntakeDeployArmMech", TelemetryVerbosity.HIGH)
               // TODO: Update arm length and mass once known
-              .withLength(Meters.of(0.4))
-              .withMass(Pounds.of(5.0));
+              .withLength(Meters.of(IntakeConstants.ARM_LENGTH_M))
+              .withMass(Pounds.of(IntakeConstants.ARM_MASS_LBS));
 
       arm = new Arm(armConfig);
     }
@@ -200,7 +207,7 @@ public class IntakeDeployArm extends SubsystemBase {
         .until(isHardStop)
         .andThen(
             setDutyCycle(0.0)
-                .withTimeout(0.25)
+                .withTimeout(IntakeConstants.ARM_HOME_SETTLE_SEC)
                 .finallyDo(
                     () -> {
                       armMotor.setPosition(Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG));
