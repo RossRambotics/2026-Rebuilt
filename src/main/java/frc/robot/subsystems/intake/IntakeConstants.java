@@ -8,14 +8,14 @@ public final class IntakeConstants {
   private IntakeConstants() {}
 
   // TODO: Tune deploy/retract angles on hardware
-  public static final double DEPLOY_ANGLE_DEG = 0.0;
-  public static final double RETRACT_ANGLE_DEG = 90.0;
+  public static final double DEPLOY_ANGLE_DEG = -26.0;
+  public static final double RETRACT_ANGLE_DEG = 110.0;
 
   // TODO: Tune gearing reduction on hardware
-  public static final double ARM_GEAR_REDUCTION = 60.0;
+  public static final double ARM_GEAR_REDUCTION = 12.0;
 
   // TODO: Tune RPM values on hardware
-  public static final double ROLLER_INTAKE_RPM = 2000.0;
+  public static final double ROLLER_INTAKE_RPM = 4000.0;
   public static final double ROLLER_REVERSE_RPM = -1000.0;
 
   // Tolerance used when detecting that the arm has reached the deploy position

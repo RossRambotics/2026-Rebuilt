@@ -155,6 +155,14 @@
       "/SmartDashboard/Mechanisms/Commands/HoodMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/HoodMotor/Up": "Command",
       "/SmartDashboard/Mechanisms/Commands/HoodMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeDeployArm/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeDeployArmMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeDeployArmMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeDeployArmMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeRoller/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeRoller/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeRoller/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeRoller/ZeroEncoder": "Command",
       "/SmartDashboard/Mechanisms/Commands/Kicker/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/Kicker/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/Kicker/Up": "Command",
@@ -204,7 +212,12 @@
       "/SmartDashboard/Spots/Opponent Trench Right": "Command"
     },
     "windows": {
-      "/SmartDashboard/Calibration/Turret Calibrate In Place": {
+      "/SmartDashboard/Auto Choices": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Calibration/Intake Arm Home & Calibrate": {
         "window": {
           "visible": true
         }
@@ -216,7 +229,8 @@
   },
   "NetworkTables Settings": {
     "mode": "Client (NT4)",
-    "serverTeam": "3201"
+    "serverTeam": "3201",
+    "visible": false
   },
   "Plots": {
     "Plot <0>": {

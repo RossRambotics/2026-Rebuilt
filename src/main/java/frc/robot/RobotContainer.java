@@ -96,7 +96,7 @@ public class RobotContainer {
 
     m_shooter = new Shooter(true);
     m_targetSelector = new ShooterTargetSelector(m_shooter);
-    m_intake = new Intake(false);
+    m_intake = new Intake(true);
     m_climbElevator = new ClimbElevator(false);
 
     switch (Constants.currentMode) {

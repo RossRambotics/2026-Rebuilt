@@ -46,7 +46,7 @@ public class IntakeDeployArm extends SubsystemBase {
   // TODO: Tune homing speed and hard-stop detection thresholds on hardware.
   // Direction must be verified: positive duty cycle should drive the arm toward
   // RETRACT_ANGLE_DEG (the retracted hard stop).
-  private static final double HOME_DUTY_CYCLE = 0.1;
+  private static final double HOME_DUTY_CYCLE = 0.25;
   private static final double HOME_STALL_VELOCITY_RPS = 0.5;
   private static final double HOME_STALL_CURRENT_AMPS = 20.0;
 
@@ -96,11 +96,11 @@ public class IntakeDeployArm extends SubsystemBase {
           new SmartMotorControllerConfig(this)
               .withControlMode(ControlMode.CLOSED_LOOP)
               .withClosedLoopController(
-                  50, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(360))
+                  75, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(360))
               .withSimClosedLoopController(
                   50, 0, 0, DegreesPerSecond.of(180), DegreesPerSecondPerSecond.of(360))
               // TODO: Tune feedforward (ks, kg, kv, ka) on hardware
-              .withFeedforward(new ArmFeedforward(0.0, 0.0, 0.0, 0.0))
+              .withFeedforward(new ArmFeedforward(0.1, 0.1, 0.2, 0.0))
               .withGearing(
                   new MechanismGearing(
                       GearBox.fromReductionStages(IntakeConstants.ARM_GEAR_REDUCTION)))
@@ -116,11 +116,11 @@ public class IntakeDeployArm extends SubsystemBase {
           new ArmConfig(armSMC)
               .withStartingPosition(Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG))
               .withHardLimit(
-                  Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG),
-                  Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG))
+                  Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG),
+                  Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG))
               .withSoftLimits(
-                  Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG),
-                  Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG))
+                  Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG),
+                  Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG))
               .withTelemetry("IntakeDeployArmMech", TelemetryVerbosity.HIGH)
               // TODO: Update arm length and mass once known
               .withLength(Meters.of(0.4))

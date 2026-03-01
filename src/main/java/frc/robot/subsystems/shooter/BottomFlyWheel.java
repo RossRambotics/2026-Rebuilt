@@ -128,7 +128,7 @@ public class BottomFlyWheel extends SubsystemBase {
               .withSimClosedLoopController(
                   25, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
               // Feedforward Constants
-              .withFeedforward(new SimpleMotorFeedforward(0, .12, 0))
+              .withFeedforward(new SimpleMotorFeedforward(.1, .12, 0))
               .withSimFeedforward(new SimpleMotorFeedforward(0, .52, .34))
               // Telemetry name and verbosity level
               .withTelemetry("BottomFlyWheelMotor", TelemetryVerbosity.HIGH)
@@ -177,16 +177,16 @@ public class BottomFlyWheel extends SubsystemBase {
 
     // Populate Angle Table (Distance -> Degrees)
     m_angleTable.put(1.0, 15.0);
-    m_angleTable.put(2.0, 16.3);
-    m_angleTable.put(3.0, 17.3);
+    m_angleTable.put(2.0, 30.0);
+    m_angleTable.put(3.0, 35.0);
     m_angleTable.put(4.0, 20.8);
     m_angleTable.put(5.0, 22.0);
     m_angleTable.put(6.0, 24.0);
 
     // Populate RPM Table (Distance -> RPM)
-    m_rpmTable.put(1.0, 1800.0);
-    m_rpmTable.put(2.0, 2200.0);
-    m_rpmTable.put(3.0, 2400.0);
+    m_rpmTable.put(1.0, 2200.0);
+    m_rpmTable.put(2.0, 2250.0);
+    m_rpmTable.put(3.0, 2450.0);
     m_rpmTable.put(4.0, 2550.0);
     m_rpmTable.put(5.0, 3000.0);
     m_rpmTable.put(6.0, 3200.0);
