@@ -93,12 +93,12 @@ public class Turret extends SubsystemBase {
           new SmartMotorControllerConfig(this)
               .withControlMode(ControlMode.CLOSED_LOOP)
               .withClosedLoopController(
-                  4, 0, 0, DegreesPerSecond.of(360), DegreesPerSecondPerSecond.of(900))
+                  300, 0, 0, DegreesPerSecond.of(360), DegreesPerSecondPerSecond.of(900))
               .withSimClosedLoopController(
                   25, 0, 0, DegreesPerSecond.of(360), DegreesPerSecondPerSecond.of(900))
               .withGearing(new MechanismGearing(GearBox.fromReductionStages(38.4)))
               .withIdleMode(MotorMode.BRAKE)
-              .withMotorInverted(false)
+              .withMotorInverted(true)
               .withTelemetry("TurretMotor", TelemetryVerbosity.HIGH)
               .withStatorCurrentLimit(Amps.of(40))
               .withClosedLoopRampRate(Seconds.of(0.25))
@@ -219,9 +219,9 @@ public class Turret extends SubsystemBase {
         Commands.runOnce(
             () -> {
               if (turretMotor != null) {
-                turretMotor.setPosition(Degrees.of(TURRET_DEGREES_MIN));
+                turretMotor.setPosition(Degrees.of(0));
               } else {
-                m_stubbedAngle = Degrees.of(TURRET_DEGREES_MIN);
+                m_stubbedAngle = Degrees.of(0);
               }
               m_isCalibrated = true;
             });

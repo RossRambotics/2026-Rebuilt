@@ -176,18 +176,18 @@ public class BottomFlyWheel extends SubsystemBase {
     m_interpolatedToF.set(0.0);
 
     // Populate Angle Table (Distance -> Degrees)
-    m_angleTable.put(1.0, 15.0);
-    m_angleTable.put(2.0, 30.0);
-    m_angleTable.put(3.0, 35.0);
-    m_angleTable.put(4.0, 20.8);
-    m_angleTable.put(5.0, 22.0);
-    m_angleTable.put(6.0, 24.0);
+    m_angleTable.put(1.7, 15.0);
+    m_angleTable.put(2.7, 30.0);
+    m_angleTable.put(3.7, 35.0);
+    m_angleTable.put(4.7, 20.8);
+    m_angleTable.put(5.7, 22.0);
+    m_angleTable.put(6.7, 24.0);
 
     // Populate RPM Table (Distance -> RPM)
-    m_rpmTable.put(1.0, 2200.0);
-    m_rpmTable.put(2.0, 2250.0);
-    m_rpmTable.put(3.0, 2450.0);
-    m_rpmTable.put(4.0, 2550.0);
+    m_rpmTable.put(1.0, 2100.0);
+    m_rpmTable.put(2.0, 2150.0);
+    m_rpmTable.put(3.0, 2350.0);
+    m_rpmTable.put(4.0, 2450.0);
     m_rpmTable.put(5.0, 3000.0);
     m_rpmTable.put(6.0, 3200.0);
     // --- Interpolation Code END ---
