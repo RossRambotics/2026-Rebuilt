@@ -240,7 +240,8 @@ All four positional subsystems (Turret, Hood, IntakeDeployArm, ClimbElevator) fo
 
 | Button label | Command | Disabled? |
 |---|---|:---:|
-| Reset Gyro | pose-reset command `.ignoringDisable(true)` | Yes |
+| Reset Gyro | heading-only pose reset `.ignoringDisable(true)` | Yes |
+| Reset Pose Hub Wall | `drive.getResetPoseHubWallCmd()` — sets X=3.6 m, Y=4.0 m + alliance heading | Yes |
 | Enable Vision Gyro | `Commands.runOnce(vision::enableVisionGyro).ignoringDisable(true)` | Yes |
 | Enable Normal Gyro | `Commands.runOnce(vision::enableNormalGyro).ignoringDisable(true)` | Yes |
 | Reseed from Vision | `Commands.runOnce(vision::reseedFromVision).ignoringDisable(true)` | Yes |

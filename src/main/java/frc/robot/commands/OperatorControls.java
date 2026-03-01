@@ -202,6 +202,8 @@ public class OperatorControls {
             .withName("Calibration/Reset Gyro")
             .ignoringDisable(true));
 
+    SmartDashboard.putData("Calibration/Reset Pose Hub Wall", drive.getResetPoseHubWallCmd());
+
     SmartDashboard.putData(
         "Calibration/Turret Home & Calibrate", shooter.getTurretHomeAndCalibrateCmd());
     SmartDashboard.putData(

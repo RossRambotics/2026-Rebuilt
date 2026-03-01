@@ -19,7 +19,8 @@ For shooter mode details (OFF / IDLE / Predictive Targeting / Manual) and the im
 | Right Bumper (hold) | Manual shoot (kicker + spindexer only) | Implemented |
 | Y | Auto-drive to selected spot | Implemented |
 | X | Lock wheels in X pattern | Implemented |
-| Back | Reset gyro heading | Implemented |
+| Back | Reset gyro heading (heading only, preserves XY) | Implemented |
+| Start | Reset pose to hub wall (X=3.6 m, Y=4.0 m) + reset gyro heading | Implemented |
 
 ---
 
@@ -93,3 +94,12 @@ Enters **MANUAL** mode. Assumes the hood, turret, and flywheel are already at th
   - **Red alliance**: 0°
   - **Blue alliance**: 180°
 - Translation is preserved; only the rotation component is updated.
+
+---
+
+### Start Button — Reset Pose to Hub Wall
+- **`onTrue`** (works while disabled): Resets the full robot pose — both XY position and heading — to the front face of the hub wall.
+  - **Position**: X = 3.6 m, Y = 4.0 m (field center, Blue alliance coordinates)
+  - **Heading**: same alliance-aware logic as Back — 180° for Blue, 0° for Red
+- Use this when the robot is physically staged against the hub wall at the start of a match.
+- Implemented via `drive.getResetPoseHubWallCmd()`. Same command is available as **Calibration → Reset Pose Hub Wall** on the Elastic dashboard.

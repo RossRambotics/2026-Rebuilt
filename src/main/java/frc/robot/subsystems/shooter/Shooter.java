@@ -743,6 +743,7 @@ public class Shooter extends SubsystemBase {
               .getDistance(solution.futurePose.getTranslation());
       Logger.recordOutput("Shooter/FutureRobotPoseDistanceMeters", predictedDistanceMeters);
       Logger.recordOutput("Shooter/TimeOfFlightSec", solution.tofSec);
+      Logger.recordOutput("Shooter/DistanceToTargetMeters", solution.distanceToTargetMeters);
       double hoodTargetAngleDeg = Radians.of(solution.hoodMechAngleRad).in(Degrees);
       Logger.recordOutput("Shooter/HoodTargetAngleDeg", hoodTargetAngleDeg);
       m_targetHoodAngleDegEntry.set(hoodTargetAngleDeg);

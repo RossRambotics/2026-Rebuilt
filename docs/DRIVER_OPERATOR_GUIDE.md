@@ -31,7 +31,8 @@ This guide covers what you need to drive and operate the robot effectively. Read
 | **Right Bumper (RB)** | **Manual Shoot** — runs kicker and spindexer only; use when manually aimed |
 | **Y Button** | Drive to selected spot (operator selects the spot on button box first) |
 | **X Button** | Lock wheels in X pattern — defensive stance |
-| **Back Button** | Reset gyro to zero (alliance-aware intake side should be visibile and square.) |
+| **Back Button** | Reset gyro heading only (keep current XY) — intake must face alliance wall |
+| **Start Button** | **Reset pose to hub wall** — resets full pose and heading. **Shooter side must be flush against the hub wall** before pressing. Works while disabled. |
 
 > **Speed note:** When RT is held (Auto Shoot), the robot automatically reduces drive speed to 50% and nearly eliminates rotation to improve aiming accuracy while moving. This is normal — do not fight it.  Prefer straffing to rotating.
 
@@ -188,6 +189,12 @@ The field widget is your first indicator of a pose problem. If the green square 
 
 - **Top LEDs GREEN but Field widget still shows wrong position:** The pose may have drifted during a period of lost vision. Continue driving with the cameras in view of tags — the estimator will pull the pose back over the next few seconds. If it doesn't recover, use fixed-distance shots as a fallback.
 
+- **Pose is badly wrong and you can reach the hub:** Use the **hub wall reset**.
+  1. Drive the robot to the hub and push the **shooter side flush against the hub wall**.
+  2. Driver press **Start button** (or operator press **Calibration / Reset Pose Hub Wall** on the dashboard).
+  3. The robot's full pose — position and heading — is immediately snapped to the known hub wall location. This works **while disabled**.
+  4. Top LEDs will confirm vision reacquisition once the pose is correct and tags are in view.
+
 ### Problem: Robot Is Not Shooting Accurately
 
 **Check the Field widget first** — if the robot's green square is in the wrong place, fix the pose first (see above). Shooting accuracy directly depends on pose accuracy.
@@ -316,8 +323,18 @@ Operator press **Shooter / Off** to completely stop all shooter mechanisms (turr
 
 ### Gyro / Heading Reset
 
-- **Driver Back button** — Quick reset during a match (alliance-aware).
-- **Calibration / Reset Gyro** — Dashboard reset; use when disabled.
+- **Driver Back button** — Resets heading only (preserves XY). Intake must face the alliance wall. Alliance-aware: Blue = 180°, Red = 0°.
+- **Calibration / Reset Gyro** — Same heading-only reset from the dashboard; works while disabled.
+
+### Hub Wall Pose Reset
+
+Use this when the robot's full pose (position + heading) has drifted badly and vision cannot recover it on its own.
+
+1. Drive the robot to the hub and push the **shooter side flush against the hub wall**.
+2. Driver press **Start button** — or operator press **Calibration / Reset Pose Hub Wall** on the dashboard.
+3. The robot's pose snaps to the known hub wall position with the correct alliance heading. Works while disabled.
+
+> This is the fastest way to get a reliable pose in the middle of a match after a severe odometry loss. Vision will begin fusing immediately once the corrected pose is set and tags are in view.
 
 ### Pose Re-Sync (Vision)
 
@@ -461,8 +478,9 @@ SHOTS CONSISTENTLY MISSING
 ROBOT WON'T DRIVE TO SPOTS (Y button)
 │
 ├─ Top LEDs RED? → Reseed from Vision first
+├─ Pose badly wrong, near hub? → Push shooter side flush to hub wall → Driver: Start button
 ├─ Still wrong after reseed? → Vision unavailable, drive manually
-└─ Gyro wrong? → Driver: Back button to reset heading
+└─ Gyro wrong? → Driver: Back button to reset heading (intake facing alliance wall)
 
 
 INTAKE JAMMED

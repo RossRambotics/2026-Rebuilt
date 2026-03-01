@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
@@ -352,6 +353,31 @@ public class Drive extends SubsystemBase {
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+  }
+
+  // X/Y position of the front face of the hub (Blue alliance coordinates).
+  private static final double HUB_WALL_X_M = 3.6;
+  private static final double HUB_WALL_Y_M = 4.0;
+
+  /**
+   * Returns a command that resets the robot pose to the front face of the hub and resets the gyro
+   * heading. Blue alliance faces 180°; Red alliance faces 0°. Safe to run while disabled.
+   */
+  public Command getResetPoseHubWallCmd() {
+    return Commands.runOnce(
+            () -> {
+              boolean isRed =
+                  DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red;
+              setPose(
+                  new Pose2d(
+                      HUB_WALL_X_M,
+                      HUB_WALL_Y_M,
+                      isRed ? Rotation2d.kZero : Rotation2d.fromDegrees(180)));
+            },
+            this)
+        .withName("Drive/ResetPoseHubWall")
+        .ignoringDisable(true);
   }
 
   /** Adds a new timestamped vision measurement. */
