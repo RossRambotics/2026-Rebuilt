@@ -373,7 +373,7 @@ public class Drive extends SubsystemBase {
                   new Pose2d(
                       HUB_WALL_X_M,
                       HUB_WALL_Y_M,
-                      isRed ? Rotation2d.kZero : Rotation2d.fromDegrees(180)));
+                      !isRed ? Rotation2d.kZero : Rotation2d.fromDegrees(180)));
             },
             this)
         .withName("Drive/ResetPoseHubWall")

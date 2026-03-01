@@ -328,13 +328,15 @@ public class RobotContainer {
                       drive.setPose(
                           new Pose2d(
                               drive.getPose().getTranslation(),
-                              isRed ? Rotation2d.kZero : Rotation2d.fromDegrees(180)));
+                              !isRed ? Rotation2d.kZero : Rotation2d.fromDegrees(180)));
                     },
                     drive)
                 .ignoringDisable(true));
 
-    // Reset pose to hub wall face (X=3.6, Y=4.0) and reset gyro heading when Start button is
-    // pressed. Same action as the Calibration/Reset Pose Hub Wall button on the dashboard.
+    // Reset pose to hub wall face (X=3.6, Y=4.0) and reset gyro heading when Start
+    // button is
+    // pressed. Same action as the Calibration/Reset Pose Hub Wall button on the
+    // dashboard.
     controller.start().onTrue(drive.getResetPoseHubWallCmd());
   }
 
