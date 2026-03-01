@@ -47,7 +47,7 @@ public class IntakeDeployArm extends SubsystemBase {
   private TalonFX armMotor;
   private Arm arm;
   private Angle m_stubbedAngle = Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG);
-  private boolean m_isCalibrated = false;
+  private boolean m_isCalibrated = true;
 
   // Calibration request bypasses both hardware and software limits so the arm
   // can drive all the way to its mechanical hard stop.

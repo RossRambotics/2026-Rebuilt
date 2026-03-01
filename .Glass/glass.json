@@ -129,6 +129,7 @@
       "/SmartDashboard/Calibration/Intake Arm Home & Calibrate": "Command",
       "/SmartDashboard/Calibration/Reseed from Vision": "Command",
       "/SmartDashboard/Calibration/Reset Gyro": "Command",
+      "/SmartDashboard/Calibration/Reset Pose Hub Wall": "Command",
       "/SmartDashboard/Calibration/Turret Calibrate In Place": "Command",
       "/SmartDashboard/Calibration/Turret Home & Calibrate": "Command",
       "/SmartDashboard/Climb/Center": "Command",
