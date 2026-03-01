@@ -128,7 +128,7 @@ public class Shooter extends SubsystemBase {
 
   /** Creates a new Shooter. */
   public Shooter(boolean isReal) {
-    m_turret = new Turret(false);
+    m_turret = new Turret(isReal);
     m_hood = new Hood(isReal);
     m_bottomFlyWheel = new BottomFlyWheel(isReal);
     m_kicker = new Kicker(isReal);
