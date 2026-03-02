@@ -37,7 +37,9 @@ public class SpotSelector extends SubsystemBase {
     Logger.recordOutput("SpotSelector/SelectedName", getSelectedName());
     Logger.recordOutput("SpotSelector/HasTarget", getSelectedPose().isPresent());
     Logger.recordOutput("SpotSelector/IsAutoDriving", m_isAutoDriving);
-    getSelectedPose().ifPresent(pose -> Logger.recordOutput("SpotSelector/SelectedPose", pose));
+    getSelectedPose()
+        .ifPresent(
+            pose -> Logger.recordOutput("SpotSelector/SelectedPose", FieldSpot.flipIfRed(pose)));
   }
 
   // ── Auto-drive state (set by DriveToSpot) ─────────────────────────────────
