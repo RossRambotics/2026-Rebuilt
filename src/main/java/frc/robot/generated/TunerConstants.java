@@ -92,7 +92,9 @@ public class TunerConstants {
 
   private static final double kDriveGearRatio = 6.746031746031747;
   private static final double kSteerGearRatio = 21.428571428571427;
-  private static final Distance kWheelRadius = Inches.of(2.286);
+  // never set this to more than 2.1 path planning may not work at all if this is
+  // too high
+  private static final Distance kWheelRadius = Inches.of(2.0);
 
   private static final boolean kInvertLeftSide = false;
   private static final boolean kInvertRightSide = true;
