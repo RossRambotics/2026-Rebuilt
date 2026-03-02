@@ -54,6 +54,7 @@ import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.FuelSim;
 import java.util.Optional;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -380,20 +381,13 @@ public class RobotContainer {
   }
 
   /**
-   * During disabled, keeps the SpotSelector pointed at the selected auto's starting pose so the
-   * Field widget shows a green X for prematch alignment. If no auto start pose is available (e.g.,
-   * "None" or a SysId routine is selected), falls back to the robot's current pose so the green X
-   * sits on the robot and effectively disappears without changing the key's data type.
+   * Publishes the selected auto's starting pose to telemetry so the Field widget can show a marker
+   * for prematch alignment. Publishes the origin when no starting pose is available (e.g., "None"
+   * or a SysId routine is selected).
    */
-  public void updatePrematchAutoStartPose() {
+  public void publishAutoStartPose() {
     Optional<Pose2d> autoStart = getSelectedAutoStartPose();
-    m_spotSelector.selectCustomPose(
-        autoStart.orElse(drive.getPose()), autoStart.isPresent() ? "Auto Start" : "Robot");
-  }
-
-  /** Clears the prematch auto-start-pose visualization when teleop begins. */
-  public void clearPrematchAutoStartPose() {
-    m_spotSelector.clearSelection();
+    Logger.recordOutput("AutoStart/Pose", autoStart.orElse(new Pose2d()));
   }
 
   public Pose2d getRobotPose2d() {

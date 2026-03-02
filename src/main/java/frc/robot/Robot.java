@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -103,9 +104,11 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically when disabled. */
   @Override
   public void disabledPeriodic() {
-    // Point the SpotSelector at the selected auto's starting pose so the Field widget shows a green
-    // X at the expected start location — drivers can visually verify robot alignment before enable.
-    robotContainer.updatePrematchAutoStartPose();
+    // Publish the selected auto's starting pose directly to telemetry so the Field widget shows a
+    // marker at the expected start location — drivers can visually verify robot alignment before
+    // enable. Uses AutoStart/Pose (Pose2d array) rather than SpotSelector to avoid clobbering
+    // any teleop spot the driver pre-selected while disabled.
+    robotContainer.publishAutoStartPose();
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
@@ -138,8 +141,8 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
-    // Clear the prematch auto-start-pose green X so the Field widget doesn't show a stale target.
-    robotContainer.clearPrematchAutoStartPose();
+    // Suppress the prematch auto-start-pose marker on the dashboard now that we are in teleop.
+    Logger.recordOutput("AutoStart/Pose", new Pose2d());
   }
 
   /** This function is called periodically during operator control. */
