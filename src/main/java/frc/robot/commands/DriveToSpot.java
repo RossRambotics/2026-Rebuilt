@@ -61,7 +61,9 @@ public class DriveToSpot extends Command {
     }
 
     m_noTarget = false;
-    Pose2d targetPose2d = FieldSpot.flipIfRed(targetOpt.get());
+    // Pass the Blue-alliance pose directly; AutoBuilder's flip lambda handles Red mirroring.
+    // Do NOT call FieldSpot.flipIfRed here — PathPlanner would double-flip for Red alliance.
+    Pose2d targetPose2d = targetOpt.get();
     double distanceM =
         m_drive.getPose().getTranslation().getDistance(targetPose2d.getTranslation());
 

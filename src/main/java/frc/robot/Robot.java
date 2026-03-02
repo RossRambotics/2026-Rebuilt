@@ -116,6 +116,9 @@ public class Robot extends LoggedRobot {
 
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
+      autonomousCommand =
+          autonomousCommand.finallyDo(
+              interrupted -> Logger.recordOutput("Auto/Ended_Interrupted", interrupted));
       CommandScheduler.getInstance().schedule(autonomousCommand);
     }
   }
