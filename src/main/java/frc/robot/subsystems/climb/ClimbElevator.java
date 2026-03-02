@@ -58,9 +58,10 @@ public class ClimbElevator extends SubsystemBase {
   // Calibration request bypasses both hardware and software limits so the
   // elevator
   // can drive all the way to its mechanical bottom hard stop.
-  private final DutyCycleOut elevatorCalibrationRequest = new DutyCycleOut(HOME_DUTY_CYCLE)
-      .withIgnoreHardwareLimits(true)
-      .withIgnoreSoftwareLimits(true);
+  private final DutyCycleOut elevatorCalibrationRequest =
+      new DutyCycleOut(HOME_DUTY_CYCLE)
+          .withIgnoreHardwareLimits(true)
+          .withIgnoreSoftwareLimits(true);
 
   // StatusSignals used for hard-stop detection. Initialized to null and
   // assigned in the real-hardware block of the constructor.
@@ -68,19 +69,19 @@ public class ClimbElevator extends SubsystemBase {
   private StatusSignal<Current> elevatorMotorTorqueCurrent = null;
 
   /**
-   * Fires when the elevator has stalled against its bottom hard stop: velocity
-   * drops below
-   * HOME_STALL_VELOCITY_RPS and stator current exceeds HOME_STALL_CURRENT_AMPS
-   * for 100 ms.
+   * Fires when the elevator has stalled against its bottom hard stop: velocity drops below
+   * HOME_STALL_VELOCITY_RPS and stator current exceeds HOME_STALL_CURRENT_AMPS for 100 ms.
    */
-  public final Trigger isHardStop = new Trigger(
-      () -> {
-        if (elevatorMotorVelocity == null)
-          return false;
-        return Math.abs(elevatorMotorVelocity.refresh().getValue().in(RotationsPerSecond)) < HOME_STALL_VELOCITY_RPS
-            && Math.abs(elevatorMotorTorqueCurrent.refresh().getValue().in(Amps)) > HOME_STALL_CURRENT_AMPS;
-      })
-      .debounce(0.1);
+  public final Trigger isHardStop =
+      new Trigger(
+              () -> {
+                if (elevatorMotorVelocity == null) return false;
+                return Math.abs(elevatorMotorVelocity.refresh().getValue().in(RotationsPerSecond))
+                        < HOME_STALL_VELOCITY_RPS
+                    && Math.abs(elevatorMotorTorqueCurrent.refresh().getValue().in(Amps))
+                        > HOME_STALL_CURRENT_AMPS;
+              })
+          .debounce(0.1);
 
   /** Creates a new ClimbElevator. */
   public ClimbElevator(boolean isReal) {
@@ -91,39 +92,41 @@ public class ClimbElevator extends SubsystemBase {
       elevatorMotorVelocity = elevatorMotor.getVelocity();
       elevatorMotorTorqueCurrent = elevatorMotor.getTorqueCurrent();
 
-      SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
-          .withControlMode(ControlMode.CLOSED_LOOP)
-          .withClosedLoopController(
-              0, 0, 0, RotationsPerSecond.of(5), RotationsPerSecondPerSecond.of(10))
-          .withSimClosedLoopController(
-              50, 0, 0, RotationsPerSecond.of(5), RotationsPerSecondPerSecond.of(10))
-          // TODO: Tune ElevatorFeedforward (ks, kg, kv, ka) on hardware
-          .withFeedforward(new ElevatorFeedforward(0.0, 0.0, 0.0, 0.0))
-          .withSimFeedforward(new ElevatorFeedforward(0.0, 0.5, 0.1, 0.0))
-          .withTelemetry("ClimbElevatorMotor", TelemetryVerbosity.HIGH)
-          .withGearing(
-              new MechanismGearing(
-                  GearBox.fromReductionStages(ClimbElevatorConstants.GEAR_REDUCTION)))
-          .withMotorInverted(false)
-          // BRAKE holds the robot's weight when hanging
-          .withIdleMode(MotorMode.BRAKE)
-          .withMechanismCircumference(
-              Inches.of(ClimbElevatorConstants.DRUM_RADIUS_INCHES * 2 * Math.PI))
-          .withStatorCurrentLimit(Amps.of(40));
+      SmartMotorControllerConfig smcConfig =
+          new SmartMotorControllerConfig(this)
+              .withControlMode(ControlMode.CLOSED_LOOP)
+              .withClosedLoopController(
+                  0, 0, 0, RotationsPerSecond.of(5), RotationsPerSecondPerSecond.of(10))
+              .withSimClosedLoopController(
+                  50, 0, 0, RotationsPerSecond.of(5), RotationsPerSecondPerSecond.of(10))
+              // TODO: Tune ElevatorFeedforward (ks, kg, kv, ka) on hardware
+              .withFeedforward(new ElevatorFeedforward(0.0, 0.0, 0.0, 0.0))
+              .withSimFeedforward(new ElevatorFeedforward(0.0, 0.5, 0.1, 0.0))
+              .withTelemetry("ClimbElevatorMotor", TelemetryVerbosity.HIGH)
+              .withGearing(
+                  new MechanismGearing(
+                      GearBox.fromReductionStages(ClimbElevatorConstants.GEAR_REDUCTION)))
+              .withMotorInverted(false)
+              // BRAKE holds the robot's weight when hanging
+              .withIdleMode(MotorMode.BRAKE)
+              .withMechanismCircumference(
+                  Inches.of(ClimbElevatorConstants.DRUM_RADIUS_INCHES * 2 * Math.PI))
+              .withStatorCurrentLimit(Amps.of(40));
 
       var elevatorSMC = new TalonFXWrapper(elevatorMotor, DCMotor.getKrakenX60(1), smcConfig);
 
-      ElevatorConfig elevatorConfig = new ElevatorConfig(elevatorSMC)
-          .withStartingHeight(Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M))
-          .withHardLimits(
-              Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M),
-              Meters.of(ClimbElevatorConstants.MAX_HEIGHT_M))
-          .withSoftLimits(
-              Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M),
-              Meters.of(ClimbElevatorConstants.MAX_HEIGHT_M))
-          .withDrumRadius(Inches.of(ClimbElevatorConstants.DRUM_RADIUS_INCHES))
-          .withMass(Pounds.of(ClimbElevatorConstants.CARRIAGE_MASS_LBS))
-          .withTelemetry("ClimbElevatorMech", TelemetryVerbosity.HIGH);
+      ElevatorConfig elevatorConfig =
+          new ElevatorConfig(elevatorSMC)
+              .withStartingHeight(Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M))
+              .withHardLimits(
+                  Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M),
+                  Meters.of(ClimbElevatorConstants.MAX_HEIGHT_M))
+              .withSoftLimits(
+                  Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M),
+                  Meters.of(ClimbElevatorConstants.MAX_HEIGHT_M))
+              .withDrumRadius(Inches.of(ClimbElevatorConstants.DRUM_RADIUS_INCHES))
+              .withMass(Pounds.of(ClimbElevatorConstants.CARRIAGE_MASS_LBS))
+              .withTelemetry("ClimbElevatorMech", TelemetryVerbosity.HIGH);
 
       elevator = new Elevator(elevatorConfig);
     }
@@ -135,10 +138,7 @@ public class ClimbElevator extends SubsystemBase {
     new Trigger(RobotState::isEnabled).onTrue(Commands.runOnce(this::ensureCalibrated));
   }
 
-  /**
-   * Schedules homeAndCalibrate() on enable if the encoder has not yet been
-   * zeroed.
-   */
+  /** Schedules homeAndCalibrate() on enable if the encoder has not yet been zeroed. */
   private void ensureCalibrated() {
     if (!m_isCalibrated) {
       CommandScheduler.getInstance().schedule(homeAndCalibrate());
@@ -151,22 +151,19 @@ public class ClimbElevator extends SubsystemBase {
 
   /** Command the elevator to a specific height (holds position). */
   public Command setHeight(Distance height) {
-    if (elevator != null)
-      return elevator.setHeight(height);
+    if (elevator != null) return elevator.setHeight(height);
     return Commands.run(() -> m_stubbedHeight = height, this);
   }
 
   /** Command the elevator to a height from a supplier (holds position). */
   public Command setHeight(Supplier<Distance> heightSupplier) {
-    if (elevator != null)
-      return elevator.setHeight(heightSupplier);
+    if (elevator != null) return elevator.setHeight(heightSupplier);
     return Commands.run(() -> m_stubbedHeight = heightSupplier.get(), this);
   }
 
   /** Returns the current elevator height. */
   public Distance getHeight() {
-    if (elevator != null)
-      return elevator.getHeight();
+    if (elevator != null) return elevator.getHeight();
     return m_stubbedHeight;
   }
 
@@ -176,21 +173,14 @@ public class ClimbElevator extends SubsystemBase {
 
   /** Open-loop duty-cycle control. Positive moves the elevator up. */
   public Command setDutyCycle(double dutyCycle) {
-    if (elevator != null)
-      return elevator.set(dutyCycle);
-    return Commands.run(() -> {
-    }, this);
+    if (elevator != null) return elevator.set(dutyCycle);
+    return Commands.run(() -> {}, this);
   }
 
-  /**
-   * Open-loop duty-cycle control from a supplier. Used for joystick manual
-   * control.
-   */
+  /** Open-loop duty-cycle control from a supplier. Used for joystick manual control. */
   public Command setDutyCycle(Supplier<Double> dutyCycleSupplier) {
-    if (elevator != null)
-      return elevator.set(dutyCycleSupplier);
-    return Commands.run(() -> {
-    }, this);
+    if (elevator != null) return elevator.set(dutyCycleSupplier);
+    return Commands.run(() -> {}, this);
   }
 
   // ---------------------------------------------------------------------------
@@ -207,9 +197,7 @@ public class ClimbElevator extends SubsystemBase {
     return setHeight(Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M)).withName("Climb/Retract");
   }
 
-  /**
-   * Retract elevator to the robot-climb height, lifting the robot off the ground.
-   */
+  /** Retract elevator to the robot-climb height, lifting the robot off the ground. */
   public Command getRobotClimbCmd() {
     return setHeight(Meters.of(ClimbElevatorConstants.ROBOT_CLIMB_HEIGHT_M))
         .withName("Climb/RobotClimb");
@@ -229,25 +217,21 @@ public class ClimbElevator extends SubsystemBase {
   // ---------------------------------------------------------------------------
 
   /**
-   * Slowly drives the elevator downward toward its bottom hard stop. When a
-   * velocity drop and
-   * current spike are detected (isHardStop), the motor is commanded to zero for
-   * 250 ms to let it
-   * settle, then the TalonFX encoder is zeroed to 0 rotations and YAMS is
-   * resynced to MIN_HEIGHT_M.
+   * Slowly drives the elevator downward toward its bottom hard stop. When a velocity drop and
+   * current spike are detected (isHardStop), the motor is commanded to zero for 250 ms to let it
+   * settle, then the TalonFX encoder is zeroed to 0 rotations and YAMS is resynced to MIN_HEIGHT_M.
    *
-   * <p>
-   * Returns immediately as a no-op when the subsystem is stubbed.
+   * <p>Returns immediately as a no-op when the subsystem is stubbed.
    *
    * @return Command to run
    */
   public Command homeAndCalibrate() {
     if (!m_isReal) {
       return this.runOnce(
-          () -> {
-            m_stubbedHeight = Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M);
-            m_isCalibrated = true;
-          })
+              () -> {
+                m_stubbedHeight = Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M);
+                m_isCalibrated = true;
+              })
           .withName("ClimbElevator/HomeAndCalibrate");
     }
     return run(() -> elevatorMotor.setControl(elevatorCalibrationRequest))
@@ -264,24 +248,23 @@ public class ClimbElevator extends SubsystemBase {
   }
 
   /**
-   * Zeroes the elevator encoder in-place, assuming the carriage is already
-   * resting at its bottom
-   * hard stop (MIN_HEIGHT_M). No motion is commanded. Runs while disabled so it
-   * can be used on the
+   * Zeroes the elevator encoder in-place, assuming the carriage is already resting at its bottom
+   * hard stop (MIN_HEIGHT_M). No motion is commanded. Runs while disabled so it can be used on the
    * field before a match.
    *
    * @return Command to run
    */
   public Command calibrateInPlace() {
-    Command c = Commands.runOnce(
-        () -> {
-          if (elevatorMotor != null) {
-            elevatorMotor.setPosition(Rotations.of(0));
-          } else {
-            m_stubbedHeight = Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M);
-          }
-          m_isCalibrated = true;
-        });
+    Command c =
+        Commands.runOnce(
+            () -> {
+              if (elevatorMotor != null) {
+                elevatorMotor.setPosition(Rotations.of(0));
+              } else {
+                m_stubbedHeight = Meters.of(ClimbElevatorConstants.MIN_HEIGHT_M);
+              }
+              m_isCalibrated = true;
+            });
     c.setName("ClimbElevator/CalibrateInPlace");
     return c.ignoringDisable(true);
   }
