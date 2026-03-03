@@ -52,23 +52,23 @@ public enum FieldSpot {
   CLIMB_LEFT(
       "Climb Left",
       new Pose2d(
-          /* TODO: fill in 2026 climb left x */ 6.0,
-          /* TODO: fill in 2026 climb left y */ 5.5,
-          Rotation2d.fromDegrees(/* TODO */ 90))),
+          /* TODO: fill in 2026 climb left x */ 0.69,
+          /* TODO: fill in 2026 climb left y */ 4.6,
+          Rotation2d.fromDegrees(/* TODO */ 180))),
 
   CLIMB_CENTER(
       "Climb Center",
       new Pose2d(
-          /* TODO: fill in 2026 climb center x */ 6.0,
-          /* TODO: fill in 2026 climb center y */ 4.1,
-          Rotation2d.fromDegrees(/* TODO */ 90))),
+          /* TODO: fill in 2026 climb center x */ 1.5,
+          /* TODO: fill in 2026 climb center y */ 3.7,
+          Rotation2d.fromDegrees(/* TODO */ 0))),
 
   CLIMB_RIGHT(
       "Climb Right",
       new Pose2d(
-          /* TODO: fill in 2026 climb right x */ 6.0,
-          /* TODO: fill in 2026 climb right y */ 2.7,
-          Rotation2d.fromDegrees(/* TODO */ 90)));
+          /* TODO: fill in 2026 climb right x */ 1.5,
+          /* TODO: fill in 2026 climb right y */ 3.0,
+          Rotation2d.fromDegrees(/* TODO */ 0)));
 
   /**
    * Full length of the 2026 field in meters (driver-station wall to driver-station wall). TODO:
