@@ -34,6 +34,7 @@ import frc.robot.RobotContainer;
 import frc.robot.commands.ShootingTarget;
 import frc.robot.subsystems.Spindexer;
 import frc.robot.util.FuelSim;
+import java.util.Arrays;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -82,6 +83,20 @@ public class Shooter extends SubsystemBase {
   // Added inside every flywheel velocity calculation (auto and fixed).
   private double m_rpmTrimOffsetRpm = 0.0;
 
+  // ── TOF empirical measurement state ───────────────────────────────────────
+  // Launch timestamps recorded on flywheel RPM droop (ball entering flywheel).
+  private final double[] m_tofLaunchTimestampsSec = new double[TOF_MAX_SHOTS];
+  // Measured TOF per shot; -1.0 = not yet confirmed.
+  private final double[] m_tofMeasuredSec = new double[TOF_MAX_SHOTS];
+  // How many RPM droop events detected (balls launched) this session.
+  private int m_tofLaunchCount = 0;
+  // How many button-press confirmations (ball arrivals) recorded this session.
+  private int m_tofConfirmCount = 0;
+  // True while droop is active; prevents counting the same ball multiple loops.
+  private boolean m_tofDroopActive = false;
+  // Cumulative count of all balls launched since robot startup (never reset).
+  private int m_totalBallsLaunched = 0;
+
   // Readiness thresholds (allowable error)
   private static final double TURRET_ANGLE_TOLERANCE_DEG = 2.0; // degrees
   private static final double HOOD_ANGLE_TOLERANCE_DEG = 2.0; // degrees
@@ -91,6 +106,12 @@ public class Shooter extends SubsystemBase {
   private static final double HOOD_READY_DEBOUNCE_SEC = 0.10; // 100 ms
   private static final double BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC = 0.10; // 100 ms
   private static final double AUTO_SHOOT_INTERVAL_SEC = 0.5; // 2 balls per second
+
+  // ── TOF empirical measurement ──────────────────────────────────────────────
+  private static final int TOF_MAX_SHOTS = 5;
+  // RPM droop below target indicating a ball is passing through the flywheel.
+  // Tune on hardware: too low = noise triggers, too high = missed detections.
+  private static final double FLYWHEEL_DROOP_RPM_THRESHOLD = 200.0;
 
   // ── Fixed-distance shot constants ────────────────────────────────────────
   // TODO: tune all six values by shooting from measured distances on the field.
@@ -351,6 +372,8 @@ public class Shooter extends SubsystemBase {
     updateTargetData();
     // Update readiness flags (moved to its own method for clarity)
     updateReadiness();
+    // Detect ball launches via flywheel RPM droop for empirical TOF measurement
+    updateTofTracking();
 
     updateTelemetry();
   }
@@ -781,6 +804,102 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/IsHoodReady", m_isHoodReady);
     Logger.recordOutput("Shooter/IsSpeedReady", m_isSpeedReady);
     Logger.recordOutput("Shooter/RPMTrimOffsetRpm", m_rpmTrimOffsetRpm);
+    Logger.recordOutput("Shooter/TOF/LaunchCount", m_tofLaunchCount);
+    Logger.recordOutput("Shooter/TOF/ConfirmCount", m_tofConfirmCount);
+    Logger.recordOutput("Shooter/TotalBallsLaunched", m_totalBallsLaunched);
+  }
+
+  /**
+   * Detects ball launches via flywheel RPM droop. Edge-triggered — one event per droop onset.
+   * Records the launch timestamp in {@code m_tofLaunchTimestampsSec} and increments {@code
+   * m_tofLaunchCount}. Only active while autoshoot is running and fewer than {@link #TOF_MAX_SHOTS}
+   * balls have been tracked this session.
+   */
+  private void updateTofTracking() {
+    if (!m_isShooting || m_tofLaunchCount >= TOF_MAX_SHOTS) {
+      m_tofDroopActive = false;
+      return;
+    }
+    double targetRpm =
+        m_lastFiringSolution != null
+            ? m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm
+            : IDLE_FLYWHEEL_RPM + m_rpmTrimOffsetRpm;
+    double actualRpm = m_bottomFlyWheel.getVelocity().in(RPM);
+    boolean droopNow = (targetRpm - actualRpm) > FLYWHEEL_DROOP_RPM_THRESHOLD;
+
+    // Rising edge of droop: ball just entered the flywheel — record launch time
+    if (droopNow && !m_tofDroopActive) {
+      m_tofLaunchTimestampsSec[m_tofLaunchCount] = Timer.getFPGATimestamp();
+      m_tofLaunchCount++;
+      m_totalBallsLaunched++;
+      Logger.recordOutput("Shooter/TOF/LaunchCount", m_tofLaunchCount);
+      Logger.recordOutput("Shooter/TotalBallsLaunched", m_totalBallsLaunched);
+    }
+    m_tofDroopActive = droopNow;
+  }
+
+  /**
+   * Records the arrival time for the next unconfirmed launch, computing the empirical TOF.
+   *
+   * <p>Map this command to a button-box button. Press once per ball, in order, as each ball visibly
+   * arrives at the target. After {@link #TOF_MAX_SHOTS} confirmations, logs average and std dev.
+   * Autoshoot resets the session automatically on each trigger press.
+   *
+   * <p>Unconfirmed launches at trigger release are filled with trigger-release time as a fallback.
+   */
+  public Command getTofConfirmCmd() {
+    return Commands.runOnce(
+            () -> {
+              if (m_tofLaunchCount == 0) {
+                Logger.recordOutput("Shooter/TOF/ConfirmStatus", "No launches recorded");
+                return;
+              }
+              if (m_tofConfirmCount >= m_tofLaunchCount) {
+                Logger.recordOutput("Shooter/TOF/ConfirmStatus", "All launches already confirmed");
+                return;
+              }
+              double arrivalTimeSec = Timer.getFPGATimestamp();
+              m_tofMeasuredSec[m_tofConfirmCount] =
+                  arrivalTimeSec - m_tofLaunchTimestampsSec[m_tofConfirmCount];
+              Logger.recordOutput(
+                  "Shooter/TOF/Ball" + (m_tofConfirmCount + 1) + "Sec",
+                  m_tofMeasuredSec[m_tofConfirmCount]);
+              Logger.recordOutput(
+                  "Shooter/TOF/ConfirmStatus", "Ball " + (m_tofConfirmCount + 1) + " confirmed");
+              m_tofConfirmCount++;
+              if (m_tofConfirmCount >= TOF_MAX_SHOTS) {
+                logTofResults();
+              }
+            })
+        .withName("TOF/Confirm");
+  }
+
+  /** Logs all per-ball TOFs, average, and std dev. Called on session end or after 5 confirms. */
+  private void logTofResults() {
+    int validCount = 0;
+    double sum = 0.0;
+    for (int i = 0; i < m_tofConfirmCount; i++) {
+      double tof = m_tofMeasuredSec[i];
+      if (tof > 0) {
+        Logger.recordOutput("Shooter/TOF/Ball" + (i + 1) + "Sec", tof);
+        sum += tof;
+        validCount++;
+      }
+    }
+    if (validCount == 0) return;
+    double avgSec = sum / validCount;
+    Logger.recordOutput("Shooter/TOF/ShotCount", validCount);
+    Logger.recordOutput("Shooter/TOF/AverageSec", avgSec);
+    if (validCount > 1) {
+      double variance = 0.0;
+      for (int i = 0; i < m_tofConfirmCount; i++) {
+        if (m_tofMeasuredSec[i] > 0) {
+          double diff = m_tofMeasuredSec[i] - avgSec;
+          variance += diff * diff;
+        }
+      }
+      Logger.recordOutput("Shooter/TOF/StdDevSec", Math.sqrt(variance / validCount));
+    }
   }
 
   public Command getSetTargetCmd(ShootingTarget target) {
@@ -1114,8 +1233,28 @@ public class Shooter extends SubsystemBase {
                         : RPM.of(IDLE_FLYWHEEL_RPM + m_rpmTrimOffsetRpm)),
             // Kicker + spindexer (+ sim fuel launch): wait until ready, then feed
             Commands.sequence(Commands.waitUntil(() -> m_isShooterReady), feedCmd))
-        .beforeStarting(() -> m_isShooting = true)
-        .finallyDo(() -> m_isShooting = false)
+        .beforeStarting(
+            () -> {
+              m_isShooting = true;
+              // Reset TOF state for new shooting session
+              m_tofLaunchCount = 0;
+              m_tofConfirmCount = 0;
+              m_tofDroopActive = false;
+              Arrays.fill(m_tofLaunchTimestampsSec, 0.0);
+              Arrays.fill(m_tofMeasuredSec, -1.0);
+            })
+        .finallyDo(
+            () -> {
+              m_isShooting = false;
+              // Fill any launched-but-unconfirmed shots with trigger-release time as fallback TOF
+              double nowSec = Timer.getFPGATimestamp();
+              while (m_tofConfirmCount < m_tofLaunchCount) {
+                m_tofMeasuredSec[m_tofConfirmCount] =
+                    nowSec - m_tofLaunchTimestampsSec[m_tofConfirmCount];
+                m_tofConfirmCount++;
+              }
+              logTofResults();
+            })
         .withName("AutoShoot");
   }
 

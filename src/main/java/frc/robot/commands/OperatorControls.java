@@ -177,6 +177,11 @@ public class OperatorControls {
     SmartDashboard.putData("Shooter/RPM -100", shooter.getRPMTrimCmd(-100));
     SmartDashboard.putData("Shooter/RPM Reset", shooter.getRPMTrimResetCmd());
 
+    // TOF empirical measurement — press once per ball as it visibly arrives at the target.
+    // Ball 1 press = TOF for 1st RPM-droop launch, ball 2 press = 2nd, etc.
+    // After 5 presses, average and std dev are logged. Resets automatically on next AutoShoot.
+    SmartDashboard.putData("Shooter/TOF Confirm", shooter.getTofConfirmCmd());
+
     // ── Intake & Spindexer ───────────────────────────────────────────────────
     SmartDashboard.putData("Intake/Deploy", intake.getDeployCmd());
     SmartDashboard.putData("Intake/Retract", intake.getRetractCmd());

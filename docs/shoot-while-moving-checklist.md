@@ -53,10 +53,131 @@
 
 ## Calibration & Physical Measurements
 
-- [ ] Populate RPM, hood angle, and ToF LUTs with real data at multiple distances (current tables cover 1-6 meters in 1m increments — may need finer resolution)
+- [ ] Populate RPM and hood angle LUTs with real data at multiple distances (current tables cover 1-6 meters in 1m increments — may need finer resolution)
 - [ ] Validate `rpmToExitVelocity()` constants (roller radii, efficiency factor 0.95, RPM ratio 1.0) against measured exit velocities
-- [ ] ToF table has a `tune = 0.2` fudge factor — calibrate with real data
+- [ ] Replace ToF LUT placeholder values and remove the `tune = 0.2` fudge factor — use the empirical measurement procedure below
 - [ ] Verify motor type in Hood (`DCMotor.getKrakenX44(1)`) — confirmed X44
+
+---
+
+## Empirical TOF Measurement
+
+The robot measures ball time-of-flight (TOF) empirically using flywheel RPM droop as the launch
+detector and a button-box confirmation button as the arrival marker. Results feed directly into the
+`m_tofTable` in `BottomFlyWheel.java`, which the firing solution uses to compute the predicted
+future robot pose.
+
+### How it works
+
+1. **Launch detection** — `Shooter.updateTofTracking()` runs every loop while autoshoot is active.
+   When the flywheel RPM droops more than `FLYWHEEL_DROOP_RPM_THRESHOLD` (200 RPM, tunable) below
+   its target, a rising-edge event records `Timer.getFPGATimestamp()` as the launch time for that
+   ball and increments the shot counter. Up to 5 launches are tracked per session.
+
+2. **Arrival confirmation** — The operator (or a second person watching the target) presses
+   **"Shooter / TOF Confirm"** on the Elastic button box the moment each ball visibly arrives at
+   the target. The first press records the arrival time for ball 1, the second for ball 2, etc.
+   TOF = arrival timestamp − launch timestamp.
+
+3. **Fallback** — If the right trigger is released before all launches are confirmed, the
+   trigger-release timestamp is used as the arrival time for any remaining unconfirmed balls.
+   These fallback values should be treated as upper-bound estimates, not calibration data.
+
+4. **Session reset** — Every new right-trigger press clears all counters and timestamps
+   automatically, so each shooting run starts fresh.
+
+5. **Statistics** — After 5 confirmations (or on trigger release), `logTofResults()` logs per-ball
+   TOF, average, and standard deviation.
+
+### Step 1 — Tune `FLYWHEEL_DROOP_RPM_THRESHOLD`
+
+Before collecting TOF data, verify the launch detector is triggering reliably.
+
+1. Stand stationary at a known distance. Hold the right trigger to spin up and begin feeding.
+2. Open AdvantageScope and watch **`Shooter/TOF/LaunchCount`** and **`Shooter/FlyWheelActualRPM`**
+   side by side.
+3. Confirm that `LaunchCount` increments exactly once per ball with no extra spurious increments
+   between shots.
+4. If `LaunchCount` increments multiple times per shot (noise), **increase**
+   `FLYWHEEL_DROOP_RPM_THRESHOLD` in `Shooter.java` (try 300–400 RPM).
+5. If `LaunchCount` fails to increment when a ball clearly passes through, **decrease** the
+   threshold (try 100–150 RPM).
+
+> The threshold is in `Shooter.java`:
+> ```java
+> private static final double FLYWHEEL_DROOP_RPM_THRESHOLD = 200.0;
+> ```
+
+### Step 2 — Collect data at each LUT distance
+
+The existing LUT covers 1 m through 6 m in 1 m increments. Collect at least 5 shots per distance
+point and use the average.
+
+**Procedure per distance:**
+
+1. Position the robot at the target distance (measure with a tape — use the robot's center, not
+   the bumper).
+2. Enable the robot in teleop. Hold the right trigger to start autoshoot. Wait for the flywheel to
+   reach target RPM (watch `Shooter/IsBottomFlyWheelReady`).
+3. Fire one ball. The second you see (or hear) it hit the target, press **"Shooter / TOF Confirm"**
+   on the button box. Reaction time is the main error source — be consistent.
+4. Fire a second ball and press again. Repeat for all 5 balls in the session.
+5. Release the right trigger. AdvantageScope will log:
+   - `Shooter/TOF/Ball1Sec` … `Ball5Sec` — individual TOFs
+   - `Shooter/TOF/AverageSec` — mean for this session
+   - `Shooter/TOF/StdDevSec` — standard deviation
+6. Record `AverageSec` for this distance. Repeat 2–3 sessions and average across sessions if std
+   dev is large (> 0.05 s).
+
+**Recommended distance points:** 1 m, 2 m, 3 m, 4 m, 5 m, 6 m. Add intermediate points (e.g.,
+1.5 m, 2.5 m) if the interpolated values feel inaccurate at those ranges during integration
+testing.
+
+### Step 3 — Update the LUT
+
+Edit the `m_tofTable` in `BottomFlyWheel.java` (constructor, around line 196):
+
+```java
+// Before (placeholders + fudge factor):
+double tune = 0.2;
+m_tofTable.put(1.0, 0.885 + tune);
+m_tofTable.put(2.0, 1.028 + tune);
+...
+
+// After (replace with measured averages, remove tune):
+m_tofTable.put(1.0, <measured average at 1 m>);
+m_tofTable.put(2.0, <measured average at 2 m>);
+m_tofTable.put(3.0, <measured average at 3 m>);
+m_tofTable.put(4.0, <measured average at 4 m>);
+m_tofTable.put(5.0, <measured average at 5 m>);
+m_tofTable.put(6.0, <measured average at 6 m>);
+```
+
+Remove the `double tune = 0.2;` line and the `+ tune` additions once real data is in place.
+
+### AdvantageScope log keys
+
+| Key | Description |
+|-----|-------------|
+| `Shooter/TOF/LaunchCount` | Balls detected via RPM droop this session |
+| `Shooter/TOF/ConfirmCount` | Button-press confirmations this session |
+| `Shooter/TOF/Ball1Sec` … `Ball5Sec` | Per-ball measured TOF |
+| `Shooter/TOF/AverageSec` | Session mean TOF |
+| `Shooter/TOF/StdDevSec` | Session std dev (logged after 5 confirms) |
+| `Shooter/TOF/ShotCount` | Valid (positive) TOF readings in session |
+| `Shooter/TOF/ConfirmStatus` | Text status of last confirm button press |
+| `Shooter/FlyWheelActualRPM` | Use to visually verify droop events |
+| `Shooter/TimeOfFlightSec` | **Predicted** TOF from the LUT (compare to measured) |
+
+### Acceptance criteria
+
+- Std dev < 0.05 s at each distance point (consistent operator timing).
+- After LUT update: `Shooter/TimeOfFlightSec` (predicted) matches measured average within ~0.05 s
+  at all tested distances while stationary.
+- During shoot-while-moving: `FutureRobotPose2d` should align with the robot's actual position at
+  the time of impact (validate in AdvantageScope replay).
+
+---
 
 ## Integration Testing
 
