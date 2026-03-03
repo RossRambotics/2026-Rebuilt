@@ -79,9 +79,9 @@ future robot pose.
    the target. The first press records the arrival time for ball 1, the second for ball 2, etc.
    TOF = arrival timestamp − launch timestamp.
 
-3. **Fallback** — If the right trigger is released before all launches are confirmed, the
-   trigger-release timestamp is used as the arrival time for any remaining unconfirmed balls.
-   These fallback values should be treated as upper-bound estimates, not calibration data.
+3. **Unconfirmed launches** — If the right trigger is released before all launches are confirmed,
+   any unconfirmed balls are recorded as 0 s and excluded from the average and std dev. Only
+   button-press confirmations contribute to the statistics.
 
 4. **Session reset** — Every new right-trigger press clears all counters and timestamps
    automatically, so each shooting run starts fresh.

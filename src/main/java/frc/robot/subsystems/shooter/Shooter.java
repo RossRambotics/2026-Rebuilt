@@ -1246,11 +1246,9 @@ public class Shooter extends SubsystemBase {
         .finallyDo(
             () -> {
               m_isShooting = false;
-              // Fill any launched-but-unconfirmed shots with trigger-release time as fallback TOF
-              double nowSec = Timer.getFPGATimestamp();
+              // Zero out any launched-but-unconfirmed shots so they are excluded from stats
               while (m_tofConfirmCount < m_tofLaunchCount) {
-                m_tofMeasuredSec[m_tofConfirmCount] =
-                    nowSec - m_tofLaunchTimestampsSec[m_tofConfirmCount];
+                m_tofMeasuredSec[m_tofConfirmCount] = 0.0;
                 m_tofConfirmCount++;
               }
               logTofResults();
