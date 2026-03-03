@@ -411,9 +411,7 @@ public class Shooter extends SubsystemBase {
       tofSec = m_lastFiringSolution.tofSec;
     } else {
       Translation2d initialShooterFieldPos =
-          currentPose
-              .getTranslation()
-              .plus(shooterOffsetRobot.rotateBy(currentPose.getRotation()));
+          currentPose.getTranslation().plus(shooterOffsetRobot.rotateBy(currentPose.getRotation()));
       double initialDistanceMeters = initialShooterFieldPos.getDistance(targetFieldPos);
       tofSec = m_bottomFlyWheel.calculateToF(initialDistanceMeters);
     }
