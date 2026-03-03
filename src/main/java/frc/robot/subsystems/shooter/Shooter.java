@@ -404,7 +404,19 @@ public class Shooter extends SubsystemBase {
       Translation2d shooterOffsetRobot) {
 
     // --- Initial guess for TOF ---
-    double tofSec = 1.0;
+    // Warm-start from last solution when available (already near-converged); otherwise seed from
+    // LUT using the current (non-predicted) shooter-to-target distance.
+    double tofSec;
+    if (m_lastFiringSolution != null) {
+      tofSec = m_lastFiringSolution.tofSec;
+    } else {
+      Translation2d initialShooterFieldPos =
+          currentPose
+              .getTranslation()
+              .plus(shooterOffsetRobot.rotateBy(currentPose.getRotation()));
+      double initialDistanceMeters = initialShooterFieldPos.getDistance(targetFieldPos);
+      tofSec = m_bottomFlyWheel.calculateToF(initialDistanceMeters);
+    }
 
     Pose2d futurePose;
     Translation2d shooterFieldPos;
