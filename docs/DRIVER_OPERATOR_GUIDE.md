@@ -14,6 +14,7 @@ This guide covers what you need to drive and operate the robot effectively. Read
 6. [Calibration Procedures](#6-calibration-procedures)
 7. [Autonomous Mode](#7-autonomous-mode)
 8. [Pre-Match Checklist](#8-pre-match-checklist)
+9. [Change Log](#change-log)
 
 ---
 
@@ -25,16 +26,16 @@ This guide covers what you need to drive and operate the robot effectively. Read
 |-------|--------|
 | **Left Stick** | Drive (forward/backward) and strafe (left/right) — field-relative |
 | **Right Stick X** | Rotate robot — field-relative |
-| **Left Trigger (LT)** | Deploy intake arm and run roller — hold to keep active |
+| **Left Trigger (LT)** | Deploy intake arm and toggle roller — press to start, press again to stop roller (arm stays deployed) |
 | **Left Bumper (LB)** | Retract intake arm |
-| **Right Trigger (RT)** | **Auto Shoot** — full predictive targeting; holds until ready and fires |
+| **Right Trigger (RT)** | **Auto Shoot** — full predictive targeting; toggle on to start, toggle off to stop |
 | **Right Bumper (RB)** | **Manual Shoot** — runs kicker and spindexer only; use when manually aimed |
 | **Y Button** | Drive to selected spot (operator selects the spot on button box first) |
 | **X Button** | Lock wheels in X pattern — defensive stance |
 | **Back Button** | Reset gyro heading only (keep current XY) — intake must face alliance wall |
 | **Start Button** | **Reset pose to hub wall** — resets full pose and heading. **Shooter side must be flush against the hub wall** before pressing. Works while disabled. |
 
-> **Speed note:** When RT is held (Auto Shoot), the robot automatically reduces drive speed to 50% and nearly eliminates rotation to improve aiming accuracy while moving. This is normal — do not fight it.  Prefer straffing to rotating.
+> **Speed note:** When RT is toggled on (Auto Shoot active), the robot automatically reduces drive speed and rotation speed to improve aiming accuracy while moving. This is normal — do not fight it. Prefer strafing to rotating.
 
 ### Operator — Button Box (Elastic Dashboard)
 
@@ -68,9 +69,10 @@ This section describes what everything should look like and do when working corr
 
 ### Intake (Picking Up Game Pieces)
 
-1. **Driver holds Left Trigger (LT)** — arm deploys and roller spins.
+1. **Driver presses Left Trigger (LT)** — arm deploys and roller spins.
    - The arm releases to coast so it can flex if hit by another robot. This is intentional.
-2. **Driver releases LT and presses Left Bumper (LB)** — arm retracts and roller stops.
+2. **Driver presses LT again** — roller stops. Arm remains deployed.
+3. **Driver presses Left Bumper (LB)** — arm retracts and roller stops.
 3. If the roller jams, the operator can press **Intake / Eject** on the button box to reverse it briefly.
 
 ### Shooting — Automatic Mode (Preferred)
@@ -85,9 +87,9 @@ Automatic mode is the default and preferred way to shoot. The robot handles all 
 - If the wrong target is selected, press the correct target button on the button box, or press **Target Enable Auto** to let the robot choose based on field position.
 
 **Driver responsibilities during shooting:**
-1. Hold **Right Trigger (RT)**.
+1. Press **Right Trigger (RT)** to toggle auto shoot on.
 2. Watch the LEDs — when the shooter status LEDs turn **solid green**, the robot is ready and actively firing.
-3. Continue holding RT until the shot is done. The robot feeds continuously while RT is held and the shooter is ready.
+3. Press RT again when the shot is done to toggle auto shoot off.
 4. Drive gently while shooting — the speed limiter will help, but smoother movement = better shots.
 
 **What the robot does automatically:**
@@ -95,6 +97,7 @@ Automatic mode is the default and preferred way to shoot. The robot handles all 
 - Hood pitches to the calculated angle for the current distance.
 - Flywheel spins up to the correct RPM.
 - Kicker and spindexer only engage once all three are within tolerance (turret ±2°, hood ±2°, flywheel ±150 RPM).
+- Once feeding starts, it continues even if tolerance is briefly lost — but stops immediately if the turret can no longer physically reach the target angle (e.g. robot is facing the wrong way). Feeding resumes automatically once the turret is back on target.
 - Drive speed is reduced to 50% and rotation is heavily limited.
 
 ### Hood Auto-Retract in Trench Zones
@@ -103,7 +106,7 @@ The hood automatically lowers to a safe angle when the robot enters the trench z
 
 ### Speed Nanny
 
-The speed limiter (SpeedNanny) is always active. During normal driving it applies no restriction. When the driver holds RT to shoot, it automatically cuts speed to 50% and nearly eliminates rotation. When RT is released, full speed is restored immediately.
+The speed limiter (SpeedNanny) is always active. During normal driving it applies no restriction. When auto shoot is toggled on (RT), it automatically cuts speed to 50% and nearly eliminates rotation. When toggled off, full speed is restored immediately.
 
 ---
 
@@ -144,7 +147,7 @@ This tells you how well the robot can see AprilTags for pose estimation.
 | Color | Meaning |
 |-------|---------|
 | **Alliance color** (red/blue) | Robot is **disabled** |
-| **AMBER** | Idle — driver is not holding RT; shooter is standing by |
+| **AMBER** | Idle — auto shoot is not active; shooter is standing by |
 | **RED** | Targeting — shoot command active, waiting for turret/hood/flywheel to align |
 | **GREEN** | Ready — all systems on target; kicker is firing |
 
@@ -205,7 +208,7 @@ The field widget is your first indicator of a pose problem. If the green square 
 
 - **Top LEDs are GREEN but shots are still off:** The pose estimate may have briefly drifted before vision reacquired. Give it a moment while keeping tags in view — the estimator will self-correct.
 
-- **Middle LEDs stay RED after holding RT:** The shooter is not ready. Possible causes:
+- **Middle LEDs stay RED after toggling RT on:** The shooter is not ready. Possible causes:
   - Most likely the turret cannot reach desired angle because of the current robot direction.  Turret hit a hard stop or is stuck — operator press **Shooter / Turret Center** to re-home, then re-enable auto.
   - Hood did not reach target angle — operator press **Shooter / Retract Hood** then re-engage.
   - Flywheel did not reach target RPM — check if shooter was just turned ON (give it 2–3 seconds to spin up).
@@ -273,7 +276,7 @@ When automatic targeting is unreliable (bad pose, vision down):
    - Selected target stays locked even as the robot moves.
 2. Operator uses **Turret Center**, **Turret Left 5deg**, **Turret Right 5deg** to manually adjust turret angle.
 3. Operator uses **RPM +100 / -100** to trim flywheel speed.
-4. Driver holds **Right Trigger (RT)** to feed balls once aligned.
+4. Driver presses **Right Trigger (RT)** to toggle auto shoot on once aligned.
 
 > **When done:** Press **Shooter / Target Enable Auto** to return to zone-based auto-targeting.
 
@@ -285,7 +288,7 @@ When pose estimation is lost entirely and you need to shoot:
 2. Operator presses **Shooter / Shot 1m**, **Shot 2m**, or **Shot 3m** depending on distance.
    - These commands lock the turret to 0° (straight ahead) and apply pre-tuned hood angle and RPM.
    - You must physically align the robot heading toward the target.
-3. Driver holds **Right Trigger (RT)** or **Right Bumper (RB)** to fire.
+3. Driver presses **Right Trigger (RT)** to toggle auto shoot on, or holds **Right Bumper (RB)** to fire manually.
 
 > These are tuned for specific distances. Use them at approximately 1 m, 2 m, or 3 m.
 
@@ -463,7 +466,7 @@ SHOTS CONSISTENTLY MISSING
 │   ├─ Vision still can't recover → Use fixed-distance shots (Shot 1m/2m/3m)
 │   └─ Operator: Reseed from Vision if tags briefly seen
 │
-├─ Middle LEDs stay RED after holding RT?
+├─ Middle LEDs stay RED after toggling RT on?
 │   ├─ Turret stuck? → Operator: Turret Center, then re-enable
 │   ├─ Hood stuck? → Operator: Retract Hood, then re-engage
 │   ├─ Flywheel slow? → Wait 2-3 sec for spin-up
@@ -486,8 +489,18 @@ ROBOT WON'T DRIVE TO SPOTS (Y button)
 INTAKE JAMMED
 │
 ├─ Operator: Intake / Eject (reverse roller)
-└─ Retract arm (LB), then re-deploy (LT)
+└─ Retract arm (LB), then press LT to re-deploy and start roller
 ```
+
+---
+
+## Change Log
+
+| Date | Change |
+|------|--------|
+| 2026-03-04 | **Left Trigger** changed from hold to toggle — press once to deploy arm and start roller, press again to stop roller (arm stays deployed) |
+| 2026-03-04 | **Right Trigger** changed from hold to toggle — press once to start auto shoot, press again to stop |
+| 2026-03-04 | **Auto Shoot** feeding now stops and automatically resumes if the turret loses feasibility (e.g. robot faces away from target) |
 
 ---
 

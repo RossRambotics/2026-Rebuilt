@@ -62,6 +62,29 @@ public class Intake extends SubsystemBase {
   }
 
   /**
+   * Deploy the intake arm only (no roller).
+   *
+   * <p>Phase 1: position-control the arm to the deploy angle. Ends when the arm reaches the deploy
+   * angle (within tolerance) or after a safety timeout.
+   *
+   * <p>Phase 2: release arm to coast (duty-cycle 0). This allows the arm to fold back freely if
+   * struck by another robot.
+   */
+  public Command getDeployArmCmd() {
+    return Commands.sequence(
+            m_deployArm
+                .setAngle(Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG))
+                .until(
+                    () ->
+                        m_deployArm.isNearAngle(
+                            Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG),
+                            Degrees.of(IntakeConstants.AT_ANGLE_TOLERANCE_DEG)))
+                .withTimeout(IntakeConstants.DEPLOY_PHASE1_TIMEOUT_SEC),
+            m_deployArm.setDutyCycle(0.0))
+        .withName("Intake/DeployArm");
+  }
+
+  /**
    * Retract the intake arm and stop the roller.
    *
    * <p>Stops the roller first, then position-controls the arm back to the retracted angle and holds

@@ -256,17 +256,18 @@ public class RobotContainer {
     // () -> -controller.getLeftX(),
     // () -> Rotation2d.kZero));
 
-    // Left trigger (hold): deploy intake arm and run intake roller
-    // getDeployCmd() runs the roller internally — no .alongWith() needed.
-    controller.leftTrigger().whileTrue(m_intake.getDeployCmd());
+    // Left trigger (toggle): deploy arm on every press; toggle roller independently.
+    // Press 1 — arm deploys, roller starts. Press 2 — roller stops, arm stays deployed.
+    controller.leftTrigger().onTrue(m_intake.getDeployArmCmd());
+    controller.leftTrigger().toggleOnTrue(m_intake.getRollerOnCmd());
 
     // Left bumper: retract intake arm
     controller.leftBumper().onTrue(m_intake.getRetractCmd());
 
-    // Right trigger (hold): auto shoot — predictive targeting mode
+    // Right trigger (toggle): auto shoot — predictive targeting mode
     // Hood and flywheel override their idle defaults; kicker and spindexer engage
     // once ready.
-    controller.rightTrigger().whileTrue(m_shooter.getAutoShootCmd());
+    controller.rightTrigger().toggleOnTrue(m_shooter.getAutoShootCmd());
 
     // Right bumper (hold): manual shoot — kicker and spindexer only
     // Assumes turret, hood, and flywheel are already at the correct setpoints.

@@ -114,6 +114,9 @@ public class Shooter extends SubsystemBase {
   private static final double HOOD_READY_DEBOUNCE_SEC = 0.10; // 100 ms
   private static final double BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC = 0.10; // 100 ms
   private static final double AUTO_SHOOT_INTERVAL_SEC = 0.5; // 2 balls per second
+  // Extra time added to TOF when predicting future pose, to compensate for system latency
+  // (sensor delay, loop delay, actuator delay). Tune on hardware.
+  private static final double POSE_PREDICT_TIMESHIFT_SEC = 0.030;
 
   // ── TOF empirical measurement ──────────────────────────────────────────────
   private static final int TOF_MAX_SHOTS = 5;
@@ -427,7 +430,7 @@ public class Shooter extends SubsystemBase {
 
     // --- Iterate once or twice ---
     for (int i = 0; i < 2; i++) {
-      futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
+      futurePose = predictRobotPoseCurve(currentPose, chassisSpeeds, tofSec);
 
       shooterFieldPos =
           futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
@@ -439,7 +442,7 @@ public class Shooter extends SubsystemBase {
     }
 
     // --- Final future pose ---
-    futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
+    futurePose = predictRobotPoseCurve(currentPose, chassisSpeeds, tofSec);
 
     shooterFieldPos =
         futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
@@ -494,7 +497,7 @@ public class Shooter extends SubsystemBase {
 
     // --- Iterate once or twice ---
     for (int i = 0; i < 2; i++) {
-      futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
+      futurePose = predictRobotPoseCurve(currentPose, chassisSpeeds, tofSec);
 
       shooterFieldPos =
           futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
@@ -522,7 +525,7 @@ public class Shooter extends SubsystemBase {
     }
 
     // --- Final future pose ---
-    futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
+    futurePose = predictRobotPoseCurve(currentPose, chassisSpeeds, tofSec);
 
     shooterFieldPos =
         futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
@@ -617,6 +620,7 @@ public class Shooter extends SubsystemBase {
       ChassisSpeeds speeds, // robot-relative
       double dtSeconds) {
     double theta = start.getRotation().getRadians();
+    dtSeconds += POSE_PREDICT_TIMESHIFT_SEC;
 
     double fieldVx =
         speeds.vxMetersPerSecond * Math.cos(theta) - speeds.vyMetersPerSecond * Math.sin(theta);
@@ -634,6 +638,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public Pose2d predictRobotPoseCurve(Pose2d start, ChassisSpeeds speeds, double totalTime) {
+    totalTime += POSE_PREDICT_TIMESHIFT_SEC;
     final double dt = 0.005;
     int steps = (int) Math.ceil(totalTime / dt);
 
@@ -1266,8 +1271,15 @@ public class Shooter extends SubsystemBase {
                     m_lastFiringSolution != null
                         ? RPM.of(m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm)
                         : RPM.of(IDLE_FLYWHEEL_RPM + m_rpmTrimOffsetRpm)),
-            // Kicker + spindexer (+ sim fuel launch): wait until ready, then feed
-            Commands.sequence(Commands.waitUntil(() -> m_isShooterReady), feedCmd))
+            // Kicker + spindexer (+ sim fuel launch): wait until ready, feed until turret
+            // infeasible, then loop back to wait for ready again.
+            Commands.sequence(
+                    Commands.waitUntil(() -> m_isShooterReady),
+                    feedCmd.until(
+                        () ->
+                            m_lastFiringSolution == null
+                                || !m_lastFiringSolution.isTurretFeasible()))
+                .repeatedly())
         .beforeStarting(
             () -> {
               m_isShooting = true;

@@ -13,9 +13,9 @@ For shooter mode details (OFF / IDLE / Predictive Targeting / Manual) and the im
 |-------|--------|--------|
 | Left Thumbstick | Translate (field-relative) | Implemented |
 | Right Thumbstick (axis 4) | Rotate | Implemented |
-| Left Trigger (hold) | Deploy intake + run intake roller | TODO |
-| Left Bumper | Retract intake | TODO |
-| Right Trigger (hold) | Auto shoot | Implemented |
+| Left Trigger (toggle) | Deploy intake arm + toggle intake roller | Implemented |
+| Left Bumper | Retract intake | Implemented |
+| Right Trigger (toggle) | Auto shoot | Implemented |
 | Right Bumper (hold) | Manual shoot (kicker + spindexer only) | Implemented |
 | Y | Auto-drive to selected spot | Implemented |
 | X | Lock wheels in X pattern | Implemented |
@@ -33,9 +33,9 @@ SpeedNanny dynamically reduces max speed/acceleration while the shooter is activ
 
 ---
 
-### Left Trigger (hold) — Deploy Intake + Run Roller
-- **`whileTrue`**: Deploy the intake arm to the down position AND run the intake roller.
-- **On release**: Intake roller stops. Intake arm remains deployed (retract is a separate button).
+### Left Trigger (toggle) — Deploy Intake + Toggle Roller
+- **Press 1**: Deploy the intake arm to the down position AND start the intake roller.
+- **Press 2**: Stop the intake roller. Intake arm remains deployed (retract is a separate button).
 
 ---
 
@@ -45,15 +45,15 @@ SpeedNanny dynamically reduces max speed/acceleration while the shooter is activ
 
 ---
 
-### Right Trigger (hold) — Auto Shoot (Predictive Targeting mode)
-Enters **PREDICTIVE TARGETING** mode. Runs while the trigger is held.
+### Right Trigger (toggle) — Auto Shoot (Predictive Targeting mode)
+Enters **PREDICTIVE TARGETING** mode. Toggles on/off with each press.
 
-**`whileTrue`: `m_shooter.getAutoShootCmd()`**
+**`toggleOnTrue`: `m_shooter.getAutoShootCmd()`**
 1. Overrides hood to firing solution angle; overrides flywheel to firing solution RPM.
 2. Turret was already tracking (predictive targeting is always running).
 3. Once `isReady()` is true (turret + hood + flywheel + speed all within tolerance, 100 ms debounce), engages kicker and spindexer to feed fuel.
 
-**On release / interrupt:**
+**On second press / interrupt:**
 1. Kicker → stopped.
 2. Spindexer → stopped.
 3. Hood default command resumes → retracts to `HOOD_DEGREES_MIN`.
@@ -70,7 +70,7 @@ The only difference is the active target in `ShooterTargetSelector`. When `AutoT
 ### Right Bumper (hold) — Manual Shoot (Manual mode)
 Enters **MANUAL** mode. Assumes the hood, turret, and flywheel are already at the correct positions/speeds (set by the operator via Elastic or a prior auto-aim sequence).
 
-**`whileTrue`: `m_shooter.getManualShootCmd()`** — runs kicker + spindexer.
+**`whileTrue`: `m_shooter.getManualShootCmd()`** — runs kicker + spindexer while held.
 **On release**: Stop kicker and spindexer.
 
 > No targeting or flywheel control — this is a raw fire trigger. See [`shooter-modes.md`](shooter-modes.md#manual).
