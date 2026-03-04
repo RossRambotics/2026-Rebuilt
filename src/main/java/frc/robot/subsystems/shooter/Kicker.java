@@ -11,6 +11,8 @@ import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -34,8 +36,15 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class Kicker extends SubsystemBase {
 
+  private static final int CANRANGE_CAN_ID = 44;
+  // Detection threshold: anything within 4 inches is a ball.
+  // Sensor looks through polycarbonate — tune ProximityThreshold on hardware.
+  private static final double FUEL_DETECTION_THRESHOLD_M = 0.1016; // 4 inches
+  private static final double FUEL_DETECTION_HYSTERESIS_M = 0.010; // 1 cm hysteresis
+
   private final boolean m_isReal;
   private FlyWheel kicker;
+  private CANrange m_canRange = null;
   private AngularVelocity m_stubbedVelocity = RPM.of(0);
   private DoubleEntry m_kickerTargetRPM = null;
 
@@ -70,6 +79,12 @@ public class Kicker extends SubsystemBase {
               .withTelemetry("KickerMech", TelemetryVerbosity.LOW);
 
       kicker = new FlyWheel(kickerConfig);
+
+      m_canRange = new CANrange(CANRANGE_CAN_ID);
+      CANrangeConfiguration canRangeConfig = new CANrangeConfiguration();
+      canRangeConfig.ProximityParams.ProximityThreshold = FUEL_DETECTION_THRESHOLD_M;
+      canRangeConfig.ProximityParams.ProximityHysteresis = FUEL_DETECTION_HYSTERESIS_M;
+      m_canRange.getConfigurator().apply(canRangeConfig);
     }
 
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
@@ -90,9 +105,23 @@ public class Kicker extends SubsystemBase {
     return Commands.run(() -> m_stubbedVelocity = RPM.of(0), this);
   }
 
+  /** Returns true if a fuel ball is detected within the threshold distance. */
+  public boolean hasFuel() {
+    if (m_canRange == null) return false;
+    return m_canRange.getIsDetected().getValue();
+  }
+
+  /** Returns the raw measured distance in meters (for tuning/telemetry). */
+  public double getFuelDistanceM() {
+    if (m_canRange == null) return 0.0;
+    return m_canRange.getDistance().getValueAsDouble();
+  }
+
   @Override
   public void periodic() {
     Logger.recordOutput("Kicker/IsStubbed", !m_isReal);
+    Logger.recordOutput("Kicker/HasFuel", hasFuel());
+    Logger.recordOutput("Kicker/FuelDistanceM", getFuelDistanceM());
 
     if (kicker != null) {
       kicker.updateTelemetry();

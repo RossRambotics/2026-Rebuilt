@@ -28,7 +28,7 @@ Controls the pitch angle of the shooter. Mechanical angle range is 15°–45° (
 Dual-motor flywheel. CAN 35 (left) is the leader; CAN 36 (right) follows in the opposed direction. Contains LUT interpolation tables for RPM, hood angle, and time-of-flight vs. distance.
 
 #### Kicker
-A single-wheel feed roller that transfers game pieces from the Spindexer into the flywheel. Velocity-controlled via YAMS FlyWheel.
+A single-wheel feed roller that transfers game pieces from the Spindexer into the flywheel. Velocity-controlled via YAMS FlyWheel. Includes a CANrange proximity sensor (CAN 44) that detects balls transiting through the kicker. The falling edge of detection (ball leaving the sensor) timestamps TOF launches; the absence of detection for > 1 second during a shoot session signals `Shooter.isHopperEmpty()`. Note: the sensor can only see balls at the kicker — it has no view into the hopper.
 
 Key files: `Shooter.java`, `Turret.java`, `Hood.java`, `BottomFlyWheel.java`, `Kicker.java`
 
@@ -125,6 +125,7 @@ Key file: `SpeedNanny.java`
 | 38 | TalonFX | Kicker | Kicker feed roller | Falcon 500 |
 | 39 | TalonFX | Spindexer | Intake/indexer roller | Falcon 500 |
 | 40 | TalonFX | Turret | Turret yaw (12:1 reduction) ⚠️ force-stubbed | Kraken X60 |
+| 44 | CANrange | Kicker | Ball proximity sensor (looks through polycarbonate) | — |
 
 ### Intake
 
@@ -173,6 +174,7 @@ Key file: `SpeedNanny.java`
 | 41 | TalonFX — Intake Deploy Arm | Intake / IntakeDeployArm |
 | 42 | TalonFX — Intake Roller | Intake / IntakeRoller |
 | 43 | TalonFX — Climb Elevator (reserved) | ClimbElevator |
+| 44 | CANrange — Kicker ball sensor | Shooter / Kicker |
 | 50 | CANdle — LED strip controller | LEDSubsystem |
 
-**Total: 19 TalonFX motors, 4 CANcoders, 1 Pigeon 2, 1 CANdle**
+**Total: 19 TalonFX motors, 4 CANcoders, 1 Pigeon 2, 1 CANdle, 1 CANrange**

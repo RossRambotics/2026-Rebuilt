@@ -62,17 +62,18 @@
 
 ## Empirical TOF Measurement
 
-The robot measures ball time-of-flight (TOF) empirically using flywheel RPM droop as the launch
-detector and a button-box confirmation button as the arrival marker. Results feed directly into the
-`m_tofTable` in `BottomFlyWheel.java`, which the firing solution uses to compute the predicted
-future robot pose.
+The robot measures ball time-of-flight (TOF) empirically using a CANrange proximity sensor on the
+kicker as the launch detector and a button-box confirmation button as the arrival marker. Results
+feed directly into the `m_tofTable` in `BottomFlyWheel.java`, which the firing solution uses to
+compute the predicted future robot pose.
 
 ### How it works
 
 1. **Launch detection** — `Shooter.updateTofTracking()` runs every loop while autoshoot is active.
-   When the flywheel RPM droops more than `FLYWHEEL_DROOP_RPM_THRESHOLD` (200 RPM, tunable) below
-   its target, a rising-edge event records `Timer.getFPGATimestamp()` as the launch time for that
-   ball and increments the shot counter. Up to 5 launches are tracked per session.
+   A CANrange sensor (CAN 44) mounted on the kicker detects each ball as it transits from the
+   spindexer into the flywheel. The **falling edge** of detection (ball leaving the sensor's view)
+   records `Timer.getFPGATimestamp()` as the launch time and increments the shot counter. Up to 5
+   launches are tracked per session.
 
 2. **Arrival confirmation** — The operator (or a second person watching the target) presses
    **"Shooter / TOF Confirm"** on the Elastic button box the moment each ball visibly arrives at
@@ -89,23 +90,28 @@ future robot pose.
 5. **Statistics** — After 5 confirmations (or on trigger release), `logTofResults()` logs per-ball
    TOF, average, and standard deviation.
 
-### Step 1 — Tune `FLYWHEEL_DROOP_RPM_THRESHOLD`
+### Step 1 — Tune the CANrange proximity threshold
 
-Before collecting TOF data, verify the launch detector is triggering reliably.
+The CANrange looks through polycarbonate. Before collecting TOF data, verify it is detecting balls
+reliably and not generating false positives.
 
 1. Stand stationary at a known distance. Hold the right trigger to spin up and begin feeding.
-2. Open AdvantageScope and watch **`Shooter/TOF/LaunchCount`** and **`Shooter/FlyWheelActualRPM`**
-   side by side.
-3. Confirm that `LaunchCount` increments exactly once per ball with no extra spurious increments
-   between shots.
-4. If `LaunchCount` increments multiple times per shot (noise), **increase**
-   `FLYWHEEL_DROOP_RPM_THRESHOLD` in `Shooter.java` (try 300–400 RPM).
-5. If `LaunchCount` fails to increment when a ball clearly passes through, **decrease** the
-   threshold (try 100–150 RPM).
+2. Open AdvantageScope and watch **`Kicker/HasFuel`**, **`Kicker/FuelDistanceM`**, and
+   **`Shooter/TOF/LaunchCount`** simultaneously.
+3. Confirm that `HasFuel` pulses once per ball and `LaunchCount` increments exactly once per pulse
+   with no spurious extra increments.
+4. If `HasFuel` flickers without a ball present (false positives through the polycarbonate),
+   **decrease** `FUEL_DETECTION_THRESHOLD_M` in `Kicker.java`, or **increase**
+   `FUEL_DETECTION_HYSTERESIS_M` to dampen chatter.
+5. If a ball passes through but `HasFuel` never goes true, **increase** `FUEL_DETECTION_THRESHOLD_M`
+   (try 0.13–0.15 m).
+6. If `MinSignalStrengthForValidMeasurement` filtering is needed, set it via `canRangeConfig.ProximityParams`
+   in `Kicker.java`.
 
-> The threshold is in `Shooter.java`:
+> Threshold constants are in `Kicker.java`:
 > ```java
-> private static final double FLYWHEEL_DROOP_RPM_THRESHOLD = 200.0;
+> private static final double FUEL_DETECTION_THRESHOLD_M = 0.1016; // 4 inches — tune for polycarbonate
+> private static final double FUEL_DETECTION_HYSTERESIS_M = 0.010; // 1 cm
 > ```
 
 ### Step 2 — Collect data at each LUT distance
@@ -159,14 +165,17 @@ Remove the `double tune = 0.2;` line and the `+ tune` additions once real data i
 
 | Key | Description |
 |-----|-------------|
-| `Shooter/TOF/LaunchCount` | Balls detected via RPM droop this session |
+| `Kicker/HasFuel` | True while a ball is at the CANrange sensor |
+| `Kicker/FuelDistanceM` | Raw CANrange distance in meters (use to tune threshold) |
+| `Shooter/KickerHasFuel` | Same as `Kicker/HasFuel`, mirrored onto the Shooter table |
+| `Shooter/TOF/LaunchCount` | Balls detected via CANrange falling edge this session |
 | `Shooter/TOF/ConfirmCount` | Button-press confirmations this session |
 | `Shooter/TOF/Ball1Sec` … `Ball5Sec` | Per-ball measured TOF |
 | `Shooter/TOF/AverageSec` | Session mean TOF |
 | `Shooter/TOF/StdDevSec` | Session std dev (logged after 5 confirms) |
 | `Shooter/TOF/ShotCount` | Valid (positive) TOF readings in session |
 | `Shooter/TOF/ConfirmStatus` | Text status of last confirm button press |
-| `Shooter/FlyWheelActualRPM` | Use to visually verify droop events |
+| `Shooter/IsHopperEmpty` | True if no ball detected for > 1 s during a shoot session |
 | `Shooter/TimeOfFlightSec` | **Predicted** TOF from the LUT (compare to measured) |
 
 ### Acceptance criteria

@@ -84,18 +84,26 @@ public class Shooter extends SubsystemBase {
   private double m_rpmTrimOffsetRpm = 0.0;
 
   // ── TOF empirical measurement state ───────────────────────────────────────
-  // Launch timestamps recorded on flywheel RPM droop (ball entering flywheel).
+  // Launch timestamps recorded on CANrange falling edge (ball leaving kicker).
   private final double[] m_tofLaunchTimestampsSec = new double[TOF_MAX_SHOTS];
   // Measured TOF per shot; -1.0 = not yet confirmed.
   private final double[] m_tofMeasuredSec = new double[TOF_MAX_SHOTS];
-  // How many RPM droop events detected (balls launched) this session.
+  // How many CANrange falling-edge events detected (balls launched) this session.
   private int m_tofLaunchCount = 0;
   // How many button-press confirmations (ball arrivals) recorded this session.
   private int m_tofConfirmCount = 0;
-  // True while droop is active; prevents counting the same ball multiple loops.
-  private boolean m_tofDroopActive = false;
+  // CANrange edge detection: track last-loop state for falling-edge detection.
+  private boolean m_kickerHadFuelLastLoop = false;
   // Cumulative count of all balls launched since robot startup (never reset).
   private int m_totalBallsLaunched = 0;
+
+  // ── Hopper-empty detection ─────────────────────────────────────────────────
+  // Timestamp of the most recent loop where kicker reported hasFuel().
+  private double m_hopperLastSeenTimestampSec = 0.0;
+  // Guards against a false-empty at the very start of a shoot sequence.
+  private boolean m_hopperSeenSinceShootStart = false;
+  private boolean m_isHopperEmpty = false;
+  private static final double HOPPER_EMPTY_TIMEOUT_SEC = 1.0;
 
   // Readiness thresholds (allowable error)
   private static final double TURRET_ANGLE_TOLERANCE_DEG = 2.0; // degrees
@@ -109,9 +117,6 @@ public class Shooter extends SubsystemBase {
 
   // ── TOF empirical measurement ──────────────────────────────────────────────
   private static final int TOF_MAX_SHOTS = 5;
-  // RPM droop below target indicating a ball is passing through the flywheel.
-  // Tune on hardware: too low = noise triggers, too high = missed detections.
-  private static final double FLYWHEEL_DROOP_RPM_THRESHOLD = 200.0;
 
   // ── Fixed-distance shot constants ────────────────────────────────────────
   // TODO: tune all six values by shooting from measured distances on the field.
@@ -372,7 +377,7 @@ public class Shooter extends SubsystemBase {
     updateTargetData();
     // Update readiness flags (moved to its own method for clarity)
     updateReadiness();
-    // Detect ball launches via flywheel RPM droop for empirical TOF measurement
+    // Detect ball launches via CANrange falling edge for empirical TOF measurement
     updateTofTracking();
 
     updateTelemetry();
@@ -817,35 +822,55 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/TOF/LaunchCount", m_tofLaunchCount);
     Logger.recordOutput("Shooter/TOF/ConfirmCount", m_tofConfirmCount);
     Logger.recordOutput("Shooter/TotalBallsLaunched", m_totalBallsLaunched);
+    Logger.recordOutput("Shooter/IsHopperEmpty", m_isHopperEmpty);
+    Logger.recordOutput("Shooter/KickerHasFuel", m_kicker.hasFuel());
   }
 
   /**
-   * Detects ball launches via flywheel RPM droop. Edge-triggered — one event per droop onset.
-   * Records the launch timestamp in {@code m_tofLaunchTimestampsSec} and increments {@code
-   * m_tofLaunchCount}. Only active while autoshoot is running and fewer than {@link #TOF_MAX_SHOTS}
-   * balls have been tracked this session.
+   * Detects ball launches via CANrange falling edge (ball leaving the kicker sensor view).
+   * Edge-triggered — one event per ball departure. Records the launch timestamp in {@code
+   * m_tofLaunchTimestampsSec} and increments {@code m_tofLaunchCount}. Also manages hopper-empty
+   * detection: if no ball has been seen for {@link #HOPPER_EMPTY_TIMEOUT_SEC} after at least one
+   * was detected this shoot session, {@code m_isHopperEmpty} is set true.
    */
   private void updateTofTracking() {
+    boolean hasFuelNow = m_kicker.hasFuel();
+
+    // Track last-seen timestamp for hopper-empty detection
+    if (hasFuelNow) {
+      m_hopperLastSeenTimestampSec = Timer.getFPGATimestamp();
+      m_hopperSeenSinceShootStart = true;
+    }
+
+    // Hopper empty: shooting active, seen at least one ball, nothing for 1+ second
+    if (m_isShooting && m_hopperSeenSinceShootStart) {
+      m_isHopperEmpty =
+          (Timer.getFPGATimestamp() - m_hopperLastSeenTimestampSec) > HOPPER_EMPTY_TIMEOUT_SEC;
+    } else if (!m_isShooting) {
+      m_isHopperEmpty = false;
+      m_hopperSeenSinceShootStart = false;
+    }
+
+    // TOF tracking: only when shooting and under max shot count
     if (!m_isShooting || m_tofLaunchCount >= TOF_MAX_SHOTS) {
-      m_tofDroopActive = false;
+      m_kickerHadFuelLastLoop = hasFuelNow;
       return;
     }
-    double targetRpm =
-        m_lastFiringSolution != null
-            ? m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm
-            : IDLE_FLYWHEEL_RPM + m_rpmTrimOffsetRpm;
-    double actualRpm = m_bottomFlyWheel.getVelocity().in(RPM);
-    boolean droopNow = (targetRpm - actualRpm) > FLYWHEEL_DROOP_RPM_THRESHOLD;
 
-    // Rising edge of droop: ball just entered the flywheel — record launch time
-    if (droopNow && !m_tofDroopActive) {
+    // Falling edge of detection: ball just left the kicker (entered flywheel) — record launch time
+    if (!hasFuelNow && m_kickerHadFuelLastLoop) {
       m_tofLaunchTimestampsSec[m_tofLaunchCount] = Timer.getFPGATimestamp();
       m_tofLaunchCount++;
       m_totalBallsLaunched++;
       Logger.recordOutput("Shooter/TOF/LaunchCount", m_tofLaunchCount);
       Logger.recordOutput("Shooter/TotalBallsLaunched", m_totalBallsLaunched);
     }
-    m_tofDroopActive = droopNow;
+    m_kickerHadFuelLastLoop = hasFuelNow;
+  }
+
+  /** True if no fuel has been detected at the kicker for {@link #HOPPER_EMPTY_TIMEOUT_SEC}. */
+  public boolean isHopperEmpty() {
+    return m_isHopperEmpty;
   }
 
   /**
@@ -855,7 +880,7 @@ public class Shooter extends SubsystemBase {
    * arrives at the target. After {@link #TOF_MAX_SHOTS} confirmations, logs average and std dev.
    * Autoshoot resets the session automatically on each trigger press.
    *
-   * <p>Unconfirmed launches at trigger release are filled with trigger-release time as a fallback.
+   * <p>Unconfirmed launches at trigger release are zeroed out and excluded from session stats.
    */
   public Command getTofConfirmCmd() {
     return Commands.runOnce(
@@ -1249,7 +1274,9 @@ public class Shooter extends SubsystemBase {
               // Reset TOF state for new shooting session
               m_tofLaunchCount = 0;
               m_tofConfirmCount = 0;
-              m_tofDroopActive = false;
+              m_kickerHadFuelLastLoop = false;
+              m_hopperSeenSinceShootStart = false;
+              m_isHopperEmpty = false;
               Arrays.fill(m_tofLaunchTimestampsSec, 0.0);
               Arrays.fill(m_tofMeasuredSec, -1.0);
             })
