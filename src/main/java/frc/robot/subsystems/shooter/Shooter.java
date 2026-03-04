@@ -640,7 +640,8 @@ public class Shooter extends SubsystemBase {
   public Pose2d predictRobotPoseCurve(Pose2d start, ChassisSpeeds speeds, double totalTime) {
     totalTime += POSE_PREDICT_TIMESHIFT_SEC;
     final double dt = 0.005;
-    int steps = (int) Math.ceil(totalTime / dt);
+    int steps = (int) (totalTime / dt);
+    double remainder = totalTime - steps * dt;
 
     double x = start.getX();
     double y = start.getY();
@@ -651,12 +652,20 @@ public class Shooter extends SubsystemBase {
       double sin = Math.sin(theta);
 
       double fieldVx = speeds.vxMetersPerSecond * cos - speeds.vyMetersPerSecond * sin;
-
       double fieldVy = speeds.vxMetersPerSecond * sin + speeds.vyMetersPerSecond * cos;
 
       x += fieldVx * dt;
       y += fieldVy * dt;
       theta += speeds.omegaRadiansPerSecond * dt;
+    }
+
+    // Partial last step to exactly hit totalTime
+    if (remainder > 0.0) {
+      double cos = Math.cos(theta);
+      double sin = Math.sin(theta);
+      x += (speeds.vxMetersPerSecond * cos - speeds.vyMetersPerSecond * sin) * remainder;
+      y += (speeds.vxMetersPerSecond * sin + speeds.vyMetersPerSecond * cos) * remainder;
+      theta += speeds.omegaRadiansPerSecond * remainder;
     }
 
     return new Pose2d(x, y, new Rotation2d(theta));
