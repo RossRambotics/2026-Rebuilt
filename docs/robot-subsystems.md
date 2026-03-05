@@ -48,6 +48,19 @@ Key files: `Vision.java`, `VisionConstants.java`
 
 ---
 
+### GamePieceVision
+A dedicated object-detection camera subsystem using a PhotonVision coprocessor running a trained YOLO-style pipeline. Detects fuel game pieces on the floor behind the robot and computes an **area-weighted centroid yaw** across all accepted targets. Applies **Exponential Moving Average (EMA)** smoothing (α = 0.35) to prevent frame-to-frame flipping when multiple pieces are visible. Close pieces dominate by area (area ∝ 1/distance²), so the centroid naturally favors the nearest and densest grouping.
+
+Used by `AutoDriveToFuel` to steer the rear intake toward detected game pieces while the driver holds B. The camera (`intake-cam`) is rear-facing, mounted at −0.30 m from robot center, 0.25 m above floor, pitched −30° down, yawed 180°.
+
+- Camera name: `"intake-cam"`, static IP `10.32.01.13`
+- All filtering thresholds and drive-tuning constants are in `GamePieceVisionConstants.java`
+- See [`docs/gamepiece-vision-setup.md`](gamepiece-vision-setup.md) for setup, configuration, and tuning
+
+Key files: `GamePieceVisionSubsystem.java`, `GamePieceVisionIO.java`, `GamePieceVisionIOPhoton.java`, `GamePieceVisionIOSim.java`, `GamePieceVisionConstants.java`; command: `AutoDriveToFuel.java`
+
+---
+
 ### Intake
 A coordinator subsystem (`Intake.java`) that owns and orchestrates IntakeRoller and IntakeDeployArm. Exposes compound commands (`getDeployCmd`, `getRetractCmd`) and standalone roller commands (`getRollerOnCmd`, `getRollerOffCmd`, `getReverseCmd`).
 
@@ -146,6 +159,16 @@ Key file: `SpeedNanny.java`
 |--------|-------------|-----------|------|
 | 50 | CANdle | LEDSubsystem | 300-LED GRB strip controller |
 
+### Network Cameras & Coprocessors
+
+These devices communicate over Ethernet (not CAN) and use static IPs in the `10.32.01.X` range.
+
+| Device | Hostname | Static IP | Subsystem | Purpose |
+|--------|----------|-----------|-----------|---------|
+| Limelight (front left) | `limelight-frontl` | `10.32.01.11` | Vision | AprilTag pose estimation |
+| Limelight (front right) | `limelight-frontr` | `10.32.01.12` | Vision | AprilTag pose estimation |
+| PhotonVision coprocessor | `photonvision.local` | `10.32.01.13` | GamePieceVision | Game piece object detection (`intake-cam`) |
+
 ---
 
 ## All Devices by CAN ID
@@ -178,3 +201,4 @@ Key file: `SpeedNanny.java`
 | 50 | CANdle — LED strip controller | LEDSubsystem |
 
 **Total: 19 TalonFX motors, 4 CANcoders, 1 Pigeon 2, 1 CANdle, 1 CANrange**
+**Network devices: 2 Limelights (`10.32.01.11`, `10.32.01.12`), 1 PhotonVision coprocessor (`10.32.01.13`)**

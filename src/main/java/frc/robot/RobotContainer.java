@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.AutoDriveToFuel;
 import frc.robot.commands.AutoTargetSelector;
 import frc.robot.commands.ClimbCommands;
 import frc.robot.commands.DriveCommands;
@@ -45,6 +46,11 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.gamepiece.GamePieceVisionConstants;
+import frc.robot.subsystems.gamepiece.GamePieceVisionIO;
+import frc.robot.subsystems.gamepiece.GamePieceVisionIOPhoton;
+import frc.robot.subsystems.gamepiece.GamePieceVisionIOSim;
+import frc.robot.subsystems.gamepiece.GamePieceVisionSubsystem;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.Shooter;
@@ -87,6 +93,8 @@ public class RobotContainer {
   public ClimbElevator m_climbElevator = null;
 
   public LEDSubsystem m_ledSubsystem = null;
+
+  public GamePieceVisionSubsystem m_gamePieceVision = null;
 
   // All subsystems bundled for passing to OperatorControls, commands, etc.
   private Subsystems m_subsystems;
@@ -179,8 +187,26 @@ public class RobotContainer {
     // Instantiate LED subsystem — real only on REAL hardware, stubbed in sim/replay
     m_ledSubsystem = new LEDSubsystem(false, vision, m_shooter);
 
+    // Instantiate game piece vision subsystem (dedicated object-detection camera)
+    switch (Constants.currentMode) {
+      case REAL:
+        m_gamePieceVision =
+            new GamePieceVisionSubsystem(
+                new GamePieceVisionIOPhoton(
+                    GamePieceVisionConstants.CAMERA_NAME,
+                    GamePieceVisionConstants.ROBOT_TO_INTAKE_CAM));
+        break;
+      case SIM:
+        m_gamePieceVision = new GamePieceVisionSubsystem(new GamePieceVisionIOSim());
+        break;
+      default:
+        m_gamePieceVision = new GamePieceVisionSubsystem(new GamePieceVisionIO() {});
+        break;
+    }
+
     // Bundle subsystems for OperatorControls and other consumers
-    m_subsystems = new Subsystems(drive, m_shooter, m_intake, m_climbElevator, vision);
+    m_subsystems =
+        new Subsystems(drive, m_shooter, m_intake, m_climbElevator, vision, m_gamePieceVision);
 
     // Register SuperFastClimb as PathPlanner named commands for use in .auto files.
     // Must be registered before AutoBuilder.buildAutoChooser().
@@ -292,17 +318,9 @@ public class RobotContainer {
     // buttonBox.button(9).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_RIGHT));
     // buttonBox.button(10).onTrue(m_spotSelector.cmdClearSelection());
 
-    // Robot centric drive when B button is held
-    // controller
-    // .b()
-    // .whileTrue(
-    // DriveCommands.joystickDriveRobotCentric(
-    // drive,
-    // () -> -controller.getLeftY(),
-    // () -> -controller.getLeftX(),
-    // // () -> -controller.getRightX()));
-    // // () -> -controller.getRawAxis(2)));
-    // () -> -controller.getRawAxis(4)));
+    // B button (hold): auto-drive toward detected game pieces and deploy intake.
+    // Release to cancel. Intake stays deployed after release — retract manually if needed.
+    controller.b().whileTrue(new AutoDriveToFuel(drive, m_intake, m_gamePieceVision));
 
     // AutoTargetSelector is the default command: selects the correct ShootingTarget
     // based on

@@ -17,6 +17,7 @@ import frc.robot.subsystems.ShooterTargetSelector;
 import frc.robot.subsystems.SpotSelector;
 import frc.robot.subsystems.climb.ClimbElevator;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.gamepiece.GamePieceVisionSubsystem;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.vision.Vision;
@@ -66,6 +67,7 @@ public class OperatorControls {
   private final Intake intake;
   private final ClimbElevator climbElevator;
   private final Vision vision;
+  private final GamePieceVisionSubsystem gamePieceVision;
   private final CommandXboxController controller;
   private final SpotSelector spotSelector;
   private final ShooterTargetSelector targetSelector;
@@ -80,6 +82,7 @@ public class OperatorControls {
     this.intake = subsystems.intake();
     this.climbElevator = subsystems.climbElevator();
     this.vision = subsystems.vision();
+    this.gamePieceVision = subsystems.gamePieceVision();
     this.controller = controller;
     this.spotSelector = spotSelector;
     this.targetSelector = targetSelector;
@@ -183,6 +186,8 @@ public class OperatorControls {
     SmartDashboard.putData("Shooter/TOF Confirm", shooter.getTofConfirmCmd());
 
     // ── Intake & Spindexer ───────────────────────────────────────────────────
+    SmartDashboard.putData(
+        "Intake/Auto Drive To Fuel", new AutoDriveToFuel(drive, intake, gamePieceVision));
     SmartDashboard.putData("Intake/Deploy", intake.getDeployCmd());
     SmartDashboard.putData("Intake/Retract", intake.getRetractCmd());
     SmartDashboard.putData("Intake/Roller On", intake.getRollerOnCmd());

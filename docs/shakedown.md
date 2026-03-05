@@ -263,18 +263,53 @@ Repeat all steps above for the second camera. This camera has a **different moun
 - Pipeline index used: `______`
 - Static IP: `10.32.01.12`
 
+#### PhotonVision Coprocessor — `intake-cam` (Game Piece Detection)
+
+The PhotonVision coprocessor runs a trained object-detection pipeline that detects fuel game pieces and publishes results over NetworkTables. The robot code connects to it by the camera name `"intake-cam"`.
+
+> For detailed configuration and tuning steps, see [`gamepiece-vision-setup.md`](gamepiece-vision-setup.md).
+
+1. Power the robot on.
+2. Connect to the coprocessor's web UI at `http://photonvision.local:5800`
+   (If `photonvision.local` doesn't resolve, check the router's DHCP table for the current IP.)
+3. **Networking:**
+   - In the web UI, click the **Settings** gear icon → **Networking**
+   - Set **IP Assignment** to **Static**: `10.32.01.13`
+   - Subnet: `255.255.255.0`, Gateway: `10.32.01.1`
+   - Click **Save** and wait for the coprocessor to reboot (~20 seconds)
+   - Browse to `http://10.32.01.13:5800` to confirm the new address works
+4. **Camera Nickname:**
+   - Click on your camera in the left sidebar
+   - Set the **Camera Nickname** field to exactly `intake-cam` (case-sensitive, no spaces)
+   - Click **Save**
+5. **Object-Detection Pipeline:**
+   - Select your trained object-detection pipeline from the **Pipeline** dropdown
+   - Confirm bounding boxes appear around fuel game pieces in the camera stream
+
+- [ ] PhotonVision web UI reachable at `http://10.32.01.13:5800`
+- [ ] Camera nickname set to `intake-cam`
+- [ ] Object-detection pipeline selected and detecting game pieces
+
+**Record:**
+- Firmware version: `______`
+- Camera nickname: `intake-cam`
+- Static IP: `10.32.01.13`
+
 #### Network Reachability Check
 
-After configuring both cameras and connecting to the robot radio:
+After configuring all cameras and connecting to the robot radio:
 
 ```
 ping 10.32.01.11   # limelight-frontl
 ping 10.32.01.12   # limelight-frontr
+ping 10.32.01.13   # PhotonVision coprocessor (intake-cam)
 ```
 
 - [ ] `10.32.01.11` (limelight-frontl) pingable from driver station laptop
 - [ ] `10.32.01.12` (limelight-frontr) pingable from driver station laptop
-- [ ] Both web UIs reachable: `http://10.32.01.11:5801` and `http://10.32.01.12:5801`
+- [ ] `10.32.01.13` (PhotonVision coprocessor) pingable from driver station laptop
+- [ ] Limelight web UIs reachable: `http://10.32.01.11:5801` and `http://10.32.01.12:5801`
+- [ ] PhotonVision web UI reachable: `http://10.32.01.13:5800`
 
 ---
 
@@ -289,6 +324,7 @@ After all imaging, firmware upgrades, and camera configuration:
 - [ ] No firmware version mismatch errors in Rio console
 - [ ] No "Vision camera disconnected" alerts in Driver Station or AdvantageScope
 - [ ] Both Limelights streaming live in their web UIs
+- [ ] `GamePieceVision/connected = true` in AdvantageScope (requires `intake-cam` coprocessor online)
 
 ---
 
@@ -703,6 +739,28 @@ Adjust readiness tolerances in `Shooter.java` if needed:
 5. Confirm game piece feeds into spindexer path
 6. Run spindexer — confirm game piece reaches kicker
 
+### 3.6 AutoDriveToFuel Verification
+
+> Requires the PhotonVision coprocessor configured and the object-detection pipeline active (see §0a.5b). For full tuning steps, see [`gamepiece-vision-setup.md`](gamepiece-vision-setup.md).
+
+1. Place a fuel game piece on the floor behind the robot (~1 m from the intake)
+2. Enable robot in **Teleop**
+3. Hold **B button** — confirm in AdvantageScope:
+   - `GamePieceVision/IsReadyToChase = true`
+   - `AutoDriveToFuel/State = Chasing`
+   - `AutoDriveToFuel/ForwardSpeedMps ≈ −1.5` (negative = driving backward toward intake)
+4. Confirm the robot drives backward toward the game piece and deploys the intake
+5. Release **B button** — confirm robot stops immediately and driver regains joystick control
+6. Hold **B** with no pieces visible — confirm `State = TargetLost` and robot does not move
+7. **Sign test:** place piece slightly to the robot's **left** → `YawErrorDeg > 0` → robot should turn **CCW** (left); if it turns the wrong way, see `YAW_KP` sign note in `GamePieceVisionConstants.java`
+8. Hold **B** for > 5 seconds with a piece in view — confirm command ends automatically (`EndReason = Timeout`)
+
+- [ ] Robot drives backward and deploys intake when B is held with piece in view
+- [ ] Robot stops when B released
+- [ ] Robot does not drive blind when no piece visible
+- [ ] Sign test passes (robot turns toward piece)
+- [ ] Timeout ends command after 5 seconds
+
 ---
 
 ## Phase 4 — Climb Subsystem
@@ -788,6 +846,7 @@ Adjust readiness tolerances in `Shooter.java` if needed:
 ### 5.1 Full Teleop Cycle
 
 - [ ] Drive to game piece → intake → feed to shooter → shoot
+- [ ] AutoDriveToFuel (B button): hold with game piece behind robot → robot drives backward and intakes the piece
 - [ ] Drive using AprilTag targeting — confirm turret auto-aims during drive
 - [ ] Fixed-distance shot from 1m, 2m, 3m
 - [ ] RPM trim works (+/− 100 per press)
@@ -815,12 +874,22 @@ Review all SmartDashboard / operator control bindings — confirm each button tr
 - [ ] Multi-step auto: drive to shoot position → aim → fire
 - [ ] SysId options appear in auto chooser and run cleanly
 
-### 5.4 Vision End-to-End
+### 5.4 AprilTag Vision End-to-End
 
 - [ ] Both Limelights connected and streaming
 - [ ] AprilTag IDs detected correctly (correct tag map loaded)
 - [ ] Robot pose within 10cm of actual after vision fusion
 - [ ] Turret uses vision-derived robot pose for firing solution
+
+### 5.5 Game Piece Vision End-to-End
+
+- [ ] `GamePieceVision/connected = true` in AdvantageScope
+- [ ] `GamePieceVision/TargetCount ≥ 1` when fuel game piece is visible to `intake-cam`
+- [ ] Hold B with game piece behind robot → `IsReadyToChase = true`, robot drives backward toward piece
+- [ ] Release B → robot stops immediately
+- [ ] Hold B with no pieces visible → robot does not move (State = TargetLost)
+- [ ] Hold B for > 5 seconds → command ends automatically (EndReason = Timeout)
+- [ ] Place 3 pieces in cluster and 1 piece alone — robot steers toward cluster (larger combined area)
 
 ---
 
@@ -844,6 +913,17 @@ Use this section to record tuned values as you go. After each session, update co
 | Hood ready tol (deg) | 2.0 | | Shooter.java |
 | Flywheel ready tol (RPM) | 150 | | Shooter.java |
 | Spindexer run RPM | 500 | | Spindexer.java |
+
+### Game Piece Vision (AutoDriveToFuel)
+
+| Parameter | Default | Tuned | File |
+|-----------|---------|-------|------|
+| MIN_CONFIDENCE | 0.5 | | GamePieceVisionConstants.java |
+| MIN_TARGET_AREA_PERCENT | 0.5 | | GamePieceVisionConstants.java |
+| YAW_KP (rad/s per deg) | 0.10 | | GamePieceVisionConstants.java |
+| YAW_EMA_ALPHA | 0.35 | | GamePieceVisionConstants.java |
+| CHASE_SPEED_MPS | 1.5 | | GamePieceVisionConstants.java |
+| CHASE_TIMEOUT_SEC | 5.0 | | GamePieceVisionConstants.java |
 
 ### Intake
 
