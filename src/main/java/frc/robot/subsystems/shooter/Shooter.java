@@ -430,7 +430,7 @@ public class Shooter extends SubsystemBase {
 
     // --- Iterate once or twice ---
     for (int i = 0; i < 2; i++) {
-      futurePose = predictRobotPoseCurve(currentPose, chassisSpeeds, tofSec);
+      futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
 
       shooterFieldPos =
           futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
@@ -442,7 +442,7 @@ public class Shooter extends SubsystemBase {
     }
 
     // --- Final future pose ---
-    futurePose = predictRobotPoseCurve(currentPose, chassisSpeeds, tofSec);
+    futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
 
     shooterFieldPos =
         futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
@@ -497,7 +497,7 @@ public class Shooter extends SubsystemBase {
 
     // --- Iterate once or twice ---
     for (int i = 0; i < 2; i++) {
-      futurePose = predictRobotPoseCurve(currentPose, chassisSpeeds, tofSec);
+      futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
 
       shooterFieldPos =
           futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
@@ -525,7 +525,7 @@ public class Shooter extends SubsystemBase {
     }
 
     // --- Final future pose ---
-    futurePose = predictRobotPoseCurve(currentPose, chassisSpeeds, tofSec);
+    futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
 
     shooterFieldPos =
         futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
