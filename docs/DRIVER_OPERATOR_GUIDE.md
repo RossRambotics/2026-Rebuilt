@@ -30,6 +30,7 @@ This guide covers what you need to drive and operate the robot effectively. Read
 | **Left Bumper (LB)** | Retract intake arm |
 | **Right Trigger (RT)** | **Auto Shoot** — full predictive targeting; toggle on to start, toggle off to stop |
 | **Right Bumper (RB)** | **Manual Shoot** — runs kicker and spindexer only; use when manually aimed |
+| **B Button** | **Auto Drive to Fuel** — hold to drive backward toward detected game pieces and auto-deploy intake; release to stop |
 | **Y Button** | Drive to selected spot (operator selects the spot on button box first) |
 | **X Button** | Lock wheels in X pattern — defensive stance |
 | **Back Button** | Reset gyro heading only (keep current XY) — intake must face alliance wall |
@@ -67,7 +68,18 @@ The button box displays a live field map. The operator should monitor this throu
 
 This section describes what everything should look like and do when working correctly.
 
-### Intake (Picking Up Game Pieces)
+### Auto Drive to Fuel (Game Piece Chase)
+
+The `intake-cam` PhotonVision coprocessor detects fuel game pieces on the floor. When B is held, the robot automatically steers its rear intake toward the nearest/densest grouping and deploys the intake.
+
+1. **Driver holds B button** — robot drives backward toward detected game pieces and deploys the intake automatically.
+2. **Release B** — robot stops immediately and driver regains full joystick control.
+3. If no game pieces are visible, the robot will not move — it will not drive blind.
+4. The command times out automatically after 5 seconds even if B is still held.
+
+> **Tip:** The robot steers toward the *densest nearby cluster* — if multiple pieces are visible, it will home in on the group rather than flipping between individual pieces.
+
+### Intake (Picking Up Game Pieces — Manual)
 
 1. **Driver presses Left Trigger (LT)** — arm deploys and roller spins.
    - The arm releases to coast so it can flex if hit by another robot. This is intentional.
@@ -164,7 +176,7 @@ This tells you how well the robot can see AprilTags for pose estimation.
 | **YELLOW** | Solid | Game piece detected |
 | **Any color** | **Strobing** | Match shift transition warning (last 5 sec of a shift) |
 
-> **Note:** Game piece detection camera is not yet installed. Bottom LEDs will show WHITE (no piece) until the sensor is added.
+> **Note:** Game piece detection uses the `intake-cam` PhotonVision coprocessor (the same one used by the B button chase command) — YELLOW when the camera sees a fuel game piece on the floor, WHITE when none are detected.
 
 ---
 

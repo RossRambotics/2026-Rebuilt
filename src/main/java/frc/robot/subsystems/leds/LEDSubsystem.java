@@ -11,8 +11,7 @@ import com.ctre.phoenix6.signals.StripTypeValue;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.vision.Vision;
+import frc.robot.Subsystems;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -33,8 +32,7 @@ import org.littletonrobotics.junction.Logger;
 public class LEDSubsystem extends SubsystemBase {
 
   private final boolean m_isReal;
-  private final Vision m_vision;
-  private final Shooter m_shooter;
+  private final Subsystems m_subsystems;
 
   // Hardware — null when not real
   private final CANdle m_candle;
@@ -65,13 +63,11 @@ public class LEDSubsystem extends SubsystemBase {
    * Creates the LED subsystem.
    *
    * @param isReal true when running on real hardware; false in sim/replay (stubs all CANdle calls)
-   * @param vision Vision subsystem used to query per-camera AprilTag counts
-   * @param shooter Shooter subsystem used to query readiness and shooting state
+   * @param subsystems Bundle of all subsystems; used to query vision, shooter, and game piece state
    */
-  public LEDSubsystem(boolean isReal, Vision vision, Shooter shooter) {
+  public LEDSubsystem(boolean isReal, Subsystems subsystems) {
     m_isReal = isReal;
-    m_vision = vision;
-    m_shooter = shooter;
+    m_subsystems = subsystems;
 
     if (m_isReal) {
       m_candle = new CANdle(CANDLE_CAN_ID);
@@ -119,17 +115,17 @@ public class LEDSubsystem extends SubsystemBase {
 
   /** Group 1 (8–47): left front limelight (camera index 0). */
   private void updateGroup1() {
-    RGBWColor color = limelightColor(m_vision.getTagCount(0));
+    RGBWColor color = limelightColor(m_subsystems.vision().getTagCount(0));
     setSolid(m_solidGroup1, color);
-    Logger.recordOutput("LEDs/Group1/TagCount", m_vision.getTagCount(0));
+    Logger.recordOutput("LEDs/Group1/TagCount", m_subsystems.vision().getTagCount(0));
     Logger.recordOutput("LEDs/Group1/Color", colorName(color));
   }
 
   /** Group 4 (158–197): right front limelight (camera index 1). */
   private void updateGroup4() {
-    RGBWColor color = limelightColor(m_vision.getTagCount(1));
+    RGBWColor color = limelightColor(m_subsystems.vision().getTagCount(1));
     setSolid(m_solidGroup4, color);
-    Logger.recordOutput("LEDs/Group4/TagCount", m_vision.getTagCount(1));
+    Logger.recordOutput("LEDs/Group4/TagCount", m_subsystems.vision().getTagCount(1));
     Logger.recordOutput("LEDs/Group4/Color", colorName(color));
   }
 
@@ -153,13 +149,13 @@ public class LEDSubsystem extends SubsystemBase {
       return;
     }
 
-    boolean isShooting = m_shooter.isShooting();
+    boolean isShooting = m_subsystems.shooter().isShooting();
     RGBWColor color;
 
     if (!isShooting) {
       color = AMBER;
     } else {
-      color = m_shooter.isReady() ? GREEN : RED;
+      color = m_subsystems.shooter().isReady() ? GREEN : RED;
     }
 
     setSolid(m_solidGroup2, color);
@@ -177,7 +173,8 @@ public class LEDSubsystem extends SubsystemBase {
    *   <li>Enabled strobing → StrobeAnimation during last 5 s of each TeleOp shift
    * </ul>
    *
-   * <p>Game piece detection is a stub (always false) until sensor hardware is available.
+   * <p>Game piece detection uses {@link frc.robot.subsystems.gamepiece.GamePieceVisionSubsystem} —
+   * Yellow when the intake-cam sees a fuel game piece, White when none are detected.
    */
   private void updateGamePieceGroups() {
     if (DriverStation.isDisabled()) {
@@ -191,8 +188,7 @@ public class LEDSubsystem extends SubsystemBase {
       return;
     }
 
-    // TODO: replace stub with real game piece detection (beam break, vision, etc.)
-    boolean hasGamePiece = false;
+    boolean hasGamePiece = m_subsystems.gamePieceVision().hasTarget();
     boolean inBlinkWindow = isInBlinkWindow();
     RGBWColor baseColor = hasGamePiece ? YELLOW : WHITE;
 

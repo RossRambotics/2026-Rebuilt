@@ -82,7 +82,7 @@ Groups 3 and 6 always show the same thing.
 | Solid yellow | Game piece detected |
 | Strobing | Last 5 seconds of a TeleOp shift period |
 
-The game piece signal is currently a **stub** (always false). Wire up `hasGamePiece` in `updateGamePieceGroups()` when sensor hardware is available.
+Game piece detection uses `GamePieceVisionSubsystem.hasTarget()` — YELLOW when the `intake-cam` PhotonVision coprocessor sees a fuel game piece on the floor, WHITE when none are detected.
 
 #### TeleOp Shift Blink Windows
 Groups 3 & 6 strobe during the last 5 seconds of each TeleOp shift to alert the drivers that the period is about to change. The shift boundaries use `DriverStation.getMatchTime()` (seconds remaining, counting down from ~150 s):
@@ -147,7 +147,7 @@ All `SolidColor` and `StrobeAnimation` control objects are pre-allocated as clas
 | 1 | Group 6 — game piece strobe (right) |
 
 ### Dependencies injected via constructor
-`Vision` and `Shooter` are passed into `LEDSubsystem` at construction time in `RobotContainer`.
+`LEDSubsystem` receives the full `Subsystems` record at construction time (instantiated after `Subsystems` is assembled in `RobotContainer`). It accesses `subsystems.vision()`, `subsystems.shooter()`, and `subsystems.gamePieceVision()` directly.
 
 ---
 
@@ -181,20 +181,7 @@ These values are deliberate placeholders and should be updated when hardware is 
 | `GROUP*_SPACER_END` | `LEDConstants.java` | 10 LEDs per group | Spacer count — adjust as needed |
 | `STROBE_FRAME_RATE_HZ` | `LEDConstants.java` | 24 Hz | Strobe speed |
 | `LED.BrightnessScalar` | `LEDSubsystem.java` constructor | 1.0 | Reduce if LEDs are too bright |
-| Game piece stub | `updateGamePieceGroups()` | `false` | Replace when sensor is ready |
-
----
-
-## Wiring Game Piece Detection
-
-When a beam break sensor, color sensor, or game piece vision pipeline is available, replace the stub in `updateGamePieceGroups()`:
-
-```java
-// TODO: replace stub with real game piece detection (beam break, vision, etc.)
-boolean hasGamePiece = false;
-```
-
-The signal can come from any subsystem — just inject the reference into `LEDSubsystem` via the constructor (same pattern as `Vision` and `Shooter`).
+| `LED.BrightnessScalar` | `LEDSubsystem.java` constructor | 1.0 | Reduce if LEDs are too bright |
 
 ---
 

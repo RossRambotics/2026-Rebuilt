@@ -184,9 +184,6 @@ public class RobotContainer {
         break;
     }
 
-    // Instantiate LED subsystem — real only on REAL hardware, stubbed in sim/replay
-    m_ledSubsystem = new LEDSubsystem(false, vision, m_shooter);
-
     // Instantiate game piece vision subsystem (dedicated object-detection camera)
     switch (Constants.currentMode) {
       case REAL:
@@ -207,6 +204,9 @@ public class RobotContainer {
     // Bundle subsystems for OperatorControls and other consumers
     m_subsystems =
         new Subsystems(drive, m_shooter, m_intake, m_climbElevator, vision, m_gamePieceVision);
+
+    // Instantiate LED subsystem after m_subsystems so it can receive the full bundle
+    m_ledSubsystem = new LEDSubsystem(Constants.currentMode == Constants.Mode.REAL, m_subsystems);
 
     // Register SuperFastClimb as PathPlanner named commands for use in .auto files.
     // Must be registered before AutoBuilder.buildAutoChooser().
