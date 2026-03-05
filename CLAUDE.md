@@ -42,13 +42,15 @@ src/main/java/frc/robot/
 │   ├── AutoTargetSelector.java         # Auto-select shooting target by field zone
 │   ├── DriveToSpot.java                # PathPlanner on-the-fly navigation to FieldSpot
 │   ├── FieldSpot.java                  # Predefined field position enum
-│   └── ShootingTarget.java             # Shooting target definitions with field poses
+│   ├── ShootingTarget.java             # Shooting target definitions with field poses
+│   └── AutoDriveToFuel.java            # Yaw-servo drive toward detected game pieces (B button)
 ├── subsystems/
 │   ├── drive/          # Swerve drivetrain (Drive, Module, GyroIO, ModuleIO, PhoenixOdometryThread)
 │   ├── shooter/        # Turret + Hood + BottomFlyWheel + Kicker, coordinated by Shooter.java
 │   ├── intake/         # IntakeRoller + IntakeDeployArm (YAMS), coordinated by Intake.java
 │   ├── climb/          # ClimbElevator (YAMS linear mechanism)
 │   ├── vision/         # Multi-camera AprilTag pose estimation (Limelight / PhotonVision)
+│   ├── gamepiece/      # GamePieceVisionSubsystem (PhotonVision object detection, intake-cam)
 │   ├── leds/           # LEDSubsystem (CANdle, 308 addressable LEDs)
 │   ├── SpeedNanny.java         # Dynamic speed/accel limiter (reduces rates while shooting)
 │   ├── Spindexer.java          # Feed mechanism (YAMS FlyWheel, TalonFX CAN 39)
@@ -69,6 +71,8 @@ src/main/java/frc/robot/
 - **LEDSubsystem** reflects shooter readiness, vision lock, and game piece status via 6 LED groups on a CANdle.
 - **SpeedNanny** dynamically reduces drive speed/acceleration limits when the shooter reports `isShooting()`.
 - **DriveCommands** applies SpeedNanny limits via slew rate limiters on joystick input.
+- **GamePieceVisionSubsystem** uses a rear-facing PhotonVision coprocessor (`intake-cam`, `10.32.01.13`) to detect fuel game pieces via object detection. Computes an area-weighted centroid yaw with EMA smoothing and exposes `isReadyToChase()` / `getYawRobotDeg()` to `AutoDriveToFuel`.
+- **AutoDriveToFuel** (B button, `whileTrue`) drives the robot backward toward detected game pieces using proportional yaw steering, auto-deploys the intake, and ends on timeout or button release.
 - **FuelSim** provides physics-based ball simulation in SIM mode (2021 field geometry).
 
 ### Autonomous
@@ -95,7 +99,8 @@ PathPlanner handles path planning and trajectory following. Paths are stored in 
 - **Climb:** ClimbElevator TalonFX (YAMS linear mechanism, 20:1 reduction)
 - **Spindexer:** TalonFX Falcon500 (CAN 39)
 - **LEDs:** CANdle (CAN 50) driving 308 addressable LEDs in 6 groups
-- **Vision:** Dual Limelight cameras (`limelight-frontl` / `limelight-frontr`) with robot-to-camera transforms in `VisionConstants`; PhotonVision used in SIM mode
+- **Vision:** Dual Limelight cameras (`limelight-frontl` `10.32.01.11` / `limelight-frontr` `10.32.01.12`) with robot-to-camera transforms in `VisionConstants`; PhotonVision used in SIM mode
+- **Game Piece Vision:** PhotonVision coprocessor (`intake-cam`, `10.32.01.13`), rear-facing, running a trained object-detection pipeline; constants in `GamePieceVisionConstants.java`
 - **CAN Bus:** `"usb"` (all swerve, shooter, intake, sensors)
 
 ### CAN ID Reference
@@ -139,6 +144,7 @@ Key docs live in `docs/`. Keep them in sync when the corresponding code changes.
 | [`docs/led-subsystem.md`](docs/led-subsystem.md) | LED groups, colors, or triggers change |
 | [`docs/super-fast-climb.md`](docs/super-fast-climb.md) | `ClimbCommands.superFastClimb()` sequence changes |
 | [`docs/vision-pipeline.md`](docs/vision-pipeline.md) | Vision IO, camera names, or pose fusion strategy changes |
+| [`docs/gamepiece-vision-setup.md`](docs/gamepiece-vision-setup.md) | `GamePieceVisionSubsystem`, `AutoDriveToFuel`, or `GamePieceVisionConstants` change |
 
 Other docs (`shakedown.md`, `shoot-while-moving-checklist.md`, `button-box-plan.md`, etc.) are process/checklist docs — update as needed but they don't track code directly.
 
