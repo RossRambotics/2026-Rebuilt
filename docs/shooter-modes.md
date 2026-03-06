@@ -77,16 +77,18 @@ Triggered by holding the **right trigger**. Overrides the hood and flywheel defa
 | Mechanism | Behavior |
 |-----------|----------|
 | Turret | Predictive targeting (same as IDLE — no change) |
-| Hood | Firing solution angle (from `m_lastFiringSolution.hoodMechAngleRad`) |
-| Flywheel | Firing solution RPM (from `m_lastFiringSolution.flywheelRPM + rpmTrim`) |
+| Hood | Firing solution angle + `m_hoodTrimOffsetDeg`, clamped to `[HOOD_DEGREES_MIN, HOOD_DEGREES_MAX]` |
+| Flywheel | Firing solution RPM + `m_rpmTrimOffsetRpm` |
 | Kicker | **Runs only when `isReady()` is true** (debounced) |
 | Spindexer | **Runs only when `isReady()` is true** (debounced) |
 
 **`isReady()` gate** — `m_isShooterReady` is true when ALL of:
 - Turret within ±2° of target (100 ms debounce)
-- Hood within ±2° of target (100 ms debounce)
-- Flywheel within ±150 RPM of target (100 ms debounce)
+- Hood within ±2° of *trimmed* target (100 ms debounce)
+- Flywheel within ±150 RPM of *trimmed* target (100 ms debounce)
 - Robot translational speed under SpeedNanny limit
+
+**Trim offsets** are applied consistently across the targeting command, readiness check, and telemetry logging. Retract commands (`getIdleHoodCmd`, `getRetractHoodCmd`) always go to `HOOD_DEGREES_MIN` and ignore the trim.
 
 **On command end (trigger released or command interrupted):**
 1. Kicker → stopped

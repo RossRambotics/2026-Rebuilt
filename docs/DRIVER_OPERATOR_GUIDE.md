@@ -244,10 +244,20 @@ Auto-driving uses the robot's pose estimate. If the pose is wrong, the robot wil
 
 The flywheel RPM trim may need adjustment.
 
-- **Short shots:** Operator press **Shooter / RPM +100** (can press multiple times, each adds 100 RPM).
-- **Long shots:** Operator press **Shooter / RPM -100**.
+- **Short shots:** Operator press **Shooter / RPM +50** (can press multiple times, each adds 50 RPM).
+- **Long shots:** Operator press **Shooter / RPM -50**.
 - **Back to baseline:** Operator press **Shooter / RPM Reset**.
 - Trim is cumulative and persists until reset. Keep track of how many presses you've made.
+
+### Problem: Aiming Lands Consistently Too High / Too Low (Hood)
+
+The hood trim may need adjustment.
+
+- **Shots too high (overshooting):** Operator press **Shooter / Hood -1deg** (can press multiple times, each removes 1°).
+- **Shots too low (undershooting):** Operator press **Shooter / Hood +1deg**.
+- **Back to baseline:** Operator press **Shooter / Hood Trim Reset**.
+- Hood trim is clamped to the hood's full angular range and persists until reset.
+- Hood retract commands (idle, trench auto-retract, **Retract Hood** button) are **not** affected by the trim — they always go to the minimum safe angle.
 
 ### Problem: Aiming Is Consistently Left / Right
 
@@ -287,7 +297,7 @@ When automatic targeting is unreliable (bad pose, vision down):
    - Auto-targeting is now **disabled** until you press **Target Enable Auto**.
    - Selected target stays locked even as the robot moves.
 2. Operator uses **Turret Center**, **Turret Left 5deg**, **Turret Right 5deg** to manually adjust turret angle.
-3. Operator uses **RPM +100 / -100** to trim flywheel speed.
+3. Operator uses **RPM +50 / -50** to trim flywheel speed; **Hood +1deg / -1deg** to trim hood angle.
 4. Driver presses **Right Trigger (RT)** to toggle auto shoot on once aligned.
 
 > **When done:** Press **Shooter / Target Enable Auto** to return to zone-based auto-targeting.
@@ -442,6 +452,7 @@ Complete this before every match.
 - [ ] Flywheel pre-spin is audible / middle LEDs confirm system active
 - [ ] Auto-targeting mode is set correctly (check button box)
 - [ ] RPM trim is reset (**Shooter / RPM Reset**)
+- [ ] Hood trim is reset (**Shooter / Hood Trim Reset**)
 - [ ] Turret nudge is cleared (verify turret snaps to calculated aim automatically)
 
 ### Gyro / Heading & Pose Verification
@@ -485,7 +496,8 @@ SHOTS CONSISTENTLY MISSING
 │   └─ Shooter off? → Operator: Normal Targeting button
 │
 └─ LEDs GREEN but aim is off?
-    ├─ Consistently short/long → Operator: RPM ±100 trim
+    ├─ Consistently short/long → Operator: RPM ±50 trim
+    ├─ Consistently high/low  → Operator: Hood ±1deg trim
     ├─ Consistently left/right → Operator: Turret ±5deg nudge
     └─ Pose drifted? → Operator: Reseed from Vision
 
@@ -510,6 +522,9 @@ INTAKE JAMMED
 
 | Date | Change |
 |------|--------|
+| 2026-03-06 | **RPM trim** step reduced from ±100 to ±50 RPM per press (`Shooter/RPM +50`, `Shooter/RPM -50`) |
+| 2026-03-06 | **Hood trim** added: `Shooter/Hood +1deg`, `Shooter/Hood -1deg`, `Shooter/Hood Trim Reset` — trims the firing solution hood angle without affecting retract commands |
+| 2026-03-06 | **Average RPM** (`Shooter/FlyWheelAverageRPM`) added to telemetry — EMA-smoothed flywheel RPM for stable dashboard reading |
 | 2026-03-04 | **Left Trigger** changed from hold to toggle — press once to deploy arm and start roller, press again to stop roller (arm stays deployed) |
 | 2026-03-04 | **Right Trigger** changed from hold to toggle — press once to start auto shoot, press again to stop |
 | 2026-03-04 | **Auto Shoot** feeding now stops and automatically resumes if the turret loses feasibility (e.g. robot faces away from target) |

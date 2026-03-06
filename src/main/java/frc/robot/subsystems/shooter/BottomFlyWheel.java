@@ -41,26 +41,14 @@ public class BottomFlyWheel extends SubsystemBase {
 
   private final boolean m_isReal;
 
-  // --- Interpolation Code START ---
-  // 1. The Interpolation Table
+  // RPM Interpolation Table (Distance meters -> RPM)
   private final TreeMap<Double, Double> m_rpmTable = new TreeMap<>();
 
-  // 2. NetworkTable Entries for debugging/dashboard
-  private DoubleEntry m_inputDistance; // We read this from the dashboard (or camera)
-  private DoubleEntry m_interpolatedRPM; // We write the result here
-  private DoubleEntry m_interpolatedToF; // Calculated time-of-flight (seconds)
-  // --- Interpolation Code END ---
-  // --- Hood Angle Code START ---
-  // 1. The Angle Interpolation Table
+  // Hood Angle Interpolation Table (Distance meters -> Degrees)
   private final TreeMap<Double, Double> m_angleTable = new TreeMap<>();
 
-  // 2. NetworkTable Entry for the calculated angle
-  private DoubleEntry m_interpolatedAngle;
-  // --- Time-of-Flight Table ---
+  // Time-of-Flight Table (Distance meters -> seconds)
   private final TreeMap<Double, Double> m_tofTable = new TreeMap<>();
-  // 2b. NetworkTable Entry for the calculated time-of-flight
-  // (declared above as m_interpolatedToF)
-  // --- Hood Angle Code END ---
 
   private DoubleEntry m_targetRPM = null;
 
@@ -165,16 +153,6 @@ public class BottomFlyWheel extends SubsystemBase {
     m_targetRPM = table.getDoubleTopic("BottomTargetRPM").getEntry(0.0);
     m_targetRPM.set(0.0);
 
-    // --- Interpolation Code START ---
-    m_inputDistance = table.getDoubleTopic("InputDistance").getEntry(0.0);
-    m_inputDistance.set(0.0); // Forces it to appear on Dashboard
-
-    m_interpolatedRPM = table.getDoubleTopic("CalculatedRPM").getEntry(0.0);
-    m_interpolatedAngle = table.getDoubleTopic("CalculatedAngle").getEntry(0.0);
-    m_interpolatedToF = table.getDoubleTopic("CalculatedToF").getEntry(0.0);
-
-    m_interpolatedToF.set(0.0);
-
     // Populate Angle Table (Distance -> Degrees)
     m_angleTable.put(1.7, 15.0);
     m_angleTable.put(2.7, 30.0);
@@ -278,21 +256,6 @@ public class BottomFlyWheel extends SubsystemBase {
     if (shooter != null) {
       shooter.updateTelemetry();
     }
-
-    // --- Interpolation Code START ---
-    // 2. Get the current distance
-    double currentDist = m_inputDistance.get();
-
-    // 3. Calculate RPM and Angle
-    double calculatedRpm = calculateRPM(currentDist);
-    double calculatedAngle = calculateAngle(currentDist);
-    double calculatedTof = calculateToF(currentDist);
-
-    // 4. Push to Dashboard so you can see it
-    m_interpolatedRPM.set(calculatedRpm);
-    m_interpolatedAngle.set(calculatedAngle);
-    m_interpolatedToF.set(calculatedTof);
-    // --- Interpolation Code END ---
   }
 
   /** Helper function to calculate Time-of-Flight from Distance using Linear Interpolation. */

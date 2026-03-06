@@ -176,9 +176,12 @@ public class OperatorControls {
     SmartDashboard.putData("Shooter/Turret Left 5deg", shooter.getTurretNudgeCmd(Degrees.of(-5)));
     SmartDashboard.putData("Shooter/Turret Center", shooter.getTurretCenterCmd());
     SmartDashboard.putData("Shooter/Turret Right 5deg", shooter.getTurretNudgeCmd(Degrees.of(5)));
-    SmartDashboard.putData("Shooter/RPM +100", shooter.getRPMTrimCmd(+100));
-    SmartDashboard.putData("Shooter/RPM -100", shooter.getRPMTrimCmd(-100));
+    SmartDashboard.putData("Shooter/RPM +50", shooter.getRPMTrimCmd(+50));
+    SmartDashboard.putData("Shooter/RPM -50", shooter.getRPMTrimCmd(-50));
     SmartDashboard.putData("Shooter/RPM Reset", shooter.getRPMTrimResetCmd());
+    SmartDashboard.putData("Shooter/Hood +1deg", shooter.getHoodTrimCmd(+1));
+    SmartDashboard.putData("Shooter/Hood -1deg", shooter.getHoodTrimCmd(-1));
+    SmartDashboard.putData("Shooter/Hood Trim Reset", shooter.getHoodTrimResetCmd());
 
     // TOF empirical measurement — press once per ball as it visibly arrives at the target.
     // Ball 1 press = TOF for 1st RPM-droop launch, ball 2 press = 2nd, etc.

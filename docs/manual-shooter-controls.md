@@ -104,7 +104,11 @@ While manual commands are running, the existing telemetry in `Shooter.updateTele
 - `Shooter/TurretActualDegRobot` — current turret angle
 - `Shooter/TurretTargetDegRobot` — target from the firing solution (not the manual override)
 - `Shooter/HoodActualAngleDeg` — current hood angle
-- `Shooter/FlyWheelActualRPM` — current flywheel RPM
-- `Shooter/FlyWheelTargetRPM` — target from the firing solution (not the manual override)
+- `Shooter/HoodTargetAngleDeg` — firing solution angle + hood trim offset (clamped)
+- `Shooter/HoodTrimOffsetDeg` — current hood trim accumulator value
+- `Shooter/FlyWheelActualRPM` — current flywheel RPM (raw)
+- `Shooter/FlyWheelAverageRPM` — EMA-smoothed flywheel RPM (~20-sample window at 50 Hz); use this for a stable dashboard reading
+- `Shooter/FlyWheelTargetRPM` — firing solution RPM + RPM trim offset
+- `Shooter/RPMTrimOffsetRpm` — current RPM trim accumulator value
 
 The YAMS motor telemetry (`TurretMotor/*`, `HoodMotor/*`, `BottomFlyWheelMotor/*`) logs the actual setpoints being sent to the motors, which will reflect the manual values.

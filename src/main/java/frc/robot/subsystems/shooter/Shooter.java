@@ -83,6 +83,14 @@ public class Shooter extends SubsystemBase {
   // Added inside every flywheel velocity calculation (auto and fixed).
   private double m_rpmTrimOffsetRpm = 0.0;
 
+  // Persistent in-match hood angle offset (degrees) accumulated by the trim buttons.
+  // Applied in every dynamic hood setpoint and the readiness check.
+  private double m_hoodTrimOffsetDeg = 0.0;
+
+  // EMA of actual flywheel RPM — smooths the noisy raw reading for dashboard display.
+  private static final double RPM_AVERAGE_ALPHA = 0.05; // 5% weight → ~20-sample window at 50 Hz
+  private double m_rpmAverageRpm = 0.0;
+
   // ── TOF empirical measurement state ───────────────────────────────────────
   // Launch timestamps recorded on CANrange falling edge (ball leaving kicker).
   private final double[] m_tofLaunchTimestampsSec = new double[TOF_MAX_SHOTS];
@@ -197,14 +205,7 @@ public class Shooter extends SubsystemBase {
     Shuffleboard.getTab("Hood").add(this.getHoodAngleTestCmd("Hood Angle 45", Degrees.of(45.0)));
     Shuffleboard.getTab("Hood").add(m_hood.getZeroHoodAngleCmd());
 
-    Shuffleboard.getTab("BottomFlyWheel").add(this.getFlyWheelRPMCmd("Bottom Flywheel 0 RPM", 0.0));
-    Shuffleboard.getTab("BottomFlyWheel")
-        .add(this.getFlyWheelRPMCmd("Bottom Flywheel 1000 RPM", 1000.0));
-    Shuffleboard.getTab("BottomFlyWheel")
-        .add(this.getFlyWheelRPMCmd("Bottom Flywheel 2000 RPM", 2000.0));
     Shuffleboard.getTab("BottomFlyWheel").add(this.getFlyWheelRPMCmd("Dynamic"));
-    Shuffleboard.getTab("BottomFlyWheel")
-        .add(this.getFlyWheelRPMCmd("Bottom Flywheel 3000 RPM", 3000.0));
     Shuffleboard.getTab("Kicker").add(this.getKickerRPMCmd("Kicker Dynamic"));
     Shuffleboard.getTab("Spindexer").add(this.getSpindexerRPMCmd("Spindexer Dynamic"));
   }
@@ -308,7 +309,13 @@ public class Shooter extends SubsystemBase {
         m_hood.setAngle(
             () -> {
               if (m_lastFiringSolution != null && m_isTurretActive) {
-                return Radians.of(m_lastFiringSolution.hoodMechAngleRad);
+                double trimmedDeg =
+                    MathUtil.clamp(
+                        Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees)
+                            + m_hoodTrimOffsetDeg,
+                        HoodConstants.HOOD_DEGREES_MIN,
+                        HoodConstants.HOOD_DEGREES_MAX);
+                return Degrees.of(trimmedDeg);
               }
               return Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
             });
@@ -723,10 +730,13 @@ public class Shooter extends SubsystemBase {
           Math.abs(currentBottomRpm - targetBottomRpm) < BOTTOM_FLYWHEEL_RPM_TOLERANCE;
       m_isBottomFlyWheelReady = m_bottomFlywheelReadyDebouncer.calculate(rawBottomReady);
 
-      // Hood readiness: compare current hood angle to target hood angle (degrees,
-      // debounced)
+      // Hood readiness: compare current hood angle to trimmed target (degrees, debounced)
       double currentHoodDeg = m_hood.getAngle().in(Degrees);
-      double targetHoodDeg = Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees);
+      double targetHoodDeg =
+          MathUtil.clamp(
+              Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees) + m_hoodTrimOffsetDeg,
+              HoodConstants.HOOD_DEGREES_MIN,
+              HoodConstants.HOOD_DEGREES_MAX);
       boolean rawHoodReady = Math.abs(currentHoodDeg - targetHoodDeg) < HOOD_ANGLE_TOLERANCE_DEG;
       m_isHoodReady = m_hoodReadyDebouncer.calculate(rawHoodReady);
 
@@ -796,7 +806,11 @@ public class Shooter extends SubsystemBase {
       Logger.recordOutput("Shooter/FutureRobotPoseDistanceMeters", predictedDistanceMeters);
       Logger.recordOutput("Shooter/TimeOfFlightSec", solution.tofSec);
       Logger.recordOutput("Shooter/DistanceToTargetMeters", solution.distanceToTargetMeters);
-      double hoodTargetAngleDeg = Radians.of(solution.hoodMechAngleRad).in(Degrees);
+      double hoodTargetAngleDeg =
+          MathUtil.clamp(
+              Radians.of(solution.hoodMechAngleRad).in(Degrees) + m_hoodTrimOffsetDeg,
+              HoodConstants.HOOD_DEGREES_MIN,
+              HoodConstants.HOOD_DEGREES_MAX);
       Logger.recordOutput("Shooter/HoodTargetAngleDeg", hoodTargetAngleDeg);
       m_targetHoodAngleDegEntry.set(hoodTargetAngleDeg);
       Logger.recordOutput("Shooter/HoodActualAngleDeg", m_hood.getAngle().in(Degrees));
@@ -821,7 +835,10 @@ public class Shooter extends SubsystemBase {
         "Shooter/ChassisSpeeds.omegaRadPerSec", chassisSpeeds.omegaRadiansPerSecond);
 
     // On-target and motor readings
-    Logger.recordOutput("Shooter/FlyWheelActualRPM", m_bottomFlyWheel.getVelocity().in(RPM));
+    double actualRpm = m_bottomFlyWheel.getVelocity().in(RPM);
+    m_rpmAverageRpm = RPM_AVERAGE_ALPHA * actualRpm + (1.0 - RPM_AVERAGE_ALPHA) * m_rpmAverageRpm;
+    Logger.recordOutput("Shooter/FlyWheelActualRPM", actualRpm);
+    Logger.recordOutput("Shooter/FlyWheelAverageRPM", m_rpmAverageRpm);
     Logger.recordOutput("Shooter/KickerActualRPM", m_kicker.getVelocity().in(RPM));
     Logger.recordOutput("Shooter/KickerTargetRPM", m_kicker.getTargetVelocity().in(RPM));
     Logger.recordOutput("Shooter/SpindexerActualRPM", m_spindexer.getVelocity().in(RPM));
@@ -833,6 +850,7 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/IsHoodReady", m_isHoodReady);
     Logger.recordOutput("Shooter/IsSpeedReady", m_isSpeedReady);
     Logger.recordOutput("Shooter/RPMTrimOffsetRpm", m_rpmTrimOffsetRpm);
+    Logger.recordOutput("Shooter/HoodTrimOffsetDeg", m_hoodTrimOffsetDeg);
     Logger.recordOutput("Shooter/TOF/LaunchCount", m_tofLaunchCount);
     Logger.recordOutput("Shooter/TOF/ConfirmCount", m_tofConfirmCount);
     Logger.recordOutput("Shooter/TotalBallsLaunched", m_totalBallsLaunched);
@@ -1270,10 +1288,18 @@ public class Shooter extends SubsystemBase {
     return Commands.parallel(
             // Override hood idle default: command targeting angle from firing solution
             m_hood.setAngle(
-                () ->
-                    m_lastFiringSolution != null
-                        ? Radians.of(m_lastFiringSolution.hoodMechAngleRad)
-                        : Degrees.of(HoodConstants.HOOD_DEGREES_MIN)),
+                () -> {
+                  if (m_lastFiringSolution != null) {
+                    double trimmedDeg =
+                        MathUtil.clamp(
+                            Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees)
+                                + m_hoodTrimOffsetDeg,
+                            HoodConstants.HOOD_DEGREES_MIN,
+                            HoodConstants.HOOD_DEGREES_MAX);
+                    return Degrees.of(trimmedDeg);
+                  }
+                  return Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
+                }),
             // Override flywheel idle default: command targeting RPM from firing solution
             m_bottomFlyWheel.setVelocity(
                 () ->
@@ -1432,6 +1458,26 @@ public class Shooter extends SubsystemBase {
   /** Resets the RPM trim offset to zero. */
   public Command getRPMTrimResetCmd() {
     return Commands.runOnce(() -> m_rpmTrimOffsetRpm = 0.0).withName("RPMTrim/Reset");
+  }
+
+  /**
+   * Adds {@code deltaDeg} to the persistent hood trim offset. Applied to every dynamic hood
+   * setpoint (auto and auto-shoot). Clamped so the commanded angle stays within the hood's valid
+   * range regardless of how many times it is pressed.
+   *
+   * @param deltaDeg degrees to add (positive = more open, negative = more retracted)
+   */
+  public Command getHoodTrimCmd(double deltaDeg) {
+    double range = HoodConstants.HOOD_DEGREES_MAX - HoodConstants.HOOD_DEGREES_MIN;
+    return Commands.runOnce(
+            () ->
+                m_hoodTrimOffsetDeg = MathUtil.clamp(m_hoodTrimOffsetDeg + deltaDeg, -range, range))
+        .withName("HoodTrim/" + (deltaDeg > 0 ? "+" : "") + (int) deltaDeg);
+  }
+
+  /** Resets the hood trim offset to zero. */
+  public Command getHoodTrimResetCmd() {
+    return Commands.runOnce(() -> m_hoodTrimOffsetDeg = 0.0).withName("HoodTrim/Reset");
   }
 
   // ── Turret manual controls ────────────────────────────────────────────────
