@@ -39,11 +39,11 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
-  // TODO update the location of the turret relative to the robot
+  // location of the turret relative to the robot
   // Turret offsets from robot center (meters)
-  private final double TURRET_X_OFFSET_M = 0.12; // meters
-  private final double TURRET_Y_OFFSET_M = -0.12; // meters
-  private final double TURRET_Z_OFFSET_M = 0.35; // meters
+  private final double TURRET_X_OFFSET_M = 0.14; // meters
+  private final double TURRET_Y_OFFSET_M = -0.158; // meters
+  private final double TURRET_Z_OFFSET_M = 0.46; // meters
 
   // Turret pose in field-relative coordinates (Pose3d)
   private Pose3d m_turretPoseField3d = null;
@@ -83,11 +83,13 @@ public class Shooter extends SubsystemBase {
   // Added inside every flywheel velocity calculation (auto and fixed).
   private double m_rpmTrimOffsetRpm = 0.0;
 
-  // Persistent in-match hood angle offset (degrees) accumulated by the trim buttons.
+  // Persistent in-match hood angle offset (degrees) accumulated by the trim
+  // buttons.
   // Applied in every dynamic hood setpoint and the readiness check.
   private double m_hoodTrimOffsetDeg = 0.0;
 
-  // EMA of actual flywheel RPM — smooths the noisy raw reading for dashboard display.
+  // EMA of actual flywheel RPM — smooths the noisy raw reading for dashboard
+  // display.
   private static final double RPM_AVERAGE_ALPHA = 0.05; // 5% weight → ~20-sample window at 50 Hz
   private double m_rpmAverageRpm = 0.0;
 
@@ -122,7 +124,8 @@ public class Shooter extends SubsystemBase {
   private static final double HOOD_READY_DEBOUNCE_SEC = 0.10; // 100 ms
   private static final double BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC = 0.10; // 100 ms
   private static final double AUTO_SHOOT_INTERVAL_SEC = 0.5; // 2 balls per second
-  // Extra time added to TOF when predicting future pose, to compensate for system latency
+  // Extra time added to TOF when predicting future pose, to compensate for system
+  // latency
   // (sensor delay, loop delay, actuator delay). Tune on hardware.
   private static final double POSE_PREDICT_TIMESHIFT_SEC = 0.030;
 
@@ -165,7 +168,7 @@ public class Shooter extends SubsystemBase {
 
   /** Creates a new Shooter. */
   public Shooter(boolean isReal) {
-    m_turret = new Turret(isReal);
+    m_turret = new Turret(true);
     m_hood = new Hood(isReal);
     m_bottomFlyWheel = new BottomFlyWheel(isReal);
     m_kicker = new Kicker(isReal);
@@ -419,7 +422,8 @@ public class Shooter extends SubsystemBase {
       Translation2d shooterOffsetRobot) {
 
     // --- Initial guess for TOF ---
-    // Warm-start from last solution when available (already near-converged); otherwise seed from
+    // Warm-start from last solution when available (already near-converged);
+    // otherwise seed from
     // LUT using the current (non-predicted) shooter-to-target distance.
     double tofSec;
     if (m_lastFiringSolution != null) {
@@ -730,7 +734,8 @@ public class Shooter extends SubsystemBase {
           Math.abs(currentBottomRpm - targetBottomRpm) < BOTTOM_FLYWHEEL_RPM_TOLERANCE;
       m_isBottomFlyWheelReady = m_bottomFlywheelReadyDebouncer.calculate(rawBottomReady);
 
-      // Hood readiness: compare current hood angle to trimmed target (degrees, debounced)
+      // Hood readiness: compare current hood angle to trimmed target (degrees,
+      // debounced)
       double currentHoodDeg = m_hood.getAngle().in(Degrees);
       double targetHoodDeg =
           MathUtil.clamp(
@@ -889,7 +894,8 @@ public class Shooter extends SubsystemBase {
       return;
     }
 
-    // Falling edge of detection: ball just left the kicker (entered flywheel) — record launch time
+    // Falling edge of detection: ball just left the kicker (entered flywheel) —
+    // record launch time
     if (!hasFuelNow && m_kickerHadFuelLastLoop) {
       m_tofLaunchTimestampsSec[m_tofLaunchCount] = Timer.getFPGATimestamp();
       m_tofLaunchCount++;

@@ -7,7 +7,8 @@
             "open": true
           },
           "open": true
-        }
+        },
+        "open": true
       },
       "Mechanisms": {
         "BottomFlyWheel": {
@@ -70,12 +71,28 @@
           },
           "open": true
         },
+        "TurretMech": {
+          "TurretMotor": {
+            "closedloop": {
+              "feedback": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "photonvision": {
         "open": true
       }
     },
     "types": {
       "/AdvantageKit/RealOutputs/Alerts": "Alerts",
       "/AdvantageKit/RealOutputs/PathPlanner": "Alerts",
+      "/AdvantageKit/RealOutputs/PhotonAlerts": "Alerts",
       "/FMSInfo": "FMSInfo",
       "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 0 RPM": "Command",
       "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 10 RPM": "Command",
@@ -140,6 +157,7 @@
       "/SmartDashboard/Climb/Robot Climb": "Command",
       "/SmartDashboard/Enable Normal Gyro": "Command",
       "/SmartDashboard/Enable Vision Gyro": "Command",
+      "/SmartDashboard/Intake/Auto Drive To Fuel": "Command",
       "/SmartDashboard/Intake/Deploy": "Command",
       "/SmartDashboard/Intake/Eject": "Command",
       "/SmartDashboard/Intake/Retract": "Command",
@@ -152,6 +170,10 @@
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/Up": "Command",
       "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ClimbElevator/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ClimbElevatorMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ClimbElevatorMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ClimbElevatorMotor/ZeroEncoder": "Command",
       "/SmartDashboard/Mechanisms/Commands/Hood/Live Tuning": "Command",
       "/SmartDashboard/Mechanisms/Commands/HoodMotor/Down": "Command",
       "/SmartDashboard/Mechanisms/Commands/HoodMotor/Up": "Command",
@@ -180,18 +202,25 @@
       "/SmartDashboard/Mechanisms/Commands/TurretMotor/Up": "Command",
       "/SmartDashboard/Mechanisms/Commands/TurretMotor/ZeroEncoder": "Command",
       "/SmartDashboard/PathPlanner": "Alerts",
+      "/SmartDashboard/PhotonAlerts": "Alerts",
       "/SmartDashboard/Reseed Gyro From Vision": "Command",
       "/SmartDashboard/Shooter/Auto Shoot": "Command",
+      "/SmartDashboard/Shooter/Hood +1deg": "Command",
+      "/SmartDashboard/Shooter/Hood -1deg": "Command",
+      "/SmartDashboard/Shooter/Hood Trim Reset": "Command",
       "/SmartDashboard/Shooter/Normal Targeting": "Command",
       "/SmartDashboard/Shooter/Off": "Command",
       "/SmartDashboard/Shooter/Predictive Targeting": "Command",
       "/SmartDashboard/Shooter/RPM +100": "Command",
+      "/SmartDashboard/Shooter/RPM +50": "Command",
       "/SmartDashboard/Shooter/RPM -100": "Command",
+      "/SmartDashboard/Shooter/RPM -50": "Command",
       "/SmartDashboard/Shooter/RPM Reset": "Command",
       "/SmartDashboard/Shooter/Retract Hood": "Command",
       "/SmartDashboard/Shooter/Shot 1m": "Command",
       "/SmartDashboard/Shooter/Shot 2m": "Command",
       "/SmartDashboard/Shooter/Shot 3m": "Command",
+      "/SmartDashboard/Shooter/TOF Confirm": "Command",
       "/SmartDashboard/Shooter/Target Enable Auto": "Command",
       "/SmartDashboard/Shooter/Target Hub": "Command",
       "/SmartDashboard/Shooter/Target Neutral Left": "Command",
@@ -219,6 +248,31 @@
         }
       },
       "/SmartDashboard/Calibration/Intake Arm Home & Calibrate": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Calibration/Turret Calibrate In Place": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Mechanisms/Commands/Turret/Live Tuning": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Shooter/Turret Center": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Shooter/Turret Left 5deg": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Shooter/Turret Right 5deg": {
         "window": {
           "visible": true
         }
