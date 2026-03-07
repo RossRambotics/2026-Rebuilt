@@ -11,7 +11,7 @@ This document describes the LED subsystem, what each group of LEDs displays, and
 - **Total LEDs:** 308 (8 onboard + 300 external)
 - **Strip update rate:** 10 Hz (state logic runs every 5 robot loop cycles)
 
-The onboard LEDs (indices 0–7) are on the CANdle PCB itself. The 300 external LEDs (indices 8–307) are divided into six groups of 50. The last 10 LEDs of each group are dark spacers that visually separate the groups.
+The onboard LEDs (indices 0–7) are on the CANdle PCB itself. Of the 300 external LEDs, the first 150 (indices 8–157) are divided into three groups of 50. The last 10 LEDs of each group are dark spacers that visually separate the groups. Indices 158–307 are unused and set to off once at startup.
 
 ---
 
@@ -21,18 +21,13 @@ The onboard LEDs (indices 0–7) are on the CANdle PCB itself. The 300 external 
 Index   Zone                    Purpose
 ──────  ──────────────────────  ────────────────────────────────────────
 0–7     Onboard                 Always solid green
-8–47    Group 1 — active (40)   Left front limelight status
+8–47    Group 1 — active (40)   Combined vision status (both cameras)
 48–57   Group 1 — spacer (10)   Always off
-58–97   Group 2 — active (40)   Shooter status (left)
+58–97   Group 2 — active (40)   Shooter status
 98–107  Group 2 — spacer (10)   Always off
-108–147 Group 3 — active (40)   Game piece tracking (left)
+108–147 Group 3 — active (40)   Game piece tracking
 148–157 Group 3 — spacer (10)   Always off
-158–197 Group 4 — active (40)   Right front limelight status
-198–207 Group 4 — spacer (10)   Always off
-208–247 Group 5 — active (40)   Shooter status (right)
-248–257 Group 5 — spacer (10)   Always off
-258–297 Group 6 — active (40)   Game piece tracking (right)
-298–307 Group 6 — spacer (10)   Always off
+158–307 Unused                  Always off
 ```
 
 ---
@@ -42,21 +37,20 @@ Index   Zone                    Purpose
 ### Onboard LEDs (0–7)
 Always solid **green**. No logic — set once at startup.
 
-### Groups 1 & 4 — Limelight Status
+### Group 1 — Combined Vision Status
 Active in **all robot modes, including disabled.**
 
 | Color | Meaning |
 |-------|---------|
-| Red | 0 AprilTags detected |
-| Blue | 1 AprilTag detected |
-| Green | 2 or more AprilTags detected |
+| Blue  | Both cameras see ≥ 1 AprilTag |
+| Lime  | Left camera only sees ≥ 1 AprilTag |
+| Rose  | Right camera only sees ≥ 1 AprilTag |
+| Red   | Neither camera sees any AprilTag |
 
-- Group 1 reflects **camera index 0** (`limelight-frontl`, left front)
-- Group 4 reflects **camera index 1** (`limelight-frontr`, right front)
+- Left camera = camera index 0 (`limelight-frontl`)
+- Right camera = camera index 1 (`limelight-frontr`)
 
-### Groups 2 & 5 — Shooter Status
-Groups 2 and 5 always show the same thing (left and right sides are mirrors).
-
+### Group 2 — Shooter Status
 **While disabled:** shows the alliance color — Red for Red alliance, Blue for Blue alliance, or Maroon (`#800000`) if the alliance has not yet been set by the Driver Station.
 
 **While enabled:**
@@ -69,10 +63,8 @@ Groups 2 and 5 always show the same thing (left and right sides are mirrors).
 
 "Ready" means all of: turret on target, hood on target, flywheel at speed, and robot speed under the SpeedNanny limit — all debounced for 100 ms.
 
-### Groups 3 & 6 — Game Piece Tracking
-Groups 3 and 6 always show the same thing.
-
-**While disabled:** shows the alliance color or Maroon (same rules as Groups 2 & 5).
+### Group 3 — Game Piece Tracking
+**While disabled:** shows the alliance color or Maroon (same rules as Group 2).
 
 **While enabled:**
 
@@ -85,7 +77,7 @@ Groups 3 and 6 always show the same thing.
 Game piece detection uses `GamePieceVisionSubsystem.hasTarget()` — YELLOW when the `intake-cam` PhotonVision coprocessor sees a fuel game piece on the floor, WHITE when none are detected.
 
 #### TeleOp Shift Blink Windows
-Groups 3 & 6 strobe during the last 5 seconds of each TeleOp shift to alert the drivers that the period is about to change. The shift boundaries use `DriverStation.getMatchTime()` (seconds remaining, counting down from ~150 s):
+Group 3 strobes during the last 5 seconds of each TeleOp shift to alert the drivers that the period is about to change. The shift boundaries use `DriverStation.getMatchTime()` (seconds remaining, counting down from ~150 s):
 
 | Shift | Time range | Blink window (matchTime) |
 |-------|-----------|--------------------------|
@@ -96,7 +88,7 @@ Groups 3 & 6 strobe during the last 5 seconds of each TeleOp shift to alert the 
 | Shift 4 | 0:55 – 0:30 | 30 – 35 s |
 | End Game | 0:30 – 0:00 | 0 – 5 s |
 
-Strobing only occurs during TeleOp. In Autonomous or practice mode (where `getMatchTime()` returns −1) the groups show their normal solid color.
+Strobing only occurs during TeleOp. In Autonomous or practice mode (where `getMatchTime()` returns −1) the group shows its normal solid color.
 
 ---
 
@@ -104,14 +96,16 @@ Strobing only occurs during TeleOp. In Autonomous or practice mode (where `getMa
 
 | Color | R | G | B | Used for |
 |-------|---|---|---|---------|
-| Green | 0 | 217 | 0 | 2+ AprilTags, shooter ready, onboard |
-| Red | 217 | 0 | 0 | 0 AprilTags, shooter targeting not ready, Red alliance |
+| Green | 0 | 217 | 0 | Shooter ready, onboard |
+| Red | 217 | 0 | 0 | No vision targets, shooter targeting not ready, Red alliance |
+| Blue | 0 | 0 | 217 | Both cameras have targets, Blue alliance |
+| Lime | 50 | 205 | 50 | Left camera only has targets |
+| Rose | 217 | 0 | 100 | Right camera only has targets |
 | Amber | 217 | 120 | 0 | Shooter idle |
-| Blue | 0 | 0 | 217 | 1 AprilTag, Blue alliance |
 | White | 217 | 217 | 217 | No game piece |
 | Yellow | 217 | 183 | 0 | Game piece detected |
 | Maroon | 128 | 0 | 0 | Alliance undetermined (disabled) |
-| Off | 0 | 0 | 0 | Spacers |
+| Off | 0 | 0 | 0 | Spacers, unused LEDs |
 
 W channel is 0 for all colors (GRB strip, no dedicated white channel).
 
@@ -136,15 +130,10 @@ if (m_periodicCount++ % UPDATE_PERIOD_CYCLES != 0) return;
 ```
 
 ### Static zones set once at startup
-Onboard LEDs and spacers never change, so they are commanded in the constructor (not in `periodic()`). This eliminates 7 redundant CAN frames per cycle.
+Onboard LEDs, spacers, and the unused 158–307 range never change, so they are commanded in the constructor (not in `periodic()`). This eliminates redundant CAN frames per cycle.
 
 ### Pre-allocated control objects
-All `SolidColor` and `StrobeAnimation` control objects are pre-allocated as class fields. The `withColor()` method mutates and returns the same object, avoiding per-cycle heap allocations. Each animated group has a dedicated CANdle animation slot:
-
-| Slot | Zone |
-|------|------|
-| 0 | Group 3 — game piece strobe (left) |
-| 1 | Group 6 — game piece strobe (right) |
+All `SolidColor` and `StrobeAnimation` control objects are pre-allocated as class fields. The `withColor()` method mutates and returns the same object, avoiding per-cycle heap allocations. Group 3 uses CANdle animation slot 0 for the game piece strobe.
 
 ### Dependencies injected via constructor
 `LEDSubsystem` receives the full `Subsystems` record at construction time (instantiated after `Subsystems` is assembled in `RobotContainer`). It accesses `subsystems.vision()`, `subsystems.shooter()`, and `subsystems.gamePieceVision()` directly.
@@ -158,16 +147,12 @@ All LED state is recorded with `Logger.recordOutput()` and available in Advantag
 | Key | Type | Description |
 |-----|------|-------------|
 | `LEDs/IsStubbed` | boolean | true in sim/replay (no real CANdle) |
-| `LEDs/Group1/TagCount` | int | AprilTags seen by left limelight |
-| `LEDs/Group1/Color` | string | Color name shown |
-| `LEDs/Group4/TagCount` | int | AprilTags seen by right limelight |
-| `LEDs/Group4/Color` | string | Color name shown |
-| `LEDs/Group2/Color` | string | Shooter color (left): AMBER / RED / GREEN |
-| `LEDs/Group5/Color` | string | Shooter color (right): AMBER / RED / GREEN |
-| `LEDs/Group3/Color` | string | Game piece color (left) |
+| `LEDs/Group1/LeftTagCount` | int | AprilTags seen by left limelight |
+| `LEDs/Group1/RightTagCount` | int | AprilTags seen by right limelight |
+| `LEDs/Group1/Color` | string | Color name shown (BLUE / LIME / ROSE / RED) |
+| `LEDs/Group2/Color` | string | Shooter color: AMBER / RED / GREEN |
+| `LEDs/Group3/Color` | string | Game piece color: YELLOW / WHITE |
 | `LEDs/Group3/Strobing` | boolean | Strobing during shift blink window |
-| `LEDs/Group6/Color` | string | Game piece color (right) |
-| `LEDs/Group6/Strobing` | boolean | Strobing during shift blink window |
 
 ---
 
@@ -181,7 +166,7 @@ These values are deliberate placeholders and should be updated when hardware is 
 | `GROUP*_SPACER_END` | `LEDConstants.java` | 10 LEDs per group | Spacer count — adjust as needed |
 | `STROBE_FRAME_RATE_HZ` | `LEDConstants.java` | 24 Hz | Strobe speed |
 | `LED.BrightnessScalar` | `LEDSubsystem.java` constructor | 1.0 | Reduce if LEDs are too bright |
-| `LED.BrightnessScalar` | `LEDSubsystem.java` constructor | 1.0 | Reduce if LEDs are too bright |
+| LIME/ROSE color values | `LEDConstants.java` | See color table | Tune for visual distinction on hardware |
 
 ---
 

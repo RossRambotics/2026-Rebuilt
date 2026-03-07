@@ -16,44 +16,27 @@ public final class LEDConstants {
   public static final int ONBOARD_START = 0;
   public static final int ONBOARD_END = 7;
 
-  // External strip: indices 8–307 (6 groups of 50 LEDs each)
+  // External strip: indices 8–157 (3 groups of 50 LEDs each)
   // Each group: 40 active LEDs + 10 spacer (always off)
+  // Indices 158–307 are unused and set to off once at startup.
 
-  // Group 1 — left front limelight (camera index 0)
-  public static final int GROUP1_ACTIVE_START = 8;
-  public static final int GROUP1_ACTIVE_END = 47;
-  public static final int GROUP1_SPACER_START = 48;
-  public static final int GROUP1_SPACER_END = 57;
+  // Group 1 — combined vision status (both cameras)
+  public static final int GROUP1_ACTIVE_START = ONBOARD_END + 1;
+  public static final int GROUP1_ACTIVE_END = GROUP1_ACTIVE_START + 39;
+  public static final int GROUP1_SPACER_START = GROUP1_ACTIVE_END + 1;
+  public static final int GROUP1_SPACER_END = GROUP1_SPACER_START + 9;
 
-  // Group 2 — shooter status (left side)
-  public static final int GROUP2_ACTIVE_START = 58;
-  public static final int GROUP2_ACTIVE_END = 97;
-  public static final int GROUP2_SPACER_START = 98;
-  public static final int GROUP2_SPACER_END = 107;
+  // Group 2 — shooter status
+  public static final int GROUP2_ACTIVE_START = GROUP1_SPACER_END + 1;
+  public static final int GROUP2_ACTIVE_END = GROUP2_ACTIVE_START + 39;
+  public static final int GROUP2_SPACER_START = GROUP2_ACTIVE_END + 1;
+  public static final int GROUP2_SPACER_END = GROUP2_SPACER_START + 9;
 
-  // Group 3 — game piece tracking (left side)
-  public static final int GROUP3_ACTIVE_START = 108;
-  public static final int GROUP3_ACTIVE_END = 147;
-  public static final int GROUP3_SPACER_START = 148;
-  public static final int GROUP3_SPACER_END = 157;
-
-  // Group 4 — right front limelight (camera index 1)
-  public static final int GROUP4_ACTIVE_START = 158;
-  public static final int GROUP4_ACTIVE_END = 197;
-  public static final int GROUP4_SPACER_START = 198;
-  public static final int GROUP4_SPACER_END = 207;
-
-  // Group 5 — shooter status (right side)
-  public static final int GROUP5_ACTIVE_START = 208;
-  public static final int GROUP5_ACTIVE_END = 247;
-  public static final int GROUP5_SPACER_START = 248;
-  public static final int GROUP5_SPACER_END = 257;
-
-  // Group 6 — game piece tracking (right side)
-  public static final int GROUP6_ACTIVE_START = 258;
-  public static final int GROUP6_ACTIVE_END = 297;
-  public static final int GROUP6_SPACER_START = 298;
-  public static final int GROUP6_SPACER_END = 307;
+  // Group 3 — game piece tracking
+  public static final int GROUP3_ACTIVE_START = GROUP2_SPACER_END + 1;
+  public static final int GROUP3_ACTIVE_END = GROUP3_ACTIVE_START + 39;
+  public static final int GROUP3_SPACER_START = GROUP3_ACTIVE_END + 1;
+  public static final int GROUP3_SPACER_END = GROUP3_SPACER_START + 9;
 
   // ------------------------------------------------------------------
   // Colors — RGBWColor(red, green, blue, white), W=0 for GRB strips
@@ -61,6 +44,8 @@ public final class LEDConstants {
   public static final RGBWColor GREEN = new RGBWColor(0, 217, 0, 0);
   public static final RGBWColor RED = new RGBWColor(217, 0, 0, 0);
   public static final RGBWColor BLUE = new RGBWColor(0, 0, 217, 0);
+  public static final RGBWColor LIME = new RGBWColor(50, 205, 50, 0);
+  public static final RGBWColor ROSE = new RGBWColor(217, 0, 100, 0);
   public static final RGBWColor WHITE = new RGBWColor(217, 217, 217, 0);
   public static final RGBWColor YELLOW = new RGBWColor(217, 183, 0, 0);
   public static final RGBWColor AMBER = new RGBWColor(217, 120, 0, 0);
@@ -73,11 +58,8 @@ public final class LEDConstants {
   /** Strobe frame rate in Hz (number of on/off transitions per second). */
   public static final double STROBE_FRAME_RATE_HZ = 24.0;
 
-  /** CANdle animation slot for Groups 3 and 6 (game piece strobe, left). */
-  public static final int SLOT_GAMEPIECE_LEFT = 0;
-
-  /** CANdle animation slot for Groups 3 and 6 (game piece strobe, right). */
-  public static final int SLOT_GAMEPIECE_RIGHT = 1;
+  /** CANdle animation slot for Group 3 (game piece strobe). */
+  public static final int SLOT_GAMEPIECE = 0;
 
   // ------------------------------------------------------------------
   // TeleOp blink windows

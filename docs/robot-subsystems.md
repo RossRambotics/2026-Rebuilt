@@ -86,7 +86,7 @@ Key files: `ClimbElevator.java`, `ClimbElevatorConstants.java`
 ---
 
 ### LEDSubsystem
-A CTRE CANdle driving a 300-LED external GRB strip plus 8 onboard LEDs. Runs in all robot modes including disabled. Groups 1 & 4 show limelight AprilTag count. Groups 2 & 5 show shooter readiness (strobes while shooting). Groups 3 & 6 show game piece presence (strobes during TeleOp shift transitions). See [`docs/led-subsystem.md`](led-subsystem.md) for full details.
+A CTRE CANdle driving a GRB strip plus 8 onboard LEDs. Runs in all robot modes including disabled. Three active groups (indices 8–157): Group 1 shows combined vision status for both cameras (BLUE = both have targets, LIME = left only, ROSE = right only, RED = neither). Group 2 shows shooter readiness. Group 3 shows game piece presence (strobes during TeleOp shift transitions). Indices 158–307 are unused and held off. See [`docs/led-subsystem.md`](led-subsystem.md) for full details.
 
 Key files: `LEDSubsystem.java`, `LEDConstants.java`
 

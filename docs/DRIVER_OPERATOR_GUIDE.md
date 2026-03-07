@@ -58,7 +58,8 @@ The button box displays a live field map. The operator should monitor this throu
 |-----------|--------------|
 | **Green square** | Robot's current estimated position on the field |
 | **Yellow circle (fuel icon)** | Where the shooter is currently targeting |
-| **Green X** | **During disabled:** selected auto's starting pose — use this for pre-match alignment. **During teleop:** the auto-drive (SpotSelector) destination. |
+| **White X** | **During disabled:** selected auto's starting pose — use this for pre-match alignment. |
+| **Green X** | **During teleop:** the auto-drive (SpotSelector) destination. |
 
 **The Field widget is your primary odometry health check.** If the green square does not match where the robot physically is on the field, the pose estimate is wrong and shooting and auto-drive will both be unreliable. See [Diagnosing Problems](#4-diagnosing-problems-during-a-match) for how to correct this.
 
@@ -128,15 +129,13 @@ The LEDs are your most important real-time diagnostic tool during a match. Learn
 
 ### LED Layout
 
-The robot has two side LED strips (left and right). Each strip is divided into three sections:
+The robot LED strip is divided into three sections:
 
 ```
-[Top]    — Limelight vision status
+[Top]    — Vision status (both cameras combined)
 [Middle] — Shooter readiness
 [Bottom] — Game piece / match timer
 ```
-
-Both sides mirror each other, so read either one.
 
 ---
 
@@ -146,8 +145,9 @@ This tells you how well the robot can see AprilTags for pose estimation.
 
 | Color | Meaning | Impact on Robot |
 |-------|---------|----------------|
-| **GREEN** | 2+ AprilTags visible | Excellent — pose estimation is confident |
-| **BLUE** | 1 AprilTag visible | OK — single-tag is lower confidence; aiming may be slightly off |
+| **BLUE** | Both cameras see ≥ 1 AprilTag | Excellent — full dual-camera pose estimation |
+| **LIME** | Left camera only sees ≥ 1 AprilTag | OK — single-camera; aiming may be slightly less confident |
+| **ROSE** | Right camera only sees ≥ 1 AprilTag | OK — single-camera; aiming may be slightly less confident |
 | **RED** | No AprilTags visible | Bad — robot is relying on wheel odometry only; aiming accuracy degrades over time |
 
 > **Key:** If the top LEDs are RED for more than a few seconds during a match, odometry drift may begin to affect shooting accuracy and auto-driving. See [Diagnosing Problems](#4-diagnosing-problems-during-a-match).
@@ -183,9 +183,9 @@ This tells you how well the robot can see AprilTags for pose estimation.
 ### LED Summary — At a Glance
 
 ```
-TOP:    GREEN = see tags, BLUE = one tag, RED = blind
+TOP:    BLUE = both cams, LIME = left only, ROSE = right only, RED = blind
 MIDDLE: AMBER = idle, RED = aligning, GREEN = ready/firing
-BOTTOM: YELLOW = game piece loaded, WHITE = empty, STROBE = shift warning
+BOTTOM: YELLOW = game piece detected, WHITE = none, STROBE = shift warning
 ```
 
 ---
@@ -198,11 +198,11 @@ The field widget is your first indicator of a pose problem. If the green square 
 
 **Check the top LEDs.**
 
-- **Top LEDs RED (no tags):** Cameras can't see AprilTags so the pose estimator is running on wheel odometry alone. Odometry drifts during play.
-  - **Fix:** Rotate the robot so the **intake faces the alliance wall**, then drive forward toward the field so the cameras can pick up AprilTags. The top LEDs will turn blue or green when tags are found and the pose will correct automatically.
+- **Top LEDs RED (no tags):** Neither camera can see AprilTags so the pose estimator is running on wheel odometry alone. Odometry drifts during play.
+  - **Fix:** Rotate the robot so the **intake faces the alliance wall**, then drive forward toward the field so the cameras can pick up AprilTags. The top LEDs will turn LIME, ROSE, or BLUE when tags are found and the pose will correct automatically.
   - If you have time pre-match: use **Calibration / Reseed from Vision** to sync the gyro heading from vision (see [Calibration Procedures](#6-calibration-procedures) for when to use this).
 
-- **Top LEDs GREEN but Field widget still shows wrong position:** The pose may have drifted during a period of lost vision. Continue driving with the cameras in view of tags — the estimator will pull the pose back over the next few seconds. If it doesn't recover, use fixed-distance shots as a fallback.
+- **Top LEDs LIME, ROSE, or BLUE but Field widget still shows wrong position:** The pose may have drifted during a period of lost vision. Continue driving with the cameras in view of tags — the estimator will pull the pose back over the next few seconds. If it doesn't recover, use fixed-distance shots as a fallback.
 
 - **Pose is badly wrong and you can reach the hub:** Use the **hub wall reset**.
   1. Drive the robot to the hub and push the **shooter side flush against the hub wall**.
@@ -214,11 +214,11 @@ The field widget is your first indicator of a pose problem. If the green square 
 
 **Check the Field widget first** — if the robot's green square is in the wrong place, fix the pose first (see above). Shooting accuracy directly depends on pose accuracy.
 
-- **Top LEDs are RED:** Vision is down. The robot is aiming based on dead-reckoning (wheel odometry only). Odometry drifts during play — the longer the robot goes without vision, the worse aiming becomes.
-  - **Fix:** Rotate intake toward the alliance wall and drive to expose cameras to AprilTags. Top LEDs will turn blue or green when tags are found.
+- **Top LEDs are RED:** Neither camera sees any AprilTags. The robot is aiming based on dead-reckoning (wheel odometry only). Odometry drifts during play — the longer the robot goes without vision, the worse aiming becomes.
+  - **Fix:** Rotate intake toward the alliance wall and drive to expose cameras to AprilTags. Top LEDs will turn LIME, ROSE, or BLUE when tags are found.
   - **If vision cannot recover:** Use fixed-distance shots (see [Manual Controls](#5-manual-controls--button-box-override)). Drive to a known distance from target and use **Shot 1m / 2m / 3m**.
 
-- **Top LEDs are GREEN but shots are still off:** The pose estimate may have briefly drifted before vision reacquired. Give it a moment while keeping tags in view — the estimator will self-correct.
+- **Top LEDs are LIME, ROSE, or BLUE but shots are still off:** The pose estimate may have briefly drifted before vision reacquired. Give it a moment while keeping tags in view — the estimator will self-correct.
 
 - **Middle LEDs stay RED after toggling RT on:** The shooter is not ready. Possible causes:
   - Most likely the turret cannot reach desired angle because of the current robot direction.  Turret hit a hard stop or is stuck — operator press **Shooter / Turret Center** to re-home, then re-enable auto.
@@ -237,7 +237,7 @@ Auto-driving uses the robot's pose estimate. If the pose is wrong, the robot wil
 ### Problem: Autonomous Path Not Executing Correctly
 
 - Vision unavailable at match start can cause the robot's initial pose to be wrong, throwing off all auto paths.
-- **Before the match:** Confirm top LEDs are GREEN (vision locked) when placed on the field. If RED at start of auto, auto may be unreliable.
+- **Before the match:** Confirm top LEDs are BLUE (both cameras locked) when placed on the field. LIME or ROSE (one camera) is acceptable but less ideal. If RED at start of auto, auto may be unreliable.
 - If auto goes wrong, switch to teleop mode as soon as possible and use manual controls.
 
 ### Problem: Aiming Lands Consistently Short / Long
@@ -400,14 +400,14 @@ Use this when the robot's full pose (position + heading) has drifted badly and v
 
 ### Verifying Start Position with the Field Widget
 
-When the robot is disabled, the **green X on the Field widget automatically moves to the selected auto's starting pose**. Use this to verify robot placement before the match:
+When the robot is disabled, the **white X on the Field widget automatically moves to the selected auto's starting pose**. Use this to verify robot placement before the match:
 
 - Place the robot on the field, then check the Field widget.
-- The **green square** (robot's current pose) should overlap the **green X** (auto start pose).
+- The **green square** (robot's current pose) should overlap the **white X** (auto start pose).
 - If they don't overlap, either the robot is in the wrong physical position, or the pose estimate is wrong.
-  - If the robot is misplaced: physically move the robot to match the green X.
-  - If the pose estimate is wrong: confirm top LEDs are **GREEN**, then use **Calibration / Reseed from Vision** to correct heading.
-- Changing the auto chooser selection will immediately move the green X to reflect the new routine's starting pose.
+  - If the robot is misplaced: physically move the robot to match the white X.
+  - If the pose estimate is wrong: confirm top LEDs are **BLUE** (or LIME/ROSE), then use **Calibration / Reseed from Vision** to correct heading.
+- Changing the auto chooser selection will immediately move the white X to reflect the new routine's starting pose.
 
 ### Available Auto Routines
 
@@ -442,8 +442,8 @@ Complete this before every match.
 
 ### Vision (Top LEDs)
 
-- [ ] Top LEDs are **GREEN** (both cameras seeing 2+ tags)
-- [ ] If only BLUE (one tag), confirm camera alignment is OK
+- [ ] Top LEDs are **BLUE** (both cameras seeing tags) — preferred
+- [ ] If LIME or ROSE (one camera only), confirm the other camera is aligned and connected
 - [ ] **Never start a match with top LEDs RED** — push robot to see tags or get field crew to check camera connections
 
 ### Shooter
@@ -463,13 +463,13 @@ Complete this before every match.
 - [ ] Compare the gyro heading displayed on the dashboard with the heading reported by vision; they should agree within a few degrees. If they disagree significantly:
   - Option A: Square the robot to the alliance wall and press **Back button** to reset the gyro
   - Option B: Use **Calibration / Reseed from Vision** to update the gyro heading from what the cameras are seeing (requires cameras to have tag visibility)
-- [ ] Top LEDs should be **GREEN** before accepting any heading/pose as trustworthy
+- [ ] Top LEDs should be **BLUE** (or at minimum LIME/ROSE) before accepting any heading/pose as trustworthy
 
 ### Autonomous
 
 - [ ] Correct auto routine selected on dashboard
-- [ ] **Field widget green X matches the robot's physical starting position** — the green X shows the selected auto's start pose; the green square shows the robot's current pose. They should overlap.
-- [ ] If they don't overlap: either physically move the robot to match the green X, or fix the pose estimate (Reseed from Vision) until they agree
+- [ ] **Field widget white X matches the robot's physical starting position** — the white X shows the selected auto's start pose; the green square shows the robot's current pose. They should overlap.
+- [ ] If they don't overlap: either physically move the robot to match the white X, or fix the pose estimate (Reseed from Vision) until they agree
 
 ### Communication
 
@@ -505,6 +505,7 @@ SHOTS CONSISTENTLY MISSING
 ROBOT WON'T DRIVE TO SPOTS (Y button)
 │
 ├─ Top LEDs RED? → Reseed from Vision first
+├─ White X not overlapping green square? → Fix pose (Reseed from Vision or hub wall reset)
 ├─ Pose badly wrong, near hub? → Push shooter side flush to hub wall → Driver: Start button
 ├─ Still wrong after reseed? → Vision unavailable, drive manually
 └─ Gyro wrong? → Driver: Back button to reset heading (intake facing alliance wall)

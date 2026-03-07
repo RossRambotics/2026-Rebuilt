@@ -21,12 +21,10 @@ import org.littletonrobotics.junction.Logger;
  *
  * <ul>
  *   <li>Onboard 0–7: always solid green
- *   <li>Group 1 (8–57): left front limelight status; 48–57 spacer (off)
- *   <li>Group 2 (58–107): shooter status left; 98–107 spacer (off)
- *   <li>Group 3 (108–157): game piece tracking left; 148–157 spacer (off)
- *   <li>Group 4 (158–207): right front limelight status; 198–207 spacer (off)
- *   <li>Group 5 (208–257): shooter status right; 248–257 spacer (off)
- *   <li>Group 6 (258–307): game piece tracking right; 298–307 spacer (off)
+ *   <li>Group 1 (8–57): combined vision status (both cameras); 48–57 spacer (off)
+ *   <li>Group 2 (58–107): shooter status; 98–107 spacer (off)
+ *   <li>Group 3 (108–157): game piece tracking; 148–157 spacer (off)
+ *   <li>158–307: unused, set to off once at startup
  * </ul>
  */
 public class LEDSubsystem extends SubsystemBase {
@@ -46,19 +44,11 @@ public class LEDSubsystem extends SubsystemBase {
   private final SolidColor m_solidGroup1 = new SolidColor(GROUP1_ACTIVE_START, GROUP1_ACTIVE_END);
   private final SolidColor m_solidGroup2 = new SolidColor(GROUP2_ACTIVE_START, GROUP2_ACTIVE_END);
   private final SolidColor m_solidGroup3 = new SolidColor(GROUP3_ACTIVE_START, GROUP3_ACTIVE_END);
-  private final SolidColor m_solidGroup4 = new SolidColor(GROUP4_ACTIVE_START, GROUP4_ACTIVE_END);
-  private final SolidColor m_solidGroup5 = new SolidColor(GROUP5_ACTIVE_START, GROUP5_ACTIVE_END);
-  private final SolidColor m_solidGroup6 = new SolidColor(GROUP6_ACTIVE_START, GROUP6_ACTIVE_END);
 
-  // Pre-allocated StrobeAnimation controls with fixed slot and frame-rate
-  // assignments
+  // Pre-allocated StrobeAnimation control with fixed slot and frame-rate assignment
   private final StrobeAnimation m_strobeGroup3 =
       new StrobeAnimation(GROUP3_ACTIVE_START, GROUP3_ACTIVE_END)
-          .withSlot(SLOT_GAMEPIECE_LEFT)
-          .withFrameRate(STROBE_FRAME_RATE_HZ);
-  private final StrobeAnimation m_strobeGroup6 =
-      new StrobeAnimation(GROUP6_ACTIVE_START, GROUP6_ACTIVE_END)
-          .withSlot(SLOT_GAMEPIECE_RIGHT)
+          .withSlot(SLOT_GAMEPIECE)
           .withFrameRate(STROBE_FRAME_RATE_HZ);
 
   /**
@@ -84,9 +74,9 @@ public class LEDSubsystem extends SubsystemBase {
       m_candle.setControl(new SolidColor(GROUP1_SPACER_START, GROUP1_SPACER_END).withColor(OFF));
       m_candle.setControl(new SolidColor(GROUP2_SPACER_START, GROUP2_SPACER_END).withColor(OFF));
       m_candle.setControl(new SolidColor(GROUP3_SPACER_START, GROUP3_SPACER_END).withColor(OFF));
-      m_candle.setControl(new SolidColor(GROUP4_SPACER_START, GROUP4_SPACER_END).withColor(OFF));
-      m_candle.setControl(new SolidColor(GROUP5_SPACER_START, GROUP5_SPACER_END).withColor(OFF));
-      m_candle.setControl(new SolidColor(GROUP6_SPACER_START, GROUP6_SPACER_END).withColor(OFF));
+
+      // Indices 158–307 are unused — turn them off once.
+      m_candle.setControl(new SolidColor(GROUP3_SPACER_END + 1, 307).withColor(OFF));
     } else {
       m_candle = null;
     }
@@ -101,39 +91,53 @@ public class LEDSubsystem extends SubsystemBase {
       return;
     }
 
-    // Limelight status groups — active in all robot modes including disabled
+    // Vision status group — active in all robot modes including disabled
     updateGroup1();
-    updateGroup4();
 
-    // Shooter status groups
-    updateShooterGroups();
+    // Shooter status group
+    updateShooterGroup();
 
-    // Game piece tracking groups
-    updateGamePieceGroups();
+    // Game piece tracking group
+    updateGamePieceGroup();
   }
 
   // ---------------------------------------------------------------------------
   // Per-zone update methods
   // ---------------------------------------------------------------------------
 
-  /** Group 1 (8–47): left front limelight (camera index 0). */
+  /**
+   * Group 1 (8–47): combined vision status for both cameras.
+   *
+   * <ul>
+   *   <li>Blue — both cameras see ≥ 1 AprilTag
+   *   <li>Lime — left camera only sees ≥ 1 AprilTag
+   *   <li>Rose — right camera only sees ≥ 1 AprilTag
+   *   <li>Red — neither camera sees any AprilTag
+   * </ul>
+   */
   private void updateGroup1() {
-    RGBWColor color = limelightColor(m_subsystems.vision().getTagCount(0));
+    boolean leftHasTarget = m_subsystems.vision().getTagCount(0) >= 1;
+    boolean rightHasTarget = m_subsystems.vision().getTagCount(1) >= 1;
+
+    RGBWColor color;
+    if (leftHasTarget && rightHasTarget) {
+      color = BLUE;
+    } else if (leftHasTarget) {
+      color = LIME;
+    } else if (rightHasTarget) {
+      color = ROSE;
+    } else {
+      color = RED;
+    }
+
     setSolid(m_solidGroup1, color);
-    Logger.recordOutput("LEDs/Group1/TagCount", m_subsystems.vision().getTagCount(0));
+    Logger.recordOutput("LEDs/Group1/LeftTagCount", m_subsystems.vision().getTagCount(0));
+    Logger.recordOutput("LEDs/Group1/RightTagCount", m_subsystems.vision().getTagCount(1));
     Logger.recordOutput("LEDs/Group1/Color", colorName(color));
   }
 
-  /** Group 4 (158–197): right front limelight (camera index 1). */
-  private void updateGroup4() {
-    RGBWColor color = limelightColor(m_subsystems.vision().getTagCount(1));
-    setSolid(m_solidGroup4, color);
-    Logger.recordOutput("LEDs/Group4/TagCount", m_subsystems.vision().getTagCount(1));
-    Logger.recordOutput("LEDs/Group4/Color", colorName(color));
-  }
-
   /**
-   * Groups 2 & 5: shooter status. Always identical.
+   * Group 2: shooter status.
    *
    * <ul>
    *   <li>Disabled → alliance color (or Maroon if undetermined)
@@ -142,13 +146,11 @@ public class LEDSubsystem extends SubsystemBase {
    *   <li>Targeting, ready → solid Green
    * </ul>
    */
-  private void updateShooterGroups() {
+  private void updateShooterGroup() {
     if (DriverStation.isDisabled()) {
       RGBWColor allianceColor = getAllianceColor();
       setSolid(m_solidGroup2, allianceColor);
-      setSolid(m_solidGroup5, allianceColor);
       Logger.recordOutput("LEDs/Group2/Color", colorName(allianceColor));
-      Logger.recordOutput("LEDs/Group5/Color", colorName(allianceColor));
       return;
     }
 
@@ -162,13 +164,11 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     setSolid(m_solidGroup2, color);
-    setSolid(m_solidGroup5, color);
     Logger.recordOutput("LEDs/Group2/Color", colorName(color));
-    Logger.recordOutput("LEDs/Group5/Color", colorName(color));
   }
 
   /**
-   * Groups 3 & 6: game piece tracking. Always identical.
+   * Group 3: game piece tracking.
    *
    * <ul>
    *   <li>Disabled → alliance color (or Maroon if undetermined)
@@ -179,15 +179,12 @@ public class LEDSubsystem extends SubsystemBase {
    * <p>Game piece detection uses {@link frc.robot.subsystems.gamepiece.GamePieceVisionSubsystem} —
    * Yellow when the intake-cam sees a fuel game piece, White when none are detected.
    */
-  private void updateGamePieceGroups() {
+  private void updateGamePieceGroup() {
     if (DriverStation.isDisabled()) {
       RGBWColor allianceColor = getAllianceColor();
       setSolid(m_solidGroup3, allianceColor);
-      setSolid(m_solidGroup6, allianceColor);
       Logger.recordOutput("LEDs/Group3/Color", colorName(allianceColor));
       Logger.recordOutput("LEDs/Group3/Strobing", false);
-      Logger.recordOutput("LEDs/Group6/Color", colorName(allianceColor));
-      Logger.recordOutput("LEDs/Group6/Strobing", false);
       return;
     }
 
@@ -197,28 +194,17 @@ public class LEDSubsystem extends SubsystemBase {
 
     if (inBlinkWindow) {
       setStrobe(m_strobeGroup3, baseColor);
-      setStrobe(m_strobeGroup6, baseColor);
     } else {
       setSolid(m_solidGroup3, baseColor);
-      setSolid(m_solidGroup6, baseColor);
     }
 
     Logger.recordOutput("LEDs/Group3/Color", colorName(baseColor));
     Logger.recordOutput("LEDs/Group3/Strobing", inBlinkWindow);
-    Logger.recordOutput("LEDs/Group6/Color", colorName(baseColor));
-    Logger.recordOutput("LEDs/Group6/Strobing", inBlinkWindow);
   }
 
   // ---------------------------------------------------------------------------
   // Helper methods
   // ---------------------------------------------------------------------------
-
-  /** Maps AprilTag count to the corresponding limelight status color. */
-  private RGBWColor limelightColor(int tagCount) {
-    if (tagCount >= 2) return GREEN;
-    if (tagCount == 1) return BLUE;
-    return RED;
-  }
 
   /**
    * Returns the alliance color for use while disabled. Falls back to Maroon if the alliance has not
@@ -262,6 +248,8 @@ public class LEDSubsystem extends SubsystemBase {
     if (color == GREEN) return "GREEN";
     if (color == RED) return "RED";
     if (color == BLUE) return "BLUE";
+    if (color == LIME) return "LIME";
+    if (color == ROSE) return "ROSE";
     if (color == WHITE) return "WHITE";
     if (color == YELLOW) return "YELLOW";
     if (color == AMBER) return "AMBER";
