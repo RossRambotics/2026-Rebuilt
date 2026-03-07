@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "dashboardId": "teleop",
+  "dashboards": {
+    "auto": {
+      "id": "auto",
+      "widgets": []
+    },
+    "teleop": {
+      "id": "teleop",
+      "viewport": {
+        "scale": 0.8258776649357197,
+        "x": 178.38957562611546,
+        "y": 118.92638375074364
+      },
+      "widgets": [
+        {
+          "id": "810d3d72-cffd-4bd2-a831-60e8ec47962b",
+          "type": "field2dx3",
+          "layout": {
+            "height": 37,
+            "left": 0,
+            "top": -4,
+            "width": 24
+          },
+          "constraints": {
+            "height": {
+              "min": 11
+            },
+            "width": {
+              "min": 6
+            }
+          },
+          "slot": "nt:/AdvantageKit/RealOutputs/Odometry/Robot",
+          "lookback": 5,
+          "props": {
+            "aimingSpotPath": "nt:/AdvantageKit/RealOutputs/Shooter/TargetPose2d",
+            "targetPath": "nt:/AdvantageKit/RealOutputs/SpotSelector/SelectedPose",
+            "autoStartPosePath": "nt:/AdvantageKit/RealOutputs/AutoStart/Pose",
+            "style": "default",
+            "orientation": "auto",
+            "bumperSizeInch": 32
+          }
+        }
+      ]
+    },
+    "custom": [
+      {
+        "id": "6ae36770-656b-4145-b40a-8e9cb0534680",
+        "widgets": []
+      }
+    ]
+  }
+}

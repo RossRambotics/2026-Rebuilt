@@ -101,9 +101,9 @@ public class RobotContainer {
   public RobotContainer() {
     instance = this;
 
-    m_shooter = new Shooter(false);
+    m_shooter = new Shooter(true);
     m_targetSelector = new ShooterTargetSelector(m_shooter);
-    m_intake = new Intake(false);
+    m_intake = new Intake(true);
     m_climbElevator = new ClimbElevator(false);
 
     switch (Constants.currentMode) {
@@ -287,7 +287,6 @@ public class RobotContainer {
     // deployed.
     controller.leftTrigger().onTrue(m_intake.getDeployArmCmd());
     controller.leftTrigger().toggleOnTrue(m_intake.getRollerOnCmd());
-
     // Left bumper: retract intake arm
     controller.leftBumper().onTrue(m_intake.getRetractCmd());
 

@@ -116,15 +116,18 @@ public class Robot extends LoggedRobot {
   /** This function is called once when the robot is disabled. */
   @Override
   public void disabledInit() {
-    setLimelightThrottle(100);
+    setLimelightThrottle(200);
   }
 
   /** This function is called periodically when disabled. */
   @Override
   public void disabledPeriodic() {
-    // Publish the selected auto's starting pose directly to telemetry so the Field widget shows a
-    // marker at the expected start location — drivers can visually verify robot alignment before
-    // enable. Uses AutoStart/Pose (Pose2d array) rather than SpotSelector to avoid clobbering
+    // Publish the selected auto's starting pose directly to telemetry so the Field
+    // widget shows a
+    // marker at the expected start location — drivers can visually verify robot
+    // alignment before
+    // enable. Uses AutoStart/Pose (Pose2d array) rather than SpotSelector to avoid
+    // clobbering
     // any teleop spot the driver pre-selected while disabled.
     robotContainer.publishAutoStartPose();
   }
@@ -159,7 +162,8 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
-    // Suppress the prematch auto-start-pose marker on the dashboard now that we are in teleop.
+    // Suppress the prematch auto-start-pose marker on the dashboard now that we are
+    // in teleop.
     Logger.recordOutput("AutoStart/Pose", new Pose2d());
   }
 

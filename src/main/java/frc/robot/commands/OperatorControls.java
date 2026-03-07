@@ -173,6 +173,11 @@ public class OperatorControls {
     SmartDashboard.putData("Shooter/Shot 1m", shooter.getFixedShot1mCmd());
     SmartDashboard.putData("Shooter/Shot 2m", shooter.getFixedShot2mCmd());
     SmartDashboard.putData("Shooter/Shot 3m", shooter.getFixedShot3mCmd());
+    SmartDashboard.putData("Shooter/Shot 4m", shooter.getFixedShot4mCmd());
+    SmartDashboard.putData("Shooter/Shot 5m", shooter.getFixedShot5mCmd());
+    SmartDashboard.putData("Shooter/Shot 6m", shooter.getFixedShot6mCmd());
+    SmartDashboard.putData("Shooter/Shot 7m", shooter.getFixedShot7mCmd());
+    SmartDashboard.putData("Shooter/Shot 8m", shooter.getFixedShot8mCmd());
     SmartDashboard.putData("Shooter/Turret Left 5deg", shooter.getTurretNudgeCmd(Degrees.of(-5)));
     SmartDashboard.putData("Shooter/Turret Center", shooter.getTurretCenterCmd());
     SmartDashboard.putData("Shooter/Turret Right 5deg", shooter.getTurretNudgeCmd(Degrees.of(5)));
@@ -183,9 +188,11 @@ public class OperatorControls {
     SmartDashboard.putData("Shooter/Hood -1deg", shooter.getHoodTrimCmd(-1));
     SmartDashboard.putData("Shooter/Hood Trim Reset", shooter.getHoodTrimResetCmd());
 
-    // TOF empirical measurement — press once per ball as it visibly arrives at the target.
+    // TOF empirical measurement — press once per ball as it visibly arrives at the
+    // target.
     // Ball 1 press = TOF for 1st RPM-droop launch, ball 2 press = 2nd, etc.
-    // After 5 presses, average and std dev are logged. Resets automatically on next AutoShoot.
+    // After 5 presses, average and std dev are logged. Resets automatically on next
+    // AutoShoot.
     SmartDashboard.putData("Shooter/TOF Confirm", shooter.getTofConfirmCmd());
 
     // ── Intake & Spindexer ───────────────────────────────────────────────────
@@ -202,11 +209,16 @@ public class OperatorControls {
     SmartDashboard.putData("Intake/Reverse Spindexer", shooter.getSpindexerReverseCmd());
 
     // ── Calibration ──────────────────────────────────────────────────────────
-    // TODO: Add prematch alignment readouts to the Calibration page on the button box.
-    // During disabled, the Field widget already shows a green X at the selected auto's starting
-    // pose (via SpotSelector/SelectedPose). For a text summary on the Calibration page, add
-    // SmartDashboard entries showing position error (m) and heading error (deg) between the
-    // robot's current pose and the auto start pose so drivers get a pass/fail at a glance.
+    // TODO: Add prematch alignment readouts to the Calibration page on the button
+    // box.
+    // During disabled, the Field widget already shows a green X at the selected
+    // auto's starting
+    // pose (via SpotSelector/SelectedPose). For a text summary on the Calibration
+    // page, add
+    // SmartDashboard entries showing position error (m) and heading error (deg)
+    // between the
+    // robot's current pose and the auto start pose so drivers get a pass/fail at a
+    // glance.
     SmartDashboard.putData(
         "Calibration/Reset Gyro",
         Commands.runOnce(

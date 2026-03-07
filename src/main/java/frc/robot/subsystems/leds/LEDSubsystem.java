@@ -45,7 +45,8 @@ public class LEDSubsystem extends TimedSubsystem {
   private final SolidColor m_solidGroup2 = new SolidColor(GROUP2_ACTIVE_START, GROUP2_ACTIVE_END);
   private final SolidColor m_solidGroup3 = new SolidColor(GROUP3_ACTIVE_START, GROUP3_ACTIVE_END);
 
-  // Pre-allocated StrobeAnimation control with fixed slot and frame-rate assignment
+  // Pre-allocated StrobeAnimation control with fixed slot and frame-rate
+  // assignment
   private final StrobeAnimation m_strobeGroup3 =
       new StrobeAnimation(GROUP3_ACTIVE_START, GROUP3_ACTIVE_END)
           .withSlot(SLOT_GAMEPIECE)
@@ -71,9 +72,7 @@ public class LEDSubsystem extends TimedSubsystem {
       // Onboard LEDs and spacers never change — set them once here instead of every
       // periodic.
       m_candle.setControl(new SolidColor(ONBOARD_START, ONBOARD_END).withColor(GREEN));
-      m_candle.setControl(new SolidColor(GROUP1_SPACER_START, GROUP1_SPACER_END).withColor(OFF));
-      m_candle.setControl(new SolidColor(GROUP2_SPACER_START, GROUP2_SPACER_END).withColor(OFF));
-      m_candle.setControl(new SolidColor(GROUP3_SPACER_START, GROUP3_SPACER_END).withColor(OFF));
+      m_candle.setControl(new SolidColor(GROUP1_SPACER_START, GROUP3_SPACER_END).withColor(OFF));
 
       // Indices 158–307 are unused — turn them off once.
       m_candle.setControl(new SolidColor(GROUP3_SPACER_END + 1, 307).withColor(OFF));

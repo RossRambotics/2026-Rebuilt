@@ -86,6 +86,9 @@
         "open": true
       },
       "photonvision": {
+        "intake-cam": {
+          "open": true
+        },
         "open": true
       }
     },
@@ -220,6 +223,11 @@
       "/SmartDashboard/Shooter/Shot 1m": "Command",
       "/SmartDashboard/Shooter/Shot 2m": "Command",
       "/SmartDashboard/Shooter/Shot 3m": "Command",
+      "/SmartDashboard/Shooter/Shot 4m": "Command",
+      "/SmartDashboard/Shooter/Shot 5m": "Command",
+      "/SmartDashboard/Shooter/Shot 6m": "Command",
+      "/SmartDashboard/Shooter/Shot 7m": "Command",
+      "/SmartDashboard/Shooter/Shot 8m": "Command",
       "/SmartDashboard/Shooter/TOF Confirm": "Command",
       "/SmartDashboard/Shooter/Target Enable Auto": "Command",
       "/SmartDashboard/Shooter/Target Hub": "Command",

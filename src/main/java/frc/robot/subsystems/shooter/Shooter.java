@@ -135,11 +135,21 @@ public class Shooter extends TimedSubsystem {
   // ── Fixed-distance shot constants ────────────────────────────────────────
   // TODO: tune all six values by shooting from measured distances on the field.
   private static final double FIXED_SHOT_1M_HOOD_DEG = 15.0; // TODO: tune
-  private static final double FIXED_SHOT_1M_RPM = 2200.0; // TODO: tune
+  private static final double FIXED_SHOT_1M_RPM = 2150.0; // TODO: tune
   private static final double FIXED_SHOT_2M_HOOD_DEG = 30.0; // TODO: tune
   private static final double FIXED_SHOT_2M_RPM = 2250.0; // TODO: tune
   private static final double FIXED_SHOT_3M_HOOD_DEG = 35.0; // TODO: tune
   private static final double FIXED_SHOT_3M_RPM = 2450.0; // TODO: tune
+  private static final double FIXED_SHOT_4M_HOOD_DEG = 40.0; // TODO: tune
+  private static final double FIXED_SHOT_4M_RPM = 2650.0; // TODO: tune
+  private static final double FIXED_SHOT_5M_HOOD_DEG = 45.0; // TODO: tune
+  private static final double FIXED_SHOT_5M_RPM = 2850.0; // TODO: tune
+  private static final double FIXED_SHOT_6M_HOOD_DEG = 50.0; // TODO: tune
+  private static final double FIXED_SHOT_6M_RPM = 3050.0; // TODO: tune
+  private static final double FIXED_SHOT_7M_HOOD_DEG = 55.0; // TODO: tune
+  private static final double FIXED_SHOT_7M_RPM = 3250.0; // TODO: tune
+  private static final double FIXED_SHOT_8M_HOOD_DEG = 60.0; // TODO: tune
+  private static final double FIXED_SHOT_8M_RPM = 3450.0; // TODO: tune
 
   // Manual control rates (tunable — degrees or RPM per second)
   private static final double MANUAL_TURRET_RATE_DEG_PER_SEC = 180.0;
@@ -168,7 +178,7 @@ public class Shooter extends TimedSubsystem {
 
   /** Creates a new Shooter. */
   public Shooter(boolean isReal) {
-    m_turret = new Turret(true);
+    m_turret = new Turret(isReal);
     m_hood = new Hood(isReal);
     m_bottomFlyWheel = new BottomFlyWheel(isReal);
     m_kicker = new Kicker(isReal);
@@ -1441,6 +1451,36 @@ public class Shooter extends TimedSubsystem {
   public Command getFixedShot3mCmd() {
     return getFixedShotCmd(Degrees.of(FIXED_SHOT_3M_HOOD_DEG), FIXED_SHOT_3M_RPM)
         .withName("FixedShot/3m");
+  }
+
+  /** Fixed shot from 4 m. Tune {@code FIXED_SHOT_4M_HOOD_DEG} and {@code FIXED_SHOT_4M_RPM}. */
+  public Command getFixedShot4mCmd() {
+    return getFixedShotCmd(Degrees.of(FIXED_SHOT_4M_HOOD_DEG), FIXED_SHOT_4M_RPM)
+        .withName("FixedShot/4m");
+  }
+
+  /** Fixed shot from 5 m. Tune {@code FIXED_SHOT_5M_HOOD_DEG} and {@code FIXED_SHOT_5M_RPM}. */
+  public Command getFixedShot5mCmd() {
+    return getFixedShotCmd(Degrees.of(FIXED_SHOT_5M_HOOD_DEG), FIXED_SHOT_5M_RPM)
+        .withName("FixedShot/5m");
+  }
+
+  /** Fixed shot from 6 m. Tune {@code FIXED_SHOT_6M_HOOD_DEG} and {@code FIXED_SHOT_6M_RPM}. */
+  public Command getFixedShot6mCmd() {
+    return getFixedShotCmd(Degrees.of(FIXED_SHOT_6M_HOOD_DEG), FIXED_SHOT_6M_RPM)
+        .withName("FixedShot/6m");
+  }
+
+  /** Fixed shot from 7 m. Tune {@code FIXED_SHOT_7M_HOOD_DEG} and {@code FIXED_SHOT_7M_RPM}. */
+  public Command getFixedShot7mCmd() {
+    return getFixedShotCmd(Degrees.of(FIXED_SHOT_7M_HOOD_DEG), FIXED_SHOT_7M_RPM)
+        .withName("FixedShot/7m");
+  }
+
+  /** Fixed shot from 8 m. Tune {@code FIXED_SHOT_8M_HOOD_DEG} and {@code FIXED_SHOT_8M_RPM}. */
+  public Command getFixedShot8mCmd() {
+    return getFixedShotCmd(Degrees.of(FIXED_SHOT_8M_HOOD_DEG), FIXED_SHOT_8M_RPM)
+        .withName("FixedShot/8m");
   }
 
   // ── In-match RPM trim ────────────────────────────────────────────────────
