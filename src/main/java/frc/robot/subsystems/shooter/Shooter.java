@@ -804,6 +804,24 @@ public class Shooter extends TimedSubsystem {
     Logger.recordOutput("Shooter/TurretErrorDeg", m_lastTurretErrorRobotAngle.in(Degrees));
     Logger.recordOutput("Shooter/TargetPose2d", m_targetPoseField3d.toPose2d());
 
+    // Distance from robot center to target (2D, Z component ignored)
+    Pose2d targetPose2d = m_targetPoseField3d.toPose2d();
+    Logger.recordOutput(
+        "Shooter/DistanceRobotCenterToTargetDistanceMeters",
+        RobotContainer.getInstance()
+            .getRobotPose2d()
+            .getTranslation()
+            .getDistance(targetPose2d.getTranslation()));
+    // Distance from turret center to target (2D, Z component ignored)
+    if (m_turretPoseField3d != null) {
+      Logger.recordOutput(
+          "Shooter/DistanceTurretToTargetDistanceMeters",
+          m_turretPoseField3d
+              .toPose2d()
+              .getTranslation()
+              .getDistance(targetPose2d.getTranslation()));
+    }
+
     // Firing solution telemetry
     if (m_lastFiringSolution != null) {
       FiringSolution solution = m_lastFiringSolution;
@@ -815,7 +833,8 @@ public class Shooter extends TimedSubsystem {
               .getDistance(solution.futurePose.getTranslation());
       Logger.recordOutput("Shooter/FutureRobotPoseDistanceMeters", predictedDistanceMeters);
       Logger.recordOutput("Shooter/TimeOfFlightSec", solution.tofSec);
-      Logger.recordOutput("Shooter/DistanceToTargetMeters", solution.distanceToTargetMeters);
+      Logger.recordOutput(
+          "Shooter/DistanceFiringSolutionToTargetMeters", solution.distanceToTargetMeters);
       double hoodTargetAngleDeg =
           MathUtil.clamp(
               Radians.of(solution.hoodMechAngleRad).in(Degrees) + m_hoodTrimOffsetDeg,
