@@ -27,8 +27,8 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.TimedSubsystem;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
@@ -41,7 +41,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 
-public class ClimbElevator extends SubsystemBase {
+public class ClimbElevator extends TimedSubsystem {
 
   // TODO: Tune homing speed and hard-stop detection thresholds on hardware.
   // Negative duty cycle drives the elevator downward toward the bottom hard stop.
@@ -102,7 +102,7 @@ public class ClimbElevator extends SubsystemBase {
               // TODO: Tune ElevatorFeedforward (ks, kg, kv, ka) on hardware
               .withFeedforward(new ElevatorFeedforward(0.0, 0.0, 0.0, 0.0))
               .withSimFeedforward(new ElevatorFeedforward(0.0, 0.5, 0.1, 0.0))
-              .withTelemetry("ClimbElevatorMotor", TelemetryVerbosity.HIGH)
+              .withTelemetry("ClimbElevatorMotor", TelemetryVerbosity.LOW)
               .withGearing(
                   new MechanismGearing(
                       GearBox.fromReductionStages(ClimbElevatorConstants.GEAR_REDUCTION)))
@@ -126,7 +126,7 @@ public class ClimbElevator extends SubsystemBase {
                   Meters.of(ClimbElevatorConstants.MAX_HEIGHT_M))
               .withDrumRadius(Inches.of(ClimbElevatorConstants.DRUM_RADIUS_INCHES))
               .withMass(Pounds.of(ClimbElevatorConstants.CARRIAGE_MASS_LBS))
-              .withTelemetry("ClimbElevatorMech", TelemetryVerbosity.HIGH);
+              .withTelemetry("ClimbElevatorMech", TelemetryVerbosity.LOW);
 
       elevator = new Elevator(elevatorConfig);
     }
@@ -286,7 +286,7 @@ public class ClimbElevator extends SubsystemBase {
   // ---------------------------------------------------------------------------
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     Logger.recordOutput("ClimbElevator/IsStubbed", !m_isReal);
     Logger.recordOutput("ClimbElevator/IsCalibrated", m_isCalibrated);
 

@@ -9,14 +9,14 @@ import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.TimedSubsystem;
 import org.littletonrobotics.junction.Logger;
 
 /**
  * Intake coordinator subsystem. Owns {@link IntakeRoller} and {@link IntakeDeployArm} and exposes
  * compound and standalone commands for operator use.
  */
-public class Intake extends SubsystemBase {
+public class Intake extends TimedSubsystem {
 
   private final boolean m_isReal;
   private final IntakeRoller m_roller;
@@ -151,7 +151,7 @@ public class Intake extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     Logger.recordOutput("Intake/IsStubbed", !m_isReal);
   }
 }

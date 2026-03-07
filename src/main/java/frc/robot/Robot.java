@@ -13,6 +13,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.util.FuelSim;
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
+import java.util.List;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -29,6 +32,11 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
+
+  private final List<GarbageCollectorMXBean> gcBeans =
+      ManagementFactory.getGarbageCollectorMXBeans();
+  private long lastGcCount = 0;
+  private long lastGcTimeMs = 0;
 
   public Robot() {
     // Record metadata
@@ -93,6 +101,16 @@ public class Robot extends LoggedRobot {
 
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
+
+    // Log GC deltas — non-zero values indicate GC ran during this loop cycle.
+    long totalGcCount =
+        gcBeans.stream().mapToLong(GarbageCollectorMXBean::getCollectionCount).sum();
+    long totalGcTimeMs =
+        gcBeans.stream().mapToLong(GarbageCollectorMXBean::getCollectionTime).sum();
+    Logger.recordOutput("Timing/GC/CollectionsDelta", totalGcCount - lastGcCount);
+    Logger.recordOutput("Timing/GC/TimeDeltaMs", totalGcTimeMs - lastGcTimeMs);
+    lastGcCount = totalGcCount;
+    lastGcTimeMs = totalGcTimeMs;
   }
 
   /** This function is called once when the robot is disabled. */

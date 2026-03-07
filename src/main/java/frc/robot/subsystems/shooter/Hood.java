@@ -23,8 +23,8 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.TimedSubsystem;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
@@ -37,7 +37,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 
-public class Hood extends SubsystemBase {
+public class Hood extends TimedSubsystem {
 
   // TODO: Tune homing speed and hard-stop detection thresholds on hardware.
   // Negative duty cycle drives the hood toward its minimum angle (hard stop).
@@ -98,7 +98,7 @@ public class Hood extends SubsystemBase {
               .withGearing(new MechanismGearing(GearBox.fromReductionStages(19)))
               .withIdleMode(MotorMode.BRAKE)
               .withMotorInverted(false)
-              .withTelemetry("HoodMotor", TelemetryVerbosity.HIGH)
+              .withTelemetry("HoodMotor", TelemetryVerbosity.LOW)
               .withStatorCurrentLimit(Amps.of(20));
 
       var hoodSMC = new TalonFXWrapper(hoodMotor, DCMotor.getKrakenX44(1), motorConfig);
@@ -112,7 +112,7 @@ public class Hood extends SubsystemBase {
               .withSoftLimits(
                   Degrees.of(HoodConstants.HOOD_DEGREES_MIN),
                   Degrees.of(HoodConstants.HOOD_DEGREES_MAX))
-              .withTelemetry("HoodMech", TelemetryVerbosity.HIGH)
+              .withTelemetry("HoodMech", TelemetryVerbosity.LOW)
               .withLength(Meters.of(0.25))
               .withMass(Pounds.of(5.0));
 
@@ -236,7 +236,7 @@ public class Hood extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     Logger.recordOutput("Hood/IsStubbed", !m_isReal);
     Logger.recordOutput("Hood/IsCalibrated", m_isCalibrated);
 

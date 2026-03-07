@@ -6,7 +6,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.commands.ShootingTarget;
 import frc.robot.subsystems.shooter.Shooter;
 import org.littletonrobotics.junction.Logger;
@@ -19,7 +18,7 @@ import org.littletonrobotics.junction.Logger;
  * #cmdSelectManual(ShootingTarget)} to override automatic selection; auto-selection resumes only
  * when {@link #cmdEnableAuto()} is triggered.
  */
-public class ShooterTargetSelector extends SubsystemBase {
+public class ShooterTargetSelector extends TimedSubsystem {
 
   private final Shooter m_shooter;
   private ShootingTarget m_selectedTarget = ShootingTarget.HUB;
@@ -30,7 +29,7 @@ public class ShooterTargetSelector extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     Logger.recordOutput("ShooterTargetSelector/SelectedTarget", m_selectedTarget.displayName);
     Logger.recordOutput("ShooterTargetSelector/IsAutoEnabled", m_isAutoEnabled);
   }

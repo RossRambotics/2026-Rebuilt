@@ -28,17 +28,17 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.commands.ShootingTarget;
 import frc.robot.subsystems.Spindexer;
+import frc.robot.subsystems.TimedSubsystem;
 import frc.robot.util.FuelSim;
 import java.util.Arrays;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class Shooter extends SubsystemBase {
+public class Shooter extends TimedSubsystem {
   // location of the turret relative to the robot
   // Turret offsets from robot center (meters)
   private final double TURRET_X_OFFSET_M = 0.14; // meters
@@ -191,11 +191,6 @@ public class Shooter extends SubsystemBase {
     m_bottomFlyWheel.setDefaultCommand(getIdleFlywheelCmd());
     m_kicker.setDefaultCommand(m_kicker.stop());
     m_spindexer.setDefaultCommand(m_spindexer.stop());
-
-    // Add Shuffleboard commands to switch between targeting modes
-    Shuffleboard.getTab("Shooter").add(getEnableNormalTargetingModeCmd());
-    Shuffleboard.getTab("Shooter").add(getEnablePredictiveTargetingModeCmd());
-    Shuffleboard.getTab("Shooter").add(getOffCmd());
 
     Shuffleboard.getTab("YAMS_SysID").add(m_hood.sysId());
 
@@ -379,7 +374,7 @@ public class Shooter extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     // This method will be called once per scheduler run
 
     updateTurretPose();

@@ -20,7 +20,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.TimedSubsystem;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class Vision extends SubsystemBase {
+public class Vision extends TimedSubsystem {
   private final VisionConsumer consumer;
   private final Supplier<Pose2d> poseSupplier;
   private final Consumer<Pose2d> poseResetter;
@@ -99,7 +99,7 @@ public class Vision extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     for (int i = 0; i < io.length; i++) {
       io[i].updateInputs(inputs[i]);
       Logger.processInputs("Vision/Camera" + Integer.toString(i), inputs[i]);

@@ -7,12 +7,11 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.generated.TunerConstants;
 import org.littletonrobotics.junction.Logger;
 
-public class SpeedNanny extends SubsystemBase {
+public class SpeedNanny extends TimedSubsystem {
   private static final double LOOP_PERIOD_SEC =
       0.02; // 20 ms loop period, used to calculate epsilon for speed checks based on max
   // acceleration
@@ -36,7 +35,7 @@ public class SpeedNanny extends SubsystemBase {
   public SpeedNanny() {}
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     // This method will be called once per scheduler run
     // Calculate new speed limit based on arm angle & arm extension
     m_speedLimit = m_kMaxSpeed;

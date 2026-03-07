@@ -22,7 +22,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.TimedSubsystem;
 import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
@@ -34,7 +34,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 
-public class Kicker extends SubsystemBase {
+public class Kicker extends TimedSubsystem {
 
   private static final int CANRANGE_CAN_ID = 44;
   // Detection threshold: anything within 4 inches is a ball.
@@ -62,7 +62,7 @@ public class Kicker extends SubsystemBase {
                   50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
               .withFeedforward(new SimpleMotorFeedforward(0, .12, 0))
               .withSimFeedforward(new SimpleMotorFeedforward(0, .52, .34))
-              .withTelemetry("Kicker", TelemetryVerbosity.HIGH)
+              .withTelemetry("Kicker", TelemetryVerbosity.LOW)
               .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
               .withMotorInverted(true)
               .withIdleMode(MotorMode.COAST)
@@ -118,7 +118,7 @@ public class Kicker extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     Logger.recordOutput("Kicker/IsStubbed", !m_isReal);
     Logger.recordOutput("Kicker/HasFuel", hasFuel());
     Logger.recordOutput("Kicker/FuelDistanceM", getFuelDistanceM());

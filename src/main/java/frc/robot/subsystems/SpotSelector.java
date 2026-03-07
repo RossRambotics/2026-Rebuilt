@@ -7,7 +7,6 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.commands.FieldSpot;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
@@ -21,7 +20,7 @@ import org.littletonrobotics.junction.Logger;
  * <p>A custom arbitrary pose can be set via {@link #cmdSelectCustomPose} for fine-tuning without
  * adding a new enum entry.
  */
-public class SpotSelector extends SubsystemBase {
+public class SpotSelector extends TimedSubsystem {
 
   private FieldSpot m_selectedSpot = null;
   private Pose2d m_customPosePose2d = null;
@@ -33,7 +32,7 @@ public class SpotSelector extends SubsystemBase {
   public SpotSelector() {}
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     Logger.recordOutput("SpotSelector/SelectedName", getSelectedName());
     Logger.recordOutput("SpotSelector/HasTarget", getSelectedPose().isPresent());
     Logger.recordOutput("SpotSelector/IsAutoDriving", m_isAutoDriving);

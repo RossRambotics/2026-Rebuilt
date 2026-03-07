@@ -3,7 +3,7 @@ package frc.robot.subsystems.gamepiece;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.TimedSubsystem;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -24,7 +24,7 @@ import org.littletonrobotics.junction.Logger;
  *
  * <p>All inputs are logged via AdvantageKit for full replay support.
  */
-public class GamePieceVisionSubsystem extends SubsystemBase {
+public class GamePieceVisionSubsystem extends TimedSubsystem {
 
   private final GamePieceVisionIO m_io;
   private final GamePieceVisionIOInputsAutoLogged m_inputs =
@@ -41,7 +41,7 @@ public class GamePieceVisionSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     m_io.updateInputs(m_inputs);
     Logger.processInputs("GamePieceVision", m_inputs);
 

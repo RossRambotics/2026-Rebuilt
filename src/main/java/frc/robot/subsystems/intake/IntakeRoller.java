@@ -17,7 +17,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.TimedSubsystem;
 import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
@@ -29,7 +29,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 
-public class IntakeRoller extends SubsystemBase {
+public class IntakeRoller extends TimedSubsystem {
 
   private final boolean m_isReal;
   private FlyWheel roller;
@@ -65,7 +65,7 @@ public class IntakeRoller extends SubsystemBase {
                       IntakeConstants.ROLLER_SIM_FF_KS,
                       IntakeConstants.ROLLER_SIM_FF_KV,
                       IntakeConstants.ROLLER_SIM_FF_KA))
-              .withTelemetry("IntakeRoller", TelemetryVerbosity.HIGH)
+              .withTelemetry("IntakeRoller", TelemetryVerbosity.LOW)
               .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
               .withMotorInverted(true)
               .withIdleMode(MotorMode.COAST)
@@ -109,7 +109,7 @@ public class IntakeRoller extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     Logger.recordOutput("IntakeRoller/IsStubbed", !m_isReal);
 
     if (roller != null) {

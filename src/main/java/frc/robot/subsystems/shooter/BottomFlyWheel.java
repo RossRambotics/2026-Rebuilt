@@ -23,7 +23,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.TimedSubsystem;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Supplier;
@@ -37,7 +37,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 
-public class BottomFlyWheel extends SubsystemBase {
+public class BottomFlyWheel extends TimedSubsystem {
 
   private final boolean m_isReal;
 
@@ -119,7 +119,7 @@ public class BottomFlyWheel extends SubsystemBase {
               .withFeedforward(new SimpleMotorFeedforward(.1, .12, 0))
               .withSimFeedforward(new SimpleMotorFeedforward(0, .52, .34))
               // Telemetry name and verbosity level
-              .withTelemetry("BottomFlyWheelMotor", TelemetryVerbosity.HIGH)
+              .withTelemetry("BottomFlyWheelMotor", TelemetryVerbosity.LOW)
               .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
               // Motor properties to prevent over currenting.
               .withMotorInverted(false)
@@ -139,7 +139,7 @@ public class BottomFlyWheel extends SubsystemBase {
               // Maximum speed of the shooter.
               .withUpperSoftLimit(RPM.of(6000))
               // Telemetry name and verbosity for the arm.
-              .withTelemetry("BottomFlyWheel", TelemetryVerbosity.HIGH);
+              .withTelemetry("BottomFlyWheel", TelemetryVerbosity.LOW);
 
       shooter = new FlyWheel(shooterConfig);
 
@@ -249,7 +249,7 @@ public class BottomFlyWheel extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     Logger.recordOutput("BottomFlyWheel/IsStubbed", !m_isReal);
 
     // 1. Update Telemetry

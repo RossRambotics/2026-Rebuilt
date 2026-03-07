@@ -21,8 +21,8 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.TimedSubsystem;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
@@ -37,7 +37,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 
-public class Turret extends SubsystemBase {
+public class Turret extends TimedSubsystem {
   public static final int TURRET_DEGREES_MIN = -90;
   public static final int TURRET_DEGREES_MAX = 90;
 
@@ -99,7 +99,7 @@ public class Turret extends SubsystemBase {
               .withGearing(new MechanismGearing(GearBox.fromReductionStages(16.0)))
               .withIdleMode(MotorMode.BRAKE)
               .withMotorInverted(true)
-              .withTelemetry("TurretMotor", TelemetryVerbosity.HIGH)
+              .withTelemetry("TurretMotor", TelemetryVerbosity.LOW)
               .withStatorCurrentLimit(Amps.of(40))
               .withClosedLoopRampRate(Seconds.of(0.25))
               .withOpenLoopRampRate(Seconds.of(0.25));
@@ -115,7 +115,7 @@ public class Turret extends SubsystemBase {
               .withHardLimit(
                   Degrees.of(TURRET_DEGREES_MIN - 10), Degrees.of(TURRET_DEGREES_MAX + 10))
               .withSoftLimits(Degrees.of(TURRET_DEGREES_MIN), Degrees.of(TURRET_DEGREES_MAX))
-              .withTelemetry("TurretMech", TelemetryVerbosity.HIGH)
+              .withTelemetry("TurretMech", TelemetryVerbosity.LOW)
               .withMechanismPositionConfig(mechConfig)
               .withMOI(Meters.of(0.25), Pounds.of(10));
 
@@ -230,7 +230,7 @@ public class Turret extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     Logger.recordOutput("Turret/IsStubbed", !m_isReal);
     Logger.recordOutput("Turret/IsCalibrated", m_isCalibrated);
 

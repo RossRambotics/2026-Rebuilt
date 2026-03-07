@@ -27,8 +27,8 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.TimedSubsystem;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
@@ -41,7 +41,7 @@ import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 
-public class IntakeDeployArm extends SubsystemBase {
+public class IntakeDeployArm extends TimedSubsystem {
 
   private final boolean m_isReal;
   private TalonFX armMotor;
@@ -114,7 +114,7 @@ public class IntakeDeployArm extends SubsystemBase {
               // COAST is critical — arm must fold freely if struck by another robot
               .withIdleMode(MotorMode.COAST)
               .withMotorInverted(false)
-              .withTelemetry("IntakeDeployArmMotor", TelemetryVerbosity.HIGH)
+              .withTelemetry("IntakeDeployArmMotor", TelemetryVerbosity.LOW)
               .withStatorCurrentLimit(Amps.of(IntakeConstants.ARM_STATOR_CURRENT_LIMIT_AMPS));
 
       var armSMC = new TalonFXWrapper(armMotor, DCMotor.getKrakenX60(1), motorConfig);
@@ -128,7 +128,7 @@ public class IntakeDeployArm extends SubsystemBase {
               .withSoftLimits(
                   Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG),
                   Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG))
-              .withTelemetry("IntakeDeployArmMech", TelemetryVerbosity.HIGH)
+              .withTelemetry("IntakeDeployArmMech", TelemetryVerbosity.LOW)
               // TODO: Update arm length and mass once known
               .withLength(Meters.of(IntakeConstants.ARM_LENGTH_M))
               .withMass(Pounds.of(IntakeConstants.ARM_MASS_LBS));
@@ -247,7 +247,7 @@ public class IntakeDeployArm extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     Logger.recordOutput("IntakeDeployArm/IsStubbed", !m_isReal);
     Logger.recordOutput("IntakeDeployArm/IsCalibrated", m_isCalibrated);
 

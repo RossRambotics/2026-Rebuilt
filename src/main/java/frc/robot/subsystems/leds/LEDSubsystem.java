@@ -10,8 +10,8 @@ import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.signals.StripTypeValue;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems;
+import frc.robot.subsystems.TimedSubsystem;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -27,7 +27,7 @@ import org.littletonrobotics.junction.Logger;
  *   <li>158–307: unused, set to off once at startup
  * </ul>
  */
-public class LEDSubsystem extends SubsystemBase {
+public class LEDSubsystem extends TimedSubsystem {
 
   private final boolean m_isReal;
   private final Subsystems m_subsystems;
@@ -83,7 +83,7 @@ public class LEDSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     Logger.recordOutput("LEDs/IsStubbed", !m_isReal);
 
     // Run LED state logic at 10 Hz to limit CAN traffic and CPU overhead
