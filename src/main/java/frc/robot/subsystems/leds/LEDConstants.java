@@ -86,12 +86,12 @@ public final class LEDConstants {
   // TeleOp is ~150 s (2:30). Blink windows = last 5 s of each shift period.
   //
   // Shift boundaries (time remaining):
-  //   Transition:  2:20–2:10  (matchTimeSec 140–130)  → blink 130–135
-  //   Shift 1:     2:10–1:45  (matchTimeSec 130–105)  → blink 105–110
-  //   Shift 2:     1:45–1:20  (matchTimeSec 105–80)   → blink  80–85
-  //   Shift 3:     1:20–0:55  (matchTimeSec  80–55)   → blink  55–60
-  //   Shift 4:     0:55–0:30  (matchTimeSec  55–30)   → blink  30–35
-  //   End Game:    0:30–0:00  (matchTimeSec  30–0)    → blink   0–5
+  // Transition: 2:20–2:10 (matchTimeSec 140–130) → blink 130–135
+  // Shift 1: 2:10–1:45 (matchTimeSec 130–105) → blink 105–110
+  // Shift 2: 1:45–1:20 (matchTimeSec 105–80) → blink 80–85
+  // Shift 3: 1:20–0:55 (matchTimeSec 80–55) → blink 55–60
+  // Shift 4: 0:55–0:30 (matchTimeSec 55–30) → blink 30–35
+  // End Game: 0:30–0:00 (matchTimeSec 30–0) → blink 0–5
   // ------------------------------------------------------------------
   public static final double BLINK_WINDOW_TRANSITION_LOW_SEC = 130.0;
   public static final double BLINK_WINDOW_TRANSITION_HIGH_SEC = 135.0;

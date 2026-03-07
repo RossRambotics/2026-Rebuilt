@@ -205,7 +205,7 @@ public class RobotContainer {
 
     // Instantiate LED subsystem after m_subsystems so it can receive the full
     // bundle
-    m_ledSubsystem = new LEDSubsystem(Constants.currentMode == Constants.Mode.REAL, m_subsystems);
+    m_ledSubsystem = new LEDSubsystem(true, m_subsystems);
 
     // Register SuperFastClimb as PathPlanner named commands for use in .auto files.
     // Must be registered before AutoBuilder.buildAutoChooser().

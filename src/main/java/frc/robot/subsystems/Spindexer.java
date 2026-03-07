@@ -44,28 +44,31 @@ public class Spindexer extends SubsystemBase {
     m_isReal = isReal;
 
     if (m_isReal) {
-      SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
-          .withControlMode(ControlMode.CLOSED_LOOP)
-          .withClosedLoopController(
-              0, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
-          .withSimClosedLoopController(
-              50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
-          .withFeedforward(new SimpleMotorFeedforward(0, .12, 0))
-          .withSimFeedforward(new SimpleMotorFeedforward(0, .52, .34))
-          .withTelemetry("Spindexer", TelemetryVerbosity.HIGH)
-          .withGearing(new MechanismGearing(GearBox.fromReductionStages(5)))
-          .withMotorInverted(true)
-          .withIdleMode(MotorMode.COAST)
-          .withStatorCurrentLimit(Amps.of(40));
+      SmartMotorControllerConfig smcConfig =
+          new SmartMotorControllerConfig(this)
+              .withControlMode(ControlMode.CLOSED_LOOP)
+              .withClosedLoopController(
+                  0, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
+              .withSimClosedLoopController(
+                  50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
+              .withFeedforward(new SimpleMotorFeedforward(0, .12, 0))
+              .withSimFeedforward(new SimpleMotorFeedforward(0, .52, .34))
+              .withTelemetry("Spindexer", TelemetryVerbosity.HIGH)
+              .withGearing(new MechanismGearing(GearBox.fromReductionStages(5)))
+              .withMotorInverted(true)
+              .withIdleMode(MotorMode.COAST)
+              .withStatorCurrentLimit(Amps.of(40));
 
       TalonFX spindexerMotor = new TalonFX(39);
-      var spindexerController = new TalonFXWrapper(spindexerMotor, DCMotor.getFalcon500(1), smcConfig);
+      var spindexerController =
+          new TalonFXWrapper(spindexerMotor, DCMotor.getFalcon500(1), smcConfig);
 
-      FlyWheelConfig spindexerConfig = new FlyWheelConfig(spindexerController)
-          .withDiameter(Inches.of(4))
-          .withMass(Pounds.of(1))
-          .withUpperSoftLimit(RPM.of(1000))
-          .withTelemetry("SpindexerMech", TelemetryVerbosity.LOW);
+      FlyWheelConfig spindexerConfig =
+          new FlyWheelConfig(spindexerController)
+              .withDiameter(Inches.of(4))
+              .withMass(Pounds.of(1))
+              .withUpperSoftLimit(RPM.of(1000))
+              .withTelemetry("SpindexerMech", TelemetryVerbosity.LOW);
 
       spindexer = new FlyWheel(spindexerConfig);
     }
@@ -97,21 +100,15 @@ public class Spindexer extends SubsystemBase {
     return setVelocity(RPM.of(REVERSE_RPM)).withName("Spindexer/Reverse");
   }
 
-  /**
-   * Run the spindexer at a set speed (0.0 to 1.0). Positive usually feeds INTO
-   * the shooter.
-   */
+  /** Run the spindexer at a set speed (0.0 to 1.0). Positive usually feeds INTO the shooter. */
   public Command runSpindexer(double percentOutput) {
-    if (spindexer != null)
-      return spindexer.set(percentOutput);
-    return Commands.run(() -> {
-    }, this);
+    if (spindexer != null) return spindexer.set(percentOutput);
+    return Commands.run(() -> {}, this);
   }
 
   /** Stop the spindexer immediately. */
   public Command stop() {
-    if (spindexer != null)
-      return spindexer.set(0.0);
+    if (spindexer != null) return spindexer.set(0.0);
     return Commands.run(() -> m_stubbedVelocity = RPM.of(0), this);
   }
 
@@ -132,8 +129,7 @@ public class Spindexer extends SubsystemBase {
   }
 
   public Command setVelocity(AngularVelocity speed) {
-    if (spindexer != null)
-      return spindexer.setSpeed(speed);
+    if (spindexer != null) return spindexer.setSpeed(speed);
     return Commands.run(() -> m_stubbedVelocity = speed, this);
   }
 
@@ -144,8 +140,7 @@ public class Spindexer extends SubsystemBase {
   }
 
   public AngularVelocity getVelocity() {
-    if (spindexer != null)
-      return spindexer.getSpeed();
+    if (spindexer != null) return spindexer.getSpeed();
     return m_stubbedVelocity;
   }
 

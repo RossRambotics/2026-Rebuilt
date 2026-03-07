@@ -41,7 +41,8 @@ public class LEDSubsystem extends SubsystemBase {
   private static final int UPDATE_PERIOD_CYCLES = 5;
   private int m_periodicCount = 0;
 
-  // Pre-allocated SolidColor controls for active groups (reused every cycle, avoids per-cycle GC)
+  // Pre-allocated SolidColor controls for active groups (reused every cycle,
+  // avoids per-cycle GC)
   private final SolidColor m_solidGroup1 = new SolidColor(GROUP1_ACTIVE_START, GROUP1_ACTIVE_END);
   private final SolidColor m_solidGroup2 = new SolidColor(GROUP2_ACTIVE_START, GROUP2_ACTIVE_END);
   private final SolidColor m_solidGroup3 = new SolidColor(GROUP3_ACTIVE_START, GROUP3_ACTIVE_END);
@@ -49,7 +50,8 @@ public class LEDSubsystem extends SubsystemBase {
   private final SolidColor m_solidGroup5 = new SolidColor(GROUP5_ACTIVE_START, GROUP5_ACTIVE_END);
   private final SolidColor m_solidGroup6 = new SolidColor(GROUP6_ACTIVE_START, GROUP6_ACTIVE_END);
 
-  // Pre-allocated StrobeAnimation controls with fixed slot and frame-rate assignments
+  // Pre-allocated StrobeAnimation controls with fixed slot and frame-rate
+  // assignments
   private final StrobeAnimation m_strobeGroup3 =
       new StrobeAnimation(GROUP3_ACTIVE_START, GROUP3_ACTIVE_END)
           .withSlot(SLOT_GAMEPIECE_LEFT)
@@ -76,7 +78,8 @@ public class LEDSubsystem extends SubsystemBase {
       config.LED.BrightnessScalar = 1.0;
       m_candle.getConfigurator().apply(config);
 
-      // Onboard LEDs and spacers never change — set them once here instead of every periodic.
+      // Onboard LEDs and spacers never change — set them once here instead of every
+      // periodic.
       m_candle.setControl(new SolidColor(ONBOARD_START, ONBOARD_END).withColor(GREEN));
       m_candle.setControl(new SolidColor(GROUP1_SPACER_START, GROUP1_SPACER_END).withColor(OFF));
       m_candle.setControl(new SolidColor(GROUP2_SPACER_START, GROUP2_SPACER_END).withColor(OFF));
