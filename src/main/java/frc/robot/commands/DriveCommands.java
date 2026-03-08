@@ -369,6 +369,35 @@ public class DriveCommands {
     double gyroDelta = 0.0;
   }
 
+  /**
+   * Spins the robot in place to the target heading, then finishes. Uses the same angle PID
+   * constants as {@link #joystickDriveAtAngle}. Ends when within 2 degrees of the target.
+   *
+   * @param drive the drive subsystem
+   * @param targetHeading supplier for the desired heading
+   */
+  public static Command spinToHeading(Drive drive, Supplier<Rotation2d> targetHeading) {
+    ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+    angleController.setTolerance(Units.degreesToRadians(2.0));
+
+    return Commands.run(
+            () -> {
+              double omega =
+                  angleController.calculate(
+                      drive.getRotation().getRadians(), targetHeading.get().getRadians());
+              drive.runVelocity(new ChassisSpeeds(0.0, 0.0, omega));
+            },
+            drive)
+        .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()))
+        .until(angleController::atGoal);
+  }
+
   public static Command joystickDriveRobotCentric(
       Drive drive,
       DoubleSupplier xSupplier,
