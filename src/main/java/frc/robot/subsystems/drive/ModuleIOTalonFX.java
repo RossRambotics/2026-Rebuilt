@@ -10,6 +10,7 @@ package frc.robot.subsystems.drive;
 import static frc.robot.util.PhoenixUtil.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -82,6 +83,9 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<AngularVelocity> turnVelocity;
   private final StatusSignal<Voltage> turnAppliedVolts;
   private final StatusSignal<Current> turnCurrent;
+
+  // Cached refresh status — set in refreshSignals(), read in updateInputs()
+  private StatusCode m_refreshStatus = StatusCode.OK;
 
   // Connection debouncers
   private final Debouncer driveConnectedDebounce =
@@ -184,24 +188,32 @@ public class ModuleIOTalonFX implements ModuleIO {
   }
 
   @Override
-  public void updateInputs(ModuleIOInputs inputs) {
-    // Refresh all signals
-    var driveStatus =
-        BaseStatusSignal.refreshAll(drivePosition, driveVelocity, driveAppliedVolts, driveCurrent);
-    var turnStatus =
-        BaseStatusSignal.refreshAll(turnPosition, turnVelocity, turnAppliedVolts, turnCurrent);
-    var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition);
+  public void refreshSignals() {
+    m_refreshStatus =
+        BaseStatusSignal.refreshAll(
+            drivePosition,
+            driveVelocity,
+            driveAppliedVolts,
+            driveCurrent,
+            turnPosition,
+            turnVelocity,
+            turnAppliedVolts,
+            turnCurrent,
+            turnAbsolutePosition);
+  }
 
+  @Override
+  public void updateInputs(ModuleIOInputs inputs) {
     // Update drive inputs
-    inputs.driveConnected = driveConnectedDebounce.calculate(driveStatus.isOK());
+    inputs.driveConnected = driveConnectedDebounce.calculate(m_refreshStatus.isOK());
     inputs.drivePositionRad = Units.rotationsToRadians(drivePosition.getValueAsDouble());
     inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble());
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
 
     // Update turn inputs
-    inputs.turnConnected = turnConnectedDebounce.calculate(turnStatus.isOK());
-    inputs.turnEncoderConnected = turnEncoderConnectedDebounce.calculate(turnEncoderStatus.isOK());
+    inputs.turnConnected = turnConnectedDebounce.calculate(m_refreshStatus.isOK());
+    inputs.turnEncoderConnected = turnEncoderConnectedDebounce.calculate(m_refreshStatus.isOK());
     inputs.turnAbsolutePosition = Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble());
     inputs.turnPosition = Rotation2d.fromRotations(turnPosition.getValueAsDouble());
     inputs.turnVelocityRadPerSec = Units.rotationsToRadians(turnVelocity.getValueAsDouble());

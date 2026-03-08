@@ -52,6 +52,10 @@ public class Module {
             AlertType.kError);
   }
 
+  public void refreshSignals() {
+    io.refreshSignals();
+  }
+
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);

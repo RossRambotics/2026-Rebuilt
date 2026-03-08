@@ -23,6 +23,7 @@ import java.util.Queue;
 public class GyroIOPigeon2 implements GyroIO {
   private final Pigeon2 pigeon =
       new Pigeon2(TunerConstants.DrivetrainConstants.Pigeon2Id, TunerConstants.kCANBus);
+  private StatusCode m_refreshStatus = StatusCode.OK;
   private final StatusSignal<Angle> yaw = pigeon.getYaw();
   private final Queue<Double> yawPositionQueue;
   private final Queue<Double> yawTimestampQueue;
@@ -48,9 +49,13 @@ public class GyroIOPigeon2 implements GyroIO {
   }
 
   @Override
+  public void refreshSignals() {
+    m_refreshStatus = BaseStatusSignal.refreshAll(yaw, yawVelocity, roll, pitch);
+  }
+
+  @Override
   public void updateInputs(GyroIOInputs inputs) {
-    inputs.connected =
-        BaseStatusSignal.refreshAll(yaw, yawVelocity, roll, pitch).equals(StatusCode.OK);
+    inputs.connected = m_refreshStatus.equals(StatusCode.OK);
     inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
     inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
     inputs.rollRobotRad = Units.degreesToRadians(roll.getValueAsDouble());

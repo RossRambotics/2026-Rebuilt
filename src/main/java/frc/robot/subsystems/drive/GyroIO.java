@@ -22,5 +22,8 @@ public interface GyroIO {
     public double pitchRobotRad = 0.0;
   }
 
+  /** Refreshes CAN signals from hardware. Call before acquiring odometryLock. */
+  public default void refreshSignals() {}
+
   public default void updateInputs(GyroIOInputs inputs) {}
 }

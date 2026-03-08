@@ -32,6 +32,9 @@ public interface ModuleIO {
     public Rotation2d[] odometryTurnPositions = new Rotation2d[] {};
   }
 
+  /** Refreshes CAN signals from hardware. Call before acquiring odometryLock. */
+  public default void refreshSignals() {}
+
   /** Updates the set of loggable inputs. */
   public default void updateInputs(ModuleIOInputs inputs) {}
 

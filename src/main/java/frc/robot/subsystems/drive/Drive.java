@@ -153,7 +153,14 @@ public class Drive extends TimedSubsystem {
 
   @Override
   protected void periodicImpl() {
-    odometryLock.lock(); // Prevents odometry updates while reading data
+    // Phase 1: refresh CAN signals — blocking reads, no lock needed
+    gyroIO.refreshSignals();
+    for (var module : modules) {
+      module.refreshSignals();
+    }
+
+    // Phase 2: read cached values + drain odometry queues — lock required
+    odometryLock.lock();
     gyroIO.updateInputs(gyroInputs);
     Logger.processInputs("Drive/Gyro", gyroInputs);
     for (var module : modules) {
