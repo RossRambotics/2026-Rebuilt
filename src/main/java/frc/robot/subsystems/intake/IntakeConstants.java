@@ -33,7 +33,8 @@ public final class IntakeConstants {
   // Deploy arm — homing
   // ---------------------------------------------------------------------------
   // TODO: Verify homing direction and tune thresholds on hardware.
-  // Positive duty cycle must drive the arm toward RETRACT_ANGLE_DEG (the hard stop).
+  // Positive duty cycle must drive the arm toward RETRACT_ANGLE_DEG (the hard
+  // stop).
   public static final double ARM_HOME_DUTY_CYCLE = 0.25;
   public static final double ARM_HOME_STALL_VELOCITY_RPS = 0.5;
   public static final double ARM_HOME_STALL_CURRENT_AMPS = 20.0;
@@ -44,7 +45,7 @@ public final class IntakeConstants {
   // Deploy arm — PID / motion magic
   // ---------------------------------------------------------------------------
   // TODO: Tune PID gains on hardware
-  public static final double ARM_KP = 75.0;
+  public static final double ARM_KP = 150.0;
   public static final double ARM_KI = 0.0;
   public static final double ARM_KD = 0.0;
   public static final double ARM_MAX_VEL_DEG_PER_SEC = 180.0;

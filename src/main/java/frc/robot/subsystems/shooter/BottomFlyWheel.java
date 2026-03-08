@@ -153,14 +153,14 @@ public class BottomFlyWheel extends TimedSubsystem {
     m_targetRPM = table.getDoubleTopic("BottomTargetRPM").getEntry(0.0);
     m_targetRPM.set(0.0);
 
-    double dist_tune = 0.15;
+    double dist_tune = 0.0;
 
     // Populate Angle Table (Distance -> Degrees)
     m_angleTable.put(1.0 + dist_tune, 15.0);
     m_angleTable.put(2.0 + dist_tune, 30.0);
     m_angleTable.put(3.0 + dist_tune, 35.0);
-    m_angleTable.put(4.0 + dist_tune, 35.0);
-    m_angleTable.put(5.0 + dist_tune, 35.0);
+    m_angleTable.put(4.2 + dist_tune, 35.0);
+    m_angleTable.put(5.2 + dist_tune, 35.0);
     m_angleTable.put(6.0 + dist_tune, 35.0);
     m_angleTable.put(7.0 + dist_tune, 35.0);
     m_angleTable.put(8.0 + dist_tune, 40.0);
@@ -169,8 +169,8 @@ public class BottomFlyWheel extends TimedSubsystem {
     m_rpmTable.put(1.0 + dist_tune, 2150.0);
     m_rpmTable.put(2.0 + dist_tune, 2000.0);
     m_rpmTable.put(3.0 + dist_tune, 2200.0);
-    m_rpmTable.put(4.0 + dist_tune, 2200.0);
-    m_rpmTable.put(5.0 + dist_tune, 2400.0);
+    m_rpmTable.put(4.2 + dist_tune, 2500.0);
+    m_rpmTable.put(5.2 + dist_tune, 2700.0);
     m_rpmTable.put(6.0 + dist_tune, 3000.0);
     m_rpmTable.put(7.0 + dist_tune, 3200.0);
     m_rpmTable.put(8.0 + dist_tune, 3450.0);
@@ -181,8 +181,8 @@ public class BottomFlyWheel extends TimedSubsystem {
     m_tofTable.put(1.0 + dist_tune, 1.6 + tune);
     m_tofTable.put(2.0 + dist_tune, 1.5 + tune);
     m_tofTable.put(3.0 + dist_tune, 1.7 + tune);
-    m_tofTable.put(4.0 + dist_tune, 1.75 + tune);
-    m_tofTable.put(5.0 + dist_tune, 1.8 + tune);
+    m_tofTable.put(4.2 + dist_tune, 1.75 + tune);
+    m_tofTable.put(5.2 + dist_tune, 1.8 + tune);
     m_tofTable.put(6.0 + dist_tune, 1.85 + tune);
     m_tofTable.put(7.0 + dist_tune, 1.95 + tune);
     m_tofTable.put(8.0 + dist_tune, 2.0 + tune);

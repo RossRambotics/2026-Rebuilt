@@ -137,18 +137,18 @@ public class Shooter extends TimedSubsystem {
   private static final double FIXED_SHOT_1M_HOOD_DEG = 15.0; // TODO: tune
   private static final double FIXED_SHOT_1M_RPM = 2150.0; // TODO: tune
   private static final double FIXED_SHOT_2M_HOOD_DEG = 30.0; // TODO: tune
-  private static final double FIXED_SHOT_2M_RPM = 2250.0; // TODO: tune
+  private static final double FIXED_SHOT_2M_RPM = 2000.0; // TODO: tune
   private static final double FIXED_SHOT_3M_HOOD_DEG = 35.0; // TODO: tune
-  private static final double FIXED_SHOT_3M_RPM = 2450.0; // TODO: tune
-  private static final double FIXED_SHOT_4M_HOOD_DEG = 40.0; // TODO: tune
-  private static final double FIXED_SHOT_4M_RPM = 2650.0; // TODO: tune
-  private static final double FIXED_SHOT_5M_HOOD_DEG = 45.0; // TODO: tune
-  private static final double FIXED_SHOT_5M_RPM = 2850.0; // TODO: tune
-  private static final double FIXED_SHOT_6M_HOOD_DEG = 50.0; // TODO: tune
-  private static final double FIXED_SHOT_6M_RPM = 3050.0; // TODO: tune
-  private static final double FIXED_SHOT_7M_HOOD_DEG = 55.0; // TODO: tune
-  private static final double FIXED_SHOT_7M_RPM = 3250.0; // TODO: tune
-  private static final double FIXED_SHOT_8M_HOOD_DEG = 60.0; // TODO: tune
+  private static final double FIXED_SHOT_3M_RPM = 2200.0; // TODO: tune
+  private static final double FIXED_SHOT_4M_HOOD_DEG = 35.0; // TODO: tune
+  private static final double FIXED_SHOT_4M_RPM = 2600.0; // TODO: tune
+  private static final double FIXED_SHOT_5M_HOOD_DEG = 35.0; // TODO: tune
+  private static final double FIXED_SHOT_5M_RPM = 2800.0; // TODO: tune
+  private static final double FIXED_SHOT_6M_HOOD_DEG = 35.0; // TODO: tune
+  private static final double FIXED_SHOT_6M_RPM = 3000.0; // TODO: tune
+  private static final double FIXED_SHOT_7M_HOOD_DEG = 35.0; // TODO: tune
+  private static final double FIXED_SHOT_7M_RPM = 3200.0; // TODO: tune
+  private static final double FIXED_SHOT_8M_HOOD_DEG = 40.0; // TODO: tune
   private static final double FIXED_SHOT_8M_RPM = 3450.0; // TODO: tune
 
   // Manual control rates (tunable — degrees or RPM per second)

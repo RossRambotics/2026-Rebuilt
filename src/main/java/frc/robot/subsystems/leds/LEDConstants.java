@@ -27,14 +27,14 @@ public final class LEDConstants {
   public static final int GROUP1_SPACER_END = GROUP1_SPACER_START + 9;
 
   // Group 2 — shooter status
-  public static final int GROUP2_ACTIVE_START = GROUP1_SPACER_END + 11;
-  public static final int GROUP2_ACTIVE_END = GROUP2_ACTIVE_START + 39;
-  public static final int GROUP2_SPACER_START = GROUP2_ACTIVE_END - 10;
-  public static final int GROUP2_SPACER_END = GROUP2_SPACER_START + 21;
+  public static final int GROUP2_ACTIVE_START = GROUP1_SPACER_END + 1;
+  public static final int GROUP2_ACTIVE_END = GROUP2_ACTIVE_START + 50;
+  public static final int GROUP2_SPACER_START = GROUP2_ACTIVE_END + 1;
+  public static final int GROUP2_SPACER_END = GROUP2_SPACER_START + 9;
 
   // Group 3 — game piece tracking
-  public static final int GROUP3_ACTIVE_START = GROUP2_SPACER_END + 11;
-  public static final int GROUP3_ACTIVE_END = GROUP3_ACTIVE_START + 39;
+  public static final int GROUP3_ACTIVE_START = GROUP2_SPACER_END + 1;
+  public static final int GROUP3_ACTIVE_END = GROUP3_ACTIVE_START + 130;
   public static final int GROUP3_SPACER_START = GROUP3_ACTIVE_END + 1;
   public static final int GROUP3_SPACER_END = GROUP3_SPACER_START + 9;
 

@@ -26,7 +26,7 @@ public class Intake extends TimedSubsystem {
   public Intake(boolean isReal) {
     m_isReal = isReal;
     m_roller = new IntakeRoller(isReal);
-    m_deployArm = new IntakeDeployArm(false);
+    m_deployArm = new IntakeDeployArm(isReal);
     m_roller.setDefaultCommand(getRollerOffCmd());
   }
 

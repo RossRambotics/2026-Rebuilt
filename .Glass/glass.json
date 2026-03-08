@@ -264,26 +264,6 @@
         "window": {
           "visible": true
         }
-      },
-      "/SmartDashboard/Mechanisms/Commands/Turret/Live Tuning": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Shooter/Turret Center": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Shooter/Turret Left 5deg": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Shooter/Turret Right 5deg": {
-        "window": {
-          "visible": true
-        }
       }
     }
   },

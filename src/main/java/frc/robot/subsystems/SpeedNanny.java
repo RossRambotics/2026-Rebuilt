@@ -13,7 +13,8 @@ import org.littletonrobotics.junction.Logger;
 
 public class SpeedNanny extends TimedSubsystem {
   private static final double LOOP_PERIOD_SEC =
-      0.02; // 20 ms loop period, used to calculate epsilon for speed checks based on max
+      0.02; // 20 ms loop period, used to calculate epsilon for speed checks
+  // based on max
   // acceleration
 
   private final double m_kMaxAcceleration = 15.0;
@@ -47,10 +48,11 @@ public class SpeedNanny extends TimedSubsystem {
       m_speedLimit = m_kMaxSpeed * 0.5; // Reduce max speed to make it easier to aim while shooting
       m_angularRateLimit =
           m_kMaxAngularRate
-              * 0.1; // Reduce max angular rate to make it easier to aim while shooting
-      m_accelerationLimit = 1.5; // Reduce acceleration to make it easier to aim while shooting
-      m_angularAccelLimit =
-          1.5; // Reduce angular acceleration to make it easier to aim while shooting
+              * 0.75; // Reduce max angular rate to make it easier to aim while shooting
+      // m_accelerationLimit = 1.5; // Reduce acceleration to make it easier to aim
+      // while shooting
+      // m_angularAccelLimit =
+      // 1.5; // Reduce angular acceleration to make it easier to aim while shooting
     }
   }
 
