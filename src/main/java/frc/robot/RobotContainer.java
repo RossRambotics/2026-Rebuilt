@@ -359,6 +359,12 @@ public class RobotContainer {
     // pressed. Same action as the Calibration/Reset Pose Hub Wall button on the
     // dashboard.
     controller.start().onTrue(drive.getResetPoseHubWallCmd());
+
+    // D-pad: turret trim (driver)
+    controller.povUp().onTrue(m_shooter.getTurretCenterCmd()); // center turret
+    controller.povRight().onTrue(m_shooter.getTurretTrimCmd(+1)); // trim right
+    controller.povLeft().onTrue(m_shooter.getTurretTrimCmd(-1)); // trim left
+    controller.povDown().onTrue(m_shooter.getTurretTrimResetCmd()); // reset trim to 0
   }
 
   /**

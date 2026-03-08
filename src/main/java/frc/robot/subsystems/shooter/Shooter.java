@@ -88,6 +88,12 @@ public class Shooter extends TimedSubsystem {
   // Applied in every dynamic hood setpoint and the readiness check.
   private double m_hoodTrimOffsetDeg = 0.0;
 
+  // Persistent in-match turret yaw offset (degrees) accumulated by the trim
+  // buttons.
+  // Applied in every dynamic turret targeting calculation and the readiness check.
+  private static final double TURRET_TRIM_MAX_DEG = 15.0;
+  private double m_turretTrimOffsetDeg = 0.0;
+
   // EMA of actual flywheel RPM — smooths the noisy raw reading for dashboard
   // display.
   private static final double RPM_AVERAGE_ALPHA = 0.05; // 5% weight → ~20-sample window at 50 Hz
@@ -252,7 +258,10 @@ public class Shooter extends TimedSubsystem {
     Angle a = Radians.of(m_lastFiringSolution.turretAngleRad);
     a =
         Degrees.of(
-            MathUtil.clamp(a.in(Degrees), Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX));
+            MathUtil.clamp(
+                a.in(Degrees) + m_turretTrimOffsetDeg,
+                Turret.TURRET_DEGREES_MIN,
+                Turret.TURRET_DEGREES_MAX));
 
     m_turretTargetRobotAngle = a;
     double turretHeadingDeg = m_turret.getAngle().in(Degrees);
@@ -275,7 +284,10 @@ public class Shooter extends TimedSubsystem {
     // clamp the turret target to the rotation available for the turret
     double turretTargetDeg = angleToTarget.getDegrees();
     turretTargetDeg =
-        MathUtil.clamp(turretTargetDeg, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX);
+        MathUtil.clamp(
+            turretTargetDeg + m_turretTrimOffsetDeg,
+            Turret.TURRET_DEGREES_MIN,
+            Turret.TURRET_DEGREES_MAX);
 
     m_turretTargetRobotAngle = Degrees.of(turretTargetDeg);
 
@@ -880,6 +892,7 @@ public class Shooter extends TimedSubsystem {
     Logger.recordOutput("Shooter/IsSpeedReady", m_isSpeedReady);
     Logger.recordOutput("Shooter/RPMTrimOffsetRpm", m_rpmTrimOffsetRpm);
     Logger.recordOutput("Shooter/HoodTrimOffsetDeg", m_hoodTrimOffsetDeg);
+    Logger.recordOutput("Shooter/TurretTrimOffsetDeg", m_turretTrimOffsetDeg);
     Logger.recordOutput("Shooter/TOF/LaunchCount", m_tofLaunchCount);
     Logger.recordOutput("Shooter/TOF/ConfirmCount", m_tofConfirmCount);
     Logger.recordOutput("Shooter/TotalBallsLaunched", m_totalBallsLaunched);
@@ -1538,6 +1551,28 @@ public class Shooter extends TimedSubsystem {
   /** Resets the hood trim offset to zero. */
   public Command getHoodTrimResetCmd() {
     return Commands.runOnce(() -> m_hoodTrimOffsetDeg = 0.0).withName("HoodTrim/Reset");
+  }
+
+  // ── In-match turret trim ──────────────────────────────────────────────────
+
+  /**
+   * Adds {@code deltaDeg} to the persistent turret trim offset. Applied to every dynamic turret
+   * targeting calculation. Clamped to ±TURRET_TRIM_MAX_DEG.
+   */
+  public Command getTurretTrimCmd(double deltaDeg) {
+    return Commands.runOnce(
+            () ->
+                m_turretTrimOffsetDeg =
+                    MathUtil.clamp(
+                        m_turretTrimOffsetDeg + deltaDeg,
+                        -TURRET_TRIM_MAX_DEG,
+                        TURRET_TRIM_MAX_DEG))
+        .withName("TurretTrim/" + (deltaDeg > 0 ? "+" : "") + (int) deltaDeg);
+  }
+
+  /** Resets the turret trim offset to zero. */
+  public Command getTurretTrimResetCmd() {
+    return Commands.runOnce(() -> m_turretTrimOffsetDeg = 0.0).withName("TurretTrim/Reset");
   }
 
   // ── Turret manual controls ────────────────────────────────────────────────

@@ -187,6 +187,9 @@ public class OperatorControls {
     SmartDashboard.putData("Shooter/Hood +1deg", shooter.getHoodTrimCmd(+1));
     SmartDashboard.putData("Shooter/Hood -1deg", shooter.getHoodTrimCmd(-1));
     SmartDashboard.putData("Shooter/Hood Trim Reset", shooter.getHoodTrimResetCmd());
+    SmartDashboard.putData("Shooter/Turret Trim +1deg", shooter.getTurretTrimCmd(+1));
+    SmartDashboard.putData("Shooter/Turret Trim -1deg", shooter.getTurretTrimCmd(-1));
+    SmartDashboard.putData("Shooter/Turret Trim Reset", shooter.getTurretTrimResetCmd());
 
     // TOF empirical measurement — press once per ball as it visibly arrives at the
     // target.
