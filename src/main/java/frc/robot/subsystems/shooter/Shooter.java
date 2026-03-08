@@ -1329,6 +1329,9 @@ public class Shooter extends TimedSubsystem {
     }
 
     return Commands.parallel(
+            // Override turret default: preempts any locked turret command (e.g. TurretCenter)
+            // so the turret resumes predictive targeting as soon as AutoShoot is triggered.
+            getPredictiveTargetingCommand(),
             // Override hood idle default: command targeting angle from firing solution
             m_hood.setAngle(
                 () -> {
