@@ -39,7 +39,7 @@ import org.littletonrobotics.junction.Logger;
  * <h3>Recommended binding</h3>
  *
  * <pre>
- *   controller.b().whileTrue(new AutoDriveToFuel(drive, intake, gamePieceVision));
+ * controller.b().whileTrue(new AutoDriveToFuel(drive, intake, gamePieceVision));
  * </pre>
  */
 public class AutoDriveToFuel extends Command {
@@ -89,8 +89,9 @@ public class AutoDriveToFuel extends Command {
     double omegaRadPerSec;
 
     if (hasTarget) {
-      double yawErrorDeg = m_gamePieceVision.getYawRobotDeg();
-      // Rear-facing camera: positive camera yaw = piece is to camera's right = robot's LEFT.
+      double yawErrorDeg = -m_gamePieceVision.getYawRobotDeg();
+      // Rear-facing camera: positive camera yaw = piece is to camera's right =
+      // robot's LEFT.
       // Turn left (CCW = positive omega) to align the rear intake with the piece.
       omegaRadPerSec =
           MathUtil.clamp(
@@ -111,7 +112,8 @@ public class AutoDriveToFuel extends Command {
       Logger.recordOutput("AutoDriveToFuel/YawErrorDeg", 0.0);
     }
 
-    // Robot-centric speeds: vx is negative (backward toward intake), vomega steers rear to target.
+    // Robot-centric speeds: vx is negative (backward toward intake), vomega steers
+    // rear to target.
     m_drive.runVelocity(new ChassisSpeeds(forwardSpeedMps, 0.0, omegaRadPerSec));
 
     Logger.recordOutput("AutoDriveToFuel/ForwardSpeedMps", forwardSpeedMps);

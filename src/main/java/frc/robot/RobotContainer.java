@@ -46,7 +46,9 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.gamepiece.GamePieceVisionConstants;
 import frc.robot.subsystems.gamepiece.GamePieceVisionIO;
+import frc.robot.subsystems.gamepiece.GamePieceVisionIOPhoton;
 import frc.robot.subsystems.gamepiece.GamePieceVisionIOSim;
 import frc.robot.subsystems.gamepiece.GamePieceVisionSubsystem;
 import frc.robot.subsystems.intake.Intake;
@@ -184,13 +186,13 @@ public class RobotContainer {
 
     // Instantiate game piece vision subsystem (dedicated object-detection camera)
     switch (Constants.currentMode) {
-        // case REAL:
-        // m_gamePieceVision =
-        // new GamePieceVisionSubsystem(
-        // new GamePieceVisionIOPhoton(
-        // GamePieceVisionConstants.CAMERA_NAME,
-        // GamePieceVisionConstants.ROBOT_TO_INTAKE_CAM));
-        // break;
+      case REAL:
+        m_gamePieceVision =
+            new GamePieceVisionSubsystem(
+                new GamePieceVisionIOPhoton(
+                    GamePieceVisionConstants.CAMERA_NAME,
+                    GamePieceVisionConstants.ROBOT_TO_INTAKE_CAM));
+        break;
       case SIM:
         m_gamePieceVision = new GamePieceVisionSubsystem(new GamePieceVisionIOSim());
         break;
