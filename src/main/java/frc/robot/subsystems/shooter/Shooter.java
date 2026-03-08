@@ -90,7 +90,8 @@ public class Shooter extends TimedSubsystem {
 
   // Persistent in-match turret yaw offset (degrees) accumulated by the trim
   // buttons.
-  // Applied in every dynamic turret targeting calculation and the readiness check.
+  // Applied in every dynamic turret targeting calculation and the readiness
+  // check.
   private static final double TURRET_TRIM_MAX_DEG = 15.0;
   private double m_turretTrimOffsetDeg = 0.0;
 
@@ -184,7 +185,7 @@ public class Shooter extends TimedSubsystem {
 
   /** Creates a new Shooter. */
   public Shooter(boolean isReal) {
-    m_turret = new Turret(isReal);
+    m_turret = new Turret(false);
     m_hood = new Hood(isReal);
     m_bottomFlyWheel = new BottomFlyWheel(isReal);
     m_kicker = new Kicker(isReal);
@@ -1329,7 +1330,8 @@ public class Shooter extends TimedSubsystem {
     }
 
     return Commands.parallel(
-            // Override turret default: preempts any locked turret command (e.g. TurretCenter)
+            // Override turret default: preempts any locked turret command (e.g.
+            // TurretCenter)
             // so the turret resumes predictive targeting as soon as AutoShoot is triggered.
             getPredictiveTargetingCommand(),
             // Override hood idle default: command targeting angle from firing solution
