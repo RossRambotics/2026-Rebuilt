@@ -17,12 +17,12 @@ public class SpeedNanny extends TimedSubsystem {
   // based on max
   // acceleration
 
-  private final double m_kMaxAcceleration = 15.0;
+  private final double m_kMaxAcceleration = 30.0;
   private final double m_kMaxSpeed =
       TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired
   // top speed
   private double m_kMaxAngularRate =
-      RotationsPerSecond.of(0.50).in(RadiansPerSecond); // 3/4 of a rotation per second
+      RotationsPerSecond.of(1.0).in(RadiansPerSecond); // 3/4 of a rotation per second
   // max angular velocity
   private double m_kMaxAngularAcceleration =
       RotationsPerSecondPerSecond.of(1.5).in(RadiansPerSecondPerSecond); // rad/s^2
