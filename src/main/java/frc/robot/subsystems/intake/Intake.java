@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.intake;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,6 +27,7 @@ public class Intake extends TimedSubsystem {
     m_roller = new IntakeRoller(isReal);
     m_deployArm = new IntakeDeployArm(isReal);
     m_roller.setDefaultCommand(getRollerOffCmd());
+    m_deployArm.setDefaultCommand(m_deployArm.setDutyCycle(0.0).withName("IntakeDeployArm/Coast"));
   }
 
   // ---------------------------------------------------------------------------
@@ -37,24 +37,19 @@ public class Intake extends TimedSubsystem {
   /**
    * Deploy the intake arm and run the roller.
    *
-   * <p>Phase 1: position-control the arm to the deploy angle while starting the roller. Ends when
-   * the arm reaches the deploy angle (within tolerance) or after a safety timeout.
+   * <p>Phase 1: burst duty cycle toward the deploy angle while starting the roller, for
+   * DEPLOY_BURST_SEC.
    *
    * <p>Phase 2: release arm to coast (duty-cycle 0) while the roller continues running. This allows
    * the arm to fold back freely if struck by another robot.
    */
   public Command getDeployCmd() {
     return Commands.sequence(
-            // Phase 1 — move arm to deploy while starting roller
+            // Phase 1 — burst arm toward deploy while starting roller
             Commands.parallel(
-                    m_deployArm.setAngle(Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG)),
+                    m_deployArm.setDutyCycle(IntakeConstants.DEPLOY_BURST_DUTY_CYCLE),
                     m_roller.setVelocity(RPM.of(IntakeConstants.ROLLER_INTAKE_RPM)))
-                .until(
-                    () ->
-                        m_deployArm.isNearAngle(
-                            Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG),
-                            Degrees.of(IntakeConstants.AT_ANGLE_TOLERANCE_DEG)))
-                .withTimeout(IntakeConstants.DEPLOY_PHASE1_TIMEOUT_SEC),
+                .withTimeout(IntakeConstants.DEPLOY_BURST_SEC),
             // Phase 2 — coast arm, keep roller running
             Commands.parallel(
                 m_deployArm.setDutyCycle(0.0),
@@ -65,8 +60,7 @@ public class Intake extends TimedSubsystem {
   /**
    * Deploy the intake arm only (no roller).
    *
-   * <p>Phase 1: position-control the arm to the deploy angle. Ends when the arm reaches the deploy
-   * angle (within tolerance) or after a safety timeout.
+   * <p>Phase 1: burst duty cycle toward the deploy angle for DEPLOY_BURST_SEC.
    *
    * <p>Phase 2: release arm to coast (duty-cycle 0). This allows the arm to fold back freely if
    * struck by another robot.
@@ -74,13 +68,8 @@ public class Intake extends TimedSubsystem {
   public Command getDeployArmCmd() {
     return Commands.sequence(
             m_deployArm
-                .setAngle(Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG))
-                .until(
-                    () ->
-                        m_deployArm.isNearAngle(
-                            Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG),
-                            Degrees.of(IntakeConstants.AT_ANGLE_TOLERANCE_DEG)))
-                .withTimeout(IntakeConstants.DEPLOY_PHASE1_TIMEOUT_SEC),
+                .setDutyCycle(IntakeConstants.DEPLOY_BURST_DUTY_CYCLE)
+                .withTimeout(IntakeConstants.DEPLOY_BURST_SEC),
             m_deployArm.setDutyCycle(0.0))
         .withName("Intake/DeployArm");
   }
@@ -88,8 +77,8 @@ public class Intake extends TimedSubsystem {
   /**
    * Retract the intake arm and stop the roller.
    *
-   * <p>Stops the roller first, then position-controls the arm back to the retracted angle and holds
-   * it there.
+   * <p>Stops the roller first, then bursts duty cycle toward the retracted angle for
+   * RETRACT_BURST_SEC, then coasts.
    */
   public Command getRetractCmd() {
     return Commands.sequence(
@@ -98,7 +87,10 @@ public class Intake extends TimedSubsystem {
                 .stop()
                 .withTimeout(
                     IntakeConstants.RETRACT_ROLLER_STOP_TIMEOUT_SEC), // brief stop to settle roller
-            m_deployArm.setAngle(Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG)))
+            m_deployArm
+                .setDutyCycle(IntakeConstants.RETRACT_BURST_DUTY_CYCLE)
+                .withTimeout(IntakeConstants.RETRACT_BURST_SEC),
+            m_deployArm.setDutyCycle(0.0))
         .withName("Intake/Retract");
   }
 
