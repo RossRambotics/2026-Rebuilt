@@ -1,0 +1,90 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+<<<<<<<< HEAD:src/main/deploy/pathplanner/paths/Middle To HP.path
+        "x": 3.6767760342368048,
+        "y": 4.054407988587732
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.5769900142653346,
+        "y": 4.002653352353782
+========
+        "x": 2.6,
+        "y": 2.3
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 3.6,
+        "y": 2.3
+>>>>>>>> 205c742 (feat: working for blue alliance):src/main/deploy/pathplanner/paths/New Path.path
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+<<<<<<<< HEAD:src/main/deploy/pathplanner/paths/Middle To HP.path
+        "x": 0.3515406562054205,
+        "y": 0.6644793152639101
+      },
+      "prevControl": {
+        "x": 1.0372895863052776,
+        "y": 0.6774179743223987
+========
+        "x": 11.919976675724637,
+        "y": 7.442668421648551
+      },
+      "prevControl": {
+        "x": 10.919976675724637,
+        "y": 7.442668421648551
+>>>>>>>> 205c742 (feat: working for blue alliance):src/main/deploy/pathplanner/paths/New Path.path
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "Auto.Shoot",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": 1.0,
+      "command": null
+    },
+    {
+      "name": "Raise.Climb",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": 1.0,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+<<<<<<<< HEAD:src/main/deploy/pathplanner/paths/Middle To HP.path
+    "rotation": 0.0
+========
+    "rotation": -45.0
+>>>>>>>> 205c742 (feat: working for blue alliance):src/main/deploy/pathplanner/paths/New Path.path
+  },
+  "useDefaultConstraints": true
+}

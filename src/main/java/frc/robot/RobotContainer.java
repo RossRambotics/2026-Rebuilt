@@ -301,10 +301,14 @@ public class RobotContainer {
     // Assumes turret, hood, and flywheel are already at the correct setpoints.
     controller.rightBumper().whileTrue(m_shooter.getManualShootCmd());
 
-    // Y button: drive to the currently selected field spot via PathPlanner
-    // on-the-fly pathfinding.
-    // Use the button box (see TODO below) to select a spot before pressing Y.
-    controller.y().whileTrue(new DriveToSpot(drive, m_spotSelector));
+    // Y button: auto-select a target spot based on robot position, then drive to it.
+    // Alliance zone → HUB_NEUTRAL; Neutral/Opposition → ALLIANCE_SHOOTING_LEFT/RIGHT by Y side.
+    controller
+        .y()
+        .whileTrue(
+            Commands.sequence(
+                Commands.runOnce(() -> m_spotSelector.autoSelectForRobot(drive.getPose())),
+                new DriveToSpot(drive, m_spotSelector)));
 
     // TODO: Wire button box buttons to spot selection once hardware is available.
     // Example bindings (replace JoystickButton refs with your actual button box
@@ -319,6 +323,19 @@ public class RobotContainer {
     // buttonBox.button(8).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_CENTER));
     // buttonBox.button(9).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_RIGHT));
     // buttonBox.button(10).onTrue(m_spotSelector.cmdClearSelection());
+
+    // A button (hold): pathfind to the start of "Left_Alliance_Neutral", then run
+    // it.
+    // Release to cancel.
+    PathPlannerAuto leftAllianceNeutral = new PathPlannerAuto("Left_Alliance_Neutral");
+    controller
+        .a()
+        .whileTrue(
+            Commands.sequence(
+                // AutoBuilder.pathfindToPose(
+                // leftAllianceNeutral.getStartingPose(),
+                // new PathConstraints(4.0, 3.0, Math.toRadians(540), Math.toRadians(720))),
+                leftAllianceNeutral));
 
     // B button (hold): auto-drive toward detected game pieces and deploy intake.
     // Release to cancel. Intake stays deployed after release — retract manually if

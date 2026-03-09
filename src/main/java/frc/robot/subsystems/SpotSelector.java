@@ -5,9 +5,12 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.FieldSpot;
+import frc.robot.commands.FieldSpot.Zone;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
@@ -85,6 +88,14 @@ public class SpotSelector extends TimedSubsystem {
   // ── Accessors ──────────────────────────────────────────────────────────────
 
   /**
+   * Returns the selected {@link FieldSpot}, or empty if a custom pose or nothing is selected.
+   * Useful for callers that need zone or display information beyond the raw pose.
+   */
+  public Optional<FieldSpot> getSelectedSpot() {
+    return Optional.ofNullable(m_selectedSpot);
+  }
+
+  /**
    * Returns the selected target pose, or {@link Optional#empty()} if nothing is selected. {@link
    * frc.robot.commands.DriveToSpot} exits immediately when empty.
    */
@@ -107,6 +118,31 @@ public class SpotSelector extends TimedSubsystem {
       return m_customName;
     }
     return "None";
+  }
+
+  // ── Auto-selection ─────────────────────────────────────────────────────────
+
+  /**
+   * Selects a target spot automatically based on the robot's current field position.
+   *
+   * <ul>
+   *   <li>Alliance zone → {@link FieldSpot#HUB_NEUTRAL}
+   *   <li>Neutral or Opposition zone, left side (Y ≥ {@link FieldSpot#Y_SPLIT_M}) → {@link
+   *       FieldSpot#ALLIANCE_SHOOTING_LEFT}
+   *   <li>Neutral or Opposition zone, right side (Y < {@link FieldSpot#Y_SPLIT_M}) → {@link
+   *       FieldSpot#ALLIANCE_SHOOTING_RIGHT}
+   * </ul>
+   *
+   * @param robotPose current robot pose in Blue-alliance coordinates
+   */
+  public void autoSelectForRobot(Pose2d robotPose) {
+    Zone zone = FieldSpot.getZone(robotPose.getX());
+    if (zone == Zone.ALLIANCE) {
+      selectSpot(FieldSpot.HUB_NEUTRAL);
+    } else {
+      boolean leftSide = robotPose.getY() >= FieldSpot.Y_SPLIT_M;
+      selectSpot(leftSide ? FieldSpot.ALLIANCE_SHOOTING_LEFT : FieldSpot.ALLIANCE_SHOOTING_RIGHT);
+    }
   }
 
   // ── Command factories (for button box bindings) ────────────────────────────
