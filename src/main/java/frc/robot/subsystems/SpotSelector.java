@@ -125,23 +125,32 @@ public class SpotSelector extends TimedSubsystem {
   /**
    * Selects a target spot automatically based on the robot's current field position.
    *
+   * <p>Poses are always in Blue-alliance coordinates, so "own alliance zone" maps to {@link
+   * Zone#ALLIANCE} for blue and {@link Zone#OPPOSITION} for red.
+   *
    * <ul>
-   *   <li>Alliance zone → {@link FieldSpot#HUB_NEUTRAL}
-   *   <li>Neutral or Opposition zone, left side (Y ≥ {@link FieldSpot#Y_SPLIT_M}) → {@link
+   *   <li>Own alliance zone → {@link FieldSpot#HUB_NEUTRAL}
+   *   <li>Neutral or opponent zone, left side (Y ≥ {@link FieldSpot#Y_SPLIT_M}) → {@link
    *       FieldSpot#ALLIANCE_SHOOTING_LEFT}
-   *   <li>Neutral or Opposition zone, right side (Y < {@link FieldSpot#Y_SPLIT_M}) → {@link
+   *   <li>Neutral or opponent zone, right side (Y < {@link FieldSpot#Y_SPLIT_M}) → {@link
    *       FieldSpot#ALLIANCE_SHOOTING_RIGHT}
    * </ul>
    *
    * @param robotPose current robot pose in Blue-alliance coordinates
    */
   public void autoSelectForRobot(Pose2d robotPose) {
+    boolean isRed = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
     Zone zone = FieldSpot.getZone(robotPose.getX());
-    if (zone == Zone.ALLIANCE) {
+    // In blue-frame: blue's home = ALLIANCE zone, red's home = OPPOSITION zone.
+    boolean inOwnAllianceZone = isRed ? (zone == Zone.OPPOSITION) : (zone == Zone.ALLIANCE);
+    if (inOwnAllianceZone) {
       selectSpot(FieldSpot.HUB_NEUTRAL);
     } else {
-      boolean leftSide = robotPose.getY() >= FieldSpot.Y_SPLIT_M;
-      selectSpot(leftSide ? FieldSpot.ALLIANCE_SHOOTING_LEFT : FieldSpot.ALLIANCE_SHOOTING_RIGHT);
+      // ALLIANCE_SHOOTING_LEFT is at high Y in blue-frame; PathPlanner flips it to low Y for red.
+      // So for red, a robot at high Y should pick RIGHT (which flips to high Y), not LEFT.
+      boolean highY = robotPose.getY() >= FieldSpot.Y_SPLIT_M;
+      boolean pickLeft = isRed ? !highY : highY;
+      selectSpot(pickLeft ? FieldSpot.ALLIANCE_SHOOTING_LEFT : FieldSpot.ALLIANCE_SHOOTING_RIGHT);
     }
   }
 
