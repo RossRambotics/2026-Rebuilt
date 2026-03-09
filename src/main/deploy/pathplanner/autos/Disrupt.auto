@@ -5,9 +5,27 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "Intake.Deploy"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake.Start"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Disrupt"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto.Shoot"
           }
         }
       ]

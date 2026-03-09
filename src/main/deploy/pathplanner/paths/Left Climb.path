@@ -3,73 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 4.0
+        "x": 3.6585060240963854,
+        "y": 4.024072289156626
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.25,
-        "y": 4.0
+        "x": 3.035626506024096,
+        "y": 2.811096385542169
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.0,
-        "y": 4.0
+        "x": 2.522024096385542,
+        "y": 3.051506024096385
       },
       "prevControl": {
-        "x": 3.0,
-        "y": 4.25
+        "x": 3.7077379518072306,
+        "y": 3.327430722891566
       },
       "nextControl": {
-        "x": 3.0,
-        "y": 3.75
+        "x": 1.3363102409638528,
+        "y": 2.7755813253012045
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.0,
-        "y": 3.0
+        "x": 0.9156506024096385,
+        "y": 2.9203734939759034
       },
       "prevControl": {
-        "x": 3.0,
-        "y": 3.602364932585968
-      },
-      "nextControl": {
-        "x": 3.0,
-        "y": 2.75
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 2.0,
-        "y": 3.0
-      },
-      "prevControl": {
-        "x": 2.0,
-        "y": 2.75
-      },
-      "nextControl": {
-        "x": 2.0,
-        "y": 3.25
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 3.622609157986112,
-        "y": 4.0
-      },
-      "prevControl": {
-        "x": 3.372609157986112,
-        "y": 4.0
+        "x": 2.620373493975903,
+        "y": 2.887590361445783
       },
       "nextControl": null,
       "isLocked": false,
@@ -79,10 +47,23 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Auto.Shoot",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": 2.0,
+      "command": null
+    },
+    {
+      "name": "Raise.Climb",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": 2.0,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 1.0,
-    "maxAcceleration": 1.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

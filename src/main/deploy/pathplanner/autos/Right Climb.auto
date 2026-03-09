@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Example Path"
+            "pathName": "Left Climb"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Lower.Climb"
           }
         }
       ]

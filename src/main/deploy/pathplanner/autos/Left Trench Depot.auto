@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Pickup Fuel"
+            "pathName": "Left Side Collect + Shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto.Shoot"
           }
         }
       ]
