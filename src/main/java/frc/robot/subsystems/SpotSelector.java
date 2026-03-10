@@ -125,33 +125,72 @@ public class SpotSelector extends TimedSubsystem {
   /**
    * Selects a target spot automatically based on the robot's current field position.
    *
-   * <p>Poses are always in Blue-alliance coordinates, so "own alliance zone" maps to {@link
-   * Zone#ALLIANCE} for blue and {@link Zone#OPPOSITION} for red.
+   * <p>Poses are always in Blue-alliance coordinates (as returned by {@code drive.getPose()}).
+   * Dispatches to the alliance-specific implementation.
    *
    * <ul>
-   *   <li>Own alliance zone → {@link FieldSpot#HUB_NEUTRAL}
-   *   <li>Neutral or opponent zone, left side (Y ≥ {@link FieldSpot#Y_SPLIT_M}) → {@link
-   *       FieldSpot#ALLIANCE_SHOOTING_LEFT}
-   *   <li>Neutral or opponent zone, right side (Y < {@link FieldSpot#Y_SPLIT_M}) → {@link
-   *       FieldSpot#ALLIANCE_SHOOTING_RIGHT}
+   *   <li>Blue in {@link Zone#BLUE_HOME} / Red in {@link Zone#RED_HOME} → {@link
+   *       FieldSpot#HUB_NEUTRAL}
+   *   <li>Top half of field (Y &ge; {@link FieldSpot#Y_SPLIT_M}) → {@link FieldSpot#SHOOTING_TOP}
+   *   <li>Bottom half of field (Y &lt; {@link FieldSpot#Y_SPLIT_M}) → {@link
+   *       FieldSpot#SHOOTING_BOTTOM}
    * </ul>
    *
    * @param robotPose current robot pose in Blue-alliance coordinates
    */
   public void autoSelectForRobot(Pose2d robotPose) {
     boolean isRed = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
-    Zone zone = FieldSpot.getZone(robotPose.getX());
-    // In blue-frame: blue's home = ALLIANCE zone, red's home = OPPOSITION zone.
-    boolean inOwnAllianceZone = isRed ? (zone == Zone.OPPOSITION) : (zone == Zone.ALLIANCE);
-    if (inOwnAllianceZone) {
-      selectSpot(FieldSpot.HUB_NEUTRAL);
+    if (isRed) {
+      autoSelectForRobotRed(robotPose);
     } else {
-      // ALLIANCE_SHOOTING_LEFT is at high Y in blue-frame; PathPlanner flips it to low Y for red.
-      // So for red, a robot at high Y should pick RIGHT (which flips to high Y), not LEFT.
-      boolean highY = robotPose.getY() >= FieldSpot.Y_SPLIT_M;
-      boolean pickLeft = isRed ? !highY : highY;
-      selectSpot(pickLeft ? FieldSpot.ALLIANCE_SHOOTING_LEFT : FieldSpot.ALLIANCE_SHOOTING_RIGHT);
+      autoSelectForRobotBlue(robotPose);
     }
+  }
+
+  /**
+   * Auto-selection logic for the <strong>Blue alliance</strong>.
+   *
+   * <p>Blue's home zone is {@link Zone#BLUE_HOME} (X &lt; {@link FieldSpot#BLUE_TRENCH_X_M}). When
+   * in the home zone, selects {@link FieldSpot#HUB_NEUTRAL} to score. Otherwise, selects the
+   * shooting position on the same half of the field as the robot:
+   *
+   * <ul>
+   *   <li>Top half (Y &ge; {@link FieldSpot#Y_SPLIT_M}) → {@link FieldSpot#SHOOTING_TOP}
+   *   <li>Bottom half → {@link FieldSpot#SHOOTING_BOTTOM}
+   * </ul>
+   */
+  private void autoSelectForRobotBlue(Pose2d robotPose) {
+    if (FieldSpot.getZone(robotPose.getX()) == Zone.BLUE_HOME) {
+      selectSpot(FieldSpot.HUB_NEUTRAL);
+      return;
+    }
+    // High Y (blue-frame) = TOP half of field — select the TOP shooting position.
+    boolean topHalf = robotPose.getY() >= FieldSpot.Y_SPLIT_M;
+    selectSpot(topHalf ? FieldSpot.SHOOTING_TOP : FieldSpot.SHOOTING_BOTTOM);
+  }
+
+  /**
+   * Auto-selection logic for the <strong>Red alliance</strong>.
+   *
+   * <p>Red's home zone is {@link Zone#RED_HOME} (X &gt; {@link FieldSpot#RED_TRENCH_X_M} in
+   * Blue-alliance frame). When in the home zone, selects {@link FieldSpot#HUB_NEUTRAL} to score.
+   * Otherwise, selects the shooting position on the same half of the field as the robot.
+   *
+   * <p>TOP/BOTTOM is determined by the robot's Y in blue-frame — the same check as for Blue —
+   * because TOP and BOTTOM refer to absolute field positions (high Y / low Y in blue-frame). After
+   * PathPlanner's alliance flip, the correct physical corridor is selected automatically without
+   * any inversion of the Y comparison.
+   */
+  private void autoSelectForRobotRed(Pose2d robotPose) {
+    if (FieldSpot.getZone(robotPose.getX()) == Zone.RED_HOME) {
+      selectSpot(FieldSpot.HUB_NEUTRAL);
+      return;
+    }
+    // High Y in blue-frame = TOP half of field — same physical meaning for both
+    // alliances.
+    // PathPlanner flips SHOOTING_TOP to the correct side for Red automatically.
+    boolean topHalf = robotPose.getY() < FieldSpot.Y_SPLIT_M;
+    selectSpot(topHalf ? FieldSpot.SHOOTING_TOP : FieldSpot.SHOOTING_BOTTOM);
   }
 
   // ── Command factories (for button box bindings) ────────────────────────────

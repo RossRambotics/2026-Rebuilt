@@ -15,33 +15,54 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
  * <p>All poses are defined for the <strong>Blue alliance</strong>. PathPlanner's alliance-flip
  * lambda (configured in {@code Drive}) automatically mirrors them to Red when needed.
  *
+ * <p>Trench and shooting positions are named using absolute field geometry:
+ *
+ * <ul>
+ *   <li><strong>TOP</strong> — high Y in blue-frame (≈ 7.5 m); Blue driver calls this LEFT, Red
+ *       driver calls this RIGHT.
+ *   <li><strong>BOTTOM</strong> — low Y in blue-frame (≈ 0.5 m); Blue driver calls this RIGHT, Red
+ *       driver calls this LEFT.
+ * </ul>
+ *
+ * <p>Field regions left-to-right in blue-frame X:
+ *
+ * <pre>
+ * Blue wall — BLUE HOME — [BLUE TRENCH] — NEUTRAL — [RED TRENCH] — RED HOME — Red wall
+ *              X &lt; 4.5       X ≈ 4.5       4.5–12      X ≈ 12       X &gt; 12
+ * </pre>
+ *
  * <p>TODO: Replace placeholder Pose2d values with actual 2026 field coordinates once available.
  */
 public enum FieldSpot {
-  // ── Alliance side ──────────────────────────────────────────────────────────
-  ALLIANCE_TRENCH_LEFT("Alliance Trench Left", new Pose2d(4.5, 7.5, Rotation2d.fromDegrees(0))),
+  // ── Blue alliance trench corridors ─────────────────────────────────────────
+  /** Blue-alliance trench, top corridor (high Y ≈ 7.5 m). Blue driver calls this LEFT. */
+  BLUE_TRENCH_TOP("Blue Trench Top", new Pose2d(4.5, 7.5, Rotation2d.fromDegrees(0))),
 
-  ALLIANCE_TRENCH_RIGHT("Alliance Trench Right", new Pose2d(4.5, 0.5, Rotation2d.fromDegrees(0))),
+  /** Blue-alliance trench, bottom corridor (low Y ≈ 0.5 m). Blue driver calls this RIGHT. */
+  BLUE_TRENCH_BOTTOM("Blue Trench Bottom", new Pose2d(4.5, 0.5, Rotation2d.fromDegrees(0))),
 
-  // Shooting positions in the alliance zone
-  ALLIANCE_SHOOTING_LEFT(
-      "Alliance Shooting Left", new Pose2d(2.6, 5.7, Rotation2d.fromDegrees(-45.0))),
-  ALLIANCE_SHOOTING_RIGHT(
-      "Alliance Shooting Right", new Pose2d(2.6, 2.3, Rotation2d.fromDegrees(45.0))),
+  // ── Shooting positions (Blue-alliance side) ─────────────────────────────────
+  /** Shooting position on the top half of the field (high Y). Blue driver calls this LEFT. */
+  SHOOTING_TOP("Shooting Top", new Pose2d(2.6, 5.7, Rotation2d.fromDegrees(-45.0))),
 
-  // ── Opponent side ──────────────────────────────────────────────────────────
-  OPPONENT_TRENCH_LEFT(
-      "Opponent Trench Left",
+  /** Shooting position on the bottom half of the field (low Y). Blue driver calls this RIGHT. */
+  SHOOTING_BOTTOM("Shooting Bottom", new Pose2d(2.6, 2.3, Rotation2d.fromDegrees(45.0))),
+
+  // ── Red alliance trench corridors ──────────────────────────────────────────
+  /** Red-alliance trench, top corridor (high Y ≈ 7.5 m). Red driver calls this RIGHT. */
+  RED_TRENCH_TOP(
+      "Red Trench Top",
       new Pose2d(
-          /* TODO: fill in 2026 opponent trench left x */ 12.0,
-          /* TODO: fill in 2026 opponent trench left y */ 7.5,
+          /* TODO: fill in 2026 red trench top x */ 12.0,
+          /* TODO: fill in 2026 red trench top y */ 7.5,
           Rotation2d.fromDegrees(/* TODO */ 180))),
 
-  OPPONENT_TRENCH_RIGHT(
-      "Opponent Trench Right",
+  /** Red-alliance trench, bottom corridor (low Y ≈ 0.5 m). Red driver calls this LEFT. */
+  RED_TRENCH_BOTTOM(
+      "Red Trench Bottom",
       new Pose2d(
-          /* TODO: fill in 2026 opponent trench right x */ 12.0,
-          /* TODO: fill in 2026 opponent trench right y */ 0.5,
+          /* TODO: fill in 2026 red trench bottom x */ 12.0,
+          /* TODO: fill in 2026 red trench bottom y */ 0.5,
           Rotation2d.fromDegrees(/* TODO */ 180))),
 
   // ── Hub positions ──────────────────────────────────────────────────────────
@@ -91,30 +112,43 @@ public enum FieldSpot {
   // ── Zone routing constants ────────────────────────────────────────────────
 
   /**
-   * X coordinate (meters) of the Alliance-side trench. Both ALLIANCE_TRENCH_LEFT and
-   * ALLIANCE_TRENCH_RIGHT share this X. Paths crossing this boundary are routed through one of the
-   * two trench corridors.
+   * X coordinate (meters) of the Blue-alliance trench boundary. Both {@link #BLUE_TRENCH_TOP} and
+   * {@link #BLUE_TRENCH_BOTTOM} share this X. Paths crossing this boundary are routed through one
+   * of the two trench corridors.
    */
-  public static final double ALLIANCE_TRENCH_X_M = ALLIANCE_TRENCH_LEFT.pose.getX();
+  public static final double BLUE_TRENCH_X_M = BLUE_TRENCH_TOP.pose.getX();
 
   /**
-   * X coordinate (meters) of the Opponent-side trench. Both OPPONENT_TRENCH_LEFT and
-   * OPPONENT_TRENCH_RIGHT share this X.
+   * X coordinate (meters) of the Red-alliance trench boundary. Both {@link #RED_TRENCH_TOP} and
+   * {@link #RED_TRENCH_BOTTOM} share this X.
    */
-  public static final double OPPONENT_TRENCH_X_M = OPPONENT_TRENCH_LEFT.pose.getX();
+  public static final double RED_TRENCH_X_M = RED_TRENCH_TOP.pose.getX();
 
   /**
    * Y split (meters) used to choose the trench corridor. Robot starting Y below this value uses the
-   * low-Y trench (ALLIANCE_TRENCH_RIGHT / OPPONENT_TRENCH_RIGHT); at or above uses the high-Y
-   * trench (ALLIANCE_TRENCH_LEFT / OPPONENT_TRENCH_LEFT).
+   * bottom trench ({@link #BLUE_TRENCH_BOTTOM} / {@link #RED_TRENCH_BOTTOM}); at or above uses the
+   * top trench ({@link #BLUE_TRENCH_TOP} / {@link #RED_TRENCH_TOP}).
    */
   public static final double Y_SPLIT_M = 4.05;
 
-  /** The three field zones separated by the two trench boundaries. */
+  /**
+   * The three field zones separated by the two trench boundaries.
+   *
+   * <ul>
+   *   <li>{@link Zone#BLUE_HOME} — X &lt; {@link #BLUE_TRENCH_X_M}: the Blue alliance's starting
+   *       zone (also called the Red opposition zone).
+   *   <li>{@link Zone#NEUTRAL} — between the two trench boundaries.
+   *   <li>{@link Zone#RED_HOME} — X &gt; {@link #RED_TRENCH_X_M}: the Red alliance's starting zone
+   *       (also called the Blue opposition zone).
+   * </ul>
+   */
   public enum Zone {
-    ALLIANCE,
+    /** Blue alliance's home zone (X < {@link FieldSpot#BLUE_TRENCH_X_M}). */
+    BLUE_HOME,
+    /** The neutral zone between the two trench boundaries. */
     NEUTRAL,
-    OPPOSITION
+    /** Red alliance's home zone (X > {@link FieldSpot#RED_TRENCH_X_M}). */
+    RED_HOME
   }
 
   /**
@@ -124,9 +158,9 @@ public enum FieldSpot {
    * @return the zone the position falls in
    */
   public static Zone getZone(double xMeters) {
-    if (xMeters < ALLIANCE_TRENCH_X_M) return Zone.ALLIANCE;
-    if (xMeters <= OPPONENT_TRENCH_X_M) return Zone.NEUTRAL;
-    return Zone.OPPOSITION;
+    if (xMeters < BLUE_TRENCH_X_M) return Zone.BLUE_HOME;
+    if (xMeters <= RED_TRENCH_X_M) return Zone.NEUTRAL;
+    return Zone.RED_HOME;
   }
 
   /**

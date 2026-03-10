@@ -302,7 +302,7 @@ public class RobotContainer {
     controller.rightBumper().whileTrue(m_shooter.getManualShootCmd());
 
     // Y button: auto-select a target spot based on robot position, then drive to it.
-    // Alliance zone → HUB_NEUTRAL; Neutral/Opposition → ALLIANCE_SHOOTING_LEFT/RIGHT by Y side.
+    // Blue/Red home zone → HUB_NEUTRAL; Neutral zone → SHOOTING_TOP/BOTTOM by field half.
     controller
         .y()
         .whileTrue(
@@ -313,10 +313,10 @@ public class RobotContainer {
     // TODO: Wire button box buttons to spot selection once hardware is available.
     // Example bindings (replace JoystickButton refs with your actual button box
     // inputs):
-    // buttonBox.button(1).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_LEFT));
-    // buttonBox.button(2).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_RIGHT));
-    // buttonBox.button(3).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_LEFT));
-    // buttonBox.button(4).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_RIGHT));
+    // buttonBox.button(1).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.BLUE_TRENCH_TOP));
+    // buttonBox.button(2).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.BLUE_TRENCH_BOTTOM));
+    // buttonBox.button(3).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.RED_TRENCH_TOP));
+    // buttonBox.button(4).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.RED_TRENCH_BOTTOM));
     // buttonBox.button(5).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.HUB_ALLIANCE));
     // buttonBox.button(6).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.HUB_NEUTRAL));
     // buttonBox.button(7).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_LEFT));
@@ -392,10 +392,10 @@ public class RobotContainer {
    */
   private void configureSpotSelectorDashboard() {
     var tab = Shuffleboard.getTab("SpotSelector");
-    tab.add("Alliance Trench Left", m_spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_LEFT));
-    tab.add("Alliance Trench Right", m_spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_RIGHT));
-    tab.add("Opponent Trench Left", m_spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_LEFT));
-    tab.add("Opponent Trench Right", m_spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_RIGHT));
+    tab.add("Blue Trench Top", m_spotSelector.cmdSelectSpot(FieldSpot.BLUE_TRENCH_TOP));
+    tab.add("Blue Trench Bottom", m_spotSelector.cmdSelectSpot(FieldSpot.BLUE_TRENCH_BOTTOM));
+    tab.add("Red Trench Top", m_spotSelector.cmdSelectSpot(FieldSpot.RED_TRENCH_TOP));
+    tab.add("Red Trench Bottom", m_spotSelector.cmdSelectSpot(FieldSpot.RED_TRENCH_BOTTOM));
     tab.add("Hub Alliance", m_spotSelector.cmdSelectSpot(FieldSpot.HUB_ALLIANCE));
     tab.add("Hub Neutral", m_spotSelector.cmdSelectSpot(FieldSpot.HUB_NEUTRAL));
     tab.add("Climb Left", m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_LEFT));

@@ -119,13 +119,11 @@ public class OperatorControls {
   private void configureButtonBox() {
     // ── Spots ───────────────────────────────────────────────────────────────
     SmartDashboard.putData(
-        "Spots/Alliance Shooting Left",
-        spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_SHOOTING_LEFT));
+        "Spots/Shooting Top", spotSelector.cmdSelectSpot(FieldSpot.SHOOTING_TOP));
     SmartDashboard.putData(
-        "Spots/Alliance Shooting Right",
-        spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_SHOOTING_RIGHT));
+        "Spots/Shooting Bottom", spotSelector.cmdSelectSpot(FieldSpot.SHOOTING_BOTTOM));
     SmartDashboard.putData(
-        "Spots/Opponent Trench Right", spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_RIGHT));
+        "Spots/Red Trench Bottom", spotSelector.cmdSelectSpot(FieldSpot.RED_TRENCH_BOTTOM));
     SmartDashboard.putData(
         "Spots/Hub Alliance", spotSelector.cmdSelectSpot(FieldSpot.HUB_ALLIANCE));
     SmartDashboard.putData("Spots/Hub Neutral", spotSelector.cmdSelectSpot(FieldSpot.HUB_NEUTRAL));
