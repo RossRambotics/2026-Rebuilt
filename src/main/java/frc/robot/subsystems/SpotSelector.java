@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.Constants;
 import frc.robot.commands.FieldSpot;
 import frc.robot.commands.FieldSpot.Zone;
 import java.util.Optional;
@@ -36,11 +37,13 @@ public class SpotSelector extends TimedSubsystem {
 
   @Override
   protected void periodicImpl() {
-    Logger.recordOutput("SpotSelector/SelectedName", getSelectedName());
     Logger.recordOutput("SpotSelector/HasTarget", getSelectedPose().isPresent());
     Logger.recordOutput("SpotSelector/IsAutoDriving", m_isAutoDriving);
-    Logger.recordOutput(
-        "SpotSelector/SelectedPose", FieldSpot.flipIfRed(getSelectedPose().orElse(new Pose2d())));
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("SpotSelector/SelectedName", getSelectedName());
+      Logger.recordOutput(
+          "SpotSelector/SelectedPose", FieldSpot.flipIfRed(getSelectedPose().orElse(new Pose2d())));
+    }
   }
 
   // ── Auto-drive state (set by DriveToSpot) ─────────────────────────────────

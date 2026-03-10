@@ -145,6 +145,8 @@ public class RobotContainer {
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
+        DriverStation.silenceJoystickConnectionWarning(true);
+
         drive =
             new Drive(
                 new GyroIO() {},
@@ -220,6 +222,7 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "SuperFastClimb/Right",
         ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_RIGHT));
+    NamedCommands.registerCommand("Intake.Deploy", m_intake.getStartIntakeCmd());
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -301,8 +304,10 @@ public class RobotContainer {
     // Assumes turret, hood, and flywheel are already at the correct setpoints.
     controller.rightBumper().whileTrue(m_shooter.getManualShootCmd());
 
-    // Y button: auto-select a target spot based on robot position, then drive to it.
-    // Blue/Red home zone → HUB_NEUTRAL; Neutral zone → SHOOTING_TOP/BOTTOM by field half.
+    // Y button: auto-select a target spot based on robot position, then drive to
+    // it.
+    // Blue/Red home zone → HUB_NEUTRAL; Neutral zone → SHOOTING_TOP/BOTTOM by field
+    // half.
     controller
         .y()
         .whileTrue(
@@ -410,7 +415,14 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    Command selected = autoChooser.get();
+    // PathPlannerAuto instances are single-use — WPILib marks composed commands as
+    // non-reusable. Rebuild from the auto name so a fresh command tree is created
+    // every autonomous period.
+    if (selected instanceof PathPlannerAuto) {
+      return new PathPlannerAuto(selected.getName());
+    }
+    return selected;
   }
 
   /**

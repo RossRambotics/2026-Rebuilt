@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants;
 import frc.robot.commands.FieldSpot.Zone;
 import frc.robot.subsystems.SpotSelector;
 import frc.robot.subsystems.drive.Drive;
@@ -244,11 +245,15 @@ public class DriveToSpot extends Command {
         }
       }
 
-      Logger.recordOutput("DriveToSpot/TrenchHeadingDeg", trenchHeading.getDegrees());
+      if (Constants.VERBOSE_TELEMETRY) {
+        Logger.recordOutput("DriveToSpot/TrenchHeadingDeg", trenchHeading.getDegrees());
+      }
     }
 
     poses.add(target);
-    Logger.recordOutput("DriveToSpot/RoutePoses", poses.toArray(new Pose2d[0]));
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("DriveToSpot/RoutePoses", poses.toArray(new Pose2d[0]));
+    }
     return assemblePath(poses, rotTargets, start, target);
   }
 
@@ -338,11 +343,15 @@ public class DriveToSpot extends Command {
         }
       }
 
-      Logger.recordOutput("DriveToSpot/TrenchHeadingDeg", trenchHeading.getDegrees());
+      if (Constants.VERBOSE_TELEMETRY) {
+        Logger.recordOutput("DriveToSpot/TrenchHeadingDeg", trenchHeading.getDegrees());
+      }
     }
 
     poses.add(target);
-    Logger.recordOutput("DriveToSpot/RoutePoses", poses.toArray(new Pose2d[0]));
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("DriveToSpot/RoutePoses", poses.toArray(new Pose2d[0]));
+    }
     return assemblePath(poses, rotTargets, start, target);
   }
 

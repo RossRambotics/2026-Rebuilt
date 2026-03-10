@@ -132,11 +132,15 @@ public class Drive extends TimedSubsystem {
     Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
         (activePath) -> {
-          Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]));
+          if (Constants.VERBOSE_TELEMETRY) {
+            Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]));
+          }
         });
     PathPlannerLogging.setLogTargetPoseCallback(
         (targetPose) -> {
-          Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+          if (Constants.VERBOSE_TELEMETRY) {
+            Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+          }
         });
 
     // Configure SysId
@@ -146,7 +150,11 @@ public class Drive extends TimedSubsystem {
                 null,
                 null,
                 null,
-                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+                (state) -> {
+                  if (Constants.VERBOSE_TELEMETRY) {
+                    Logger.recordOutput("Drive/SysIdState", state.toString());
+                  }
+                }),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
   }
@@ -168,8 +176,8 @@ public class Drive extends TimedSubsystem {
       }
     }
 
-    // Log empty setpoint states when disabled
-    if (DriverStation.isDisabled()) {
+    // Log empty setpoint states when disabled (verbose only)
+    if (DriverStation.isDisabled() && Constants.VERBOSE_TELEMETRY) {
       Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
       Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
     }
@@ -206,6 +214,11 @@ public class Drive extends TimedSubsystem {
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
 
+    // Log measured swerve states (verbose only)
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("SwerveStates/Measured", getModuleStates());
+    }
+
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
   }
@@ -221,17 +234,21 @@ public class Drive extends TimedSubsystem {
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
 
-    // Log unoptimized setpoints and setpoint speeds
-    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-    Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+    if (Constants.VERBOSE_TELEMETRY) {
+      // Log unoptimized setpoints and setpoint speeds
+      Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+      Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+    }
 
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
       modules[i].runSetpoint(setpointStates[i]);
     }
 
-    // Log optimized setpoints (runSetpoint mutates each state)
-    Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    if (Constants.VERBOSE_TELEMETRY) {
+      // Log optimized setpoints (runSetpoint mutates each state)
+      Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    }
   }
 
   /** Runs the drive in a straight line with the specified drive output. */
@@ -272,7 +289,6 @@ public class Drive extends TimedSubsystem {
   }
 
   /** Returns the module states (turn angles and drive velocities) for all of the modules. */
-  @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
     for (int i = 0; i < 4; i++) {

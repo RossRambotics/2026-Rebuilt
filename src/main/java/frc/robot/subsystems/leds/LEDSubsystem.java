@@ -10,6 +10,7 @@ import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.signals.StripTypeValue;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.Constants;
 import frc.robot.Subsystems;
 import frc.robot.subsystems.TimedSubsystem;
 import org.littletonrobotics.junction.Logger;
@@ -83,7 +84,9 @@ public class LEDSubsystem extends TimedSubsystem {
 
   @Override
   protected void periodicImpl() {
-    Logger.recordOutput("LEDs/IsStubbed", !m_isReal);
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("LEDs/IsStubbed", !m_isReal);
+    }
 
     // Run LED state logic at 10 Hz to limit CAN traffic and CPU overhead
     if (m_periodicCount++ % UPDATE_PERIOD_CYCLES != 0) {
@@ -130,9 +133,11 @@ public class LEDSubsystem extends TimedSubsystem {
     }
 
     setSolid(m_solidGroup1, color);
-    Logger.recordOutput("LEDs/Group1/LeftTagCount", m_subsystems.vision().getTagCount(0));
-    Logger.recordOutput("LEDs/Group1/RightTagCount", m_subsystems.vision().getTagCount(1));
-    Logger.recordOutput("LEDs/Group1/Color", colorName(color));
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("LEDs/Group1/LeftTagCount", m_subsystems.vision().getTagCount(0));
+      Logger.recordOutput("LEDs/Group1/RightTagCount", m_subsystems.vision().getTagCount(1));
+      Logger.recordOutput("LEDs/Group1/Color", colorName(color));
+    }
   }
 
   /**
@@ -149,7 +154,9 @@ public class LEDSubsystem extends TimedSubsystem {
     if (DriverStation.isDisabled()) {
       RGBWColor allianceColor = getAllianceColor();
       setSolid(m_solidGroup2, allianceColor);
-      Logger.recordOutput("LEDs/Group2/Color", colorName(allianceColor));
+      if (Constants.VERBOSE_TELEMETRY) {
+        Logger.recordOutput("LEDs/Group2/Color", colorName(allianceColor));
+      }
       return;
     }
 
@@ -163,7 +170,9 @@ public class LEDSubsystem extends TimedSubsystem {
     }
 
     setSolid(m_solidGroup2, color);
-    Logger.recordOutput("LEDs/Group2/Color", colorName(color));
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("LEDs/Group2/Color", colorName(color));
+    }
   }
 
   /**
@@ -182,8 +191,10 @@ public class LEDSubsystem extends TimedSubsystem {
     if (DriverStation.isDisabled()) {
       RGBWColor allianceColor = getAllianceColor();
       setSolid(m_solidGroup3, allianceColor);
-      Logger.recordOutput("LEDs/Group3/Color", colorName(allianceColor));
-      Logger.recordOutput("LEDs/Group3/Strobing", false);
+      if (Constants.VERBOSE_TELEMETRY) {
+        Logger.recordOutput("LEDs/Group3/Color", colorName(allianceColor));
+        Logger.recordOutput("LEDs/Group3/Strobing", false);
+      }
       return;
     }
 
@@ -197,8 +208,10 @@ public class LEDSubsystem extends TimedSubsystem {
       setSolid(m_solidGroup3, baseColor);
     }
 
-    Logger.recordOutput("LEDs/Group3/Color", colorName(baseColor));
-    Logger.recordOutput("LEDs/Group3/Strobing", inBlinkWindow);
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("LEDs/Group3/Color", colorName(baseColor));
+      Logger.recordOutput("LEDs/Group3/Strobing", inBlinkWindow);
+    }
   }
 
   // ---------------------------------------------------------------------------

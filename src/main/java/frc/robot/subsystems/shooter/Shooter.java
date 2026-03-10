@@ -803,89 +803,7 @@ public class Shooter extends TimedSubsystem {
 
   /** Centralized telemetry publish. Called once at the end of periodic(). */
   private void updateTelemetry() {
-    // Basic turret and robot heading
-    if (m_turretPoseField3d != null) {
-      Logger.recordOutput("Shooter/TurretPoseField3d", m_turretPoseField3d);
-    }
-
-    double robotHeadingDeg =
-        RobotContainer.getInstance().getRobotPose2d().getRotation().getDegrees();
-    Logger.recordOutput("Shooter/robotHeadingFieldDeg", robotHeadingDeg);
-
-    Logger.recordOutput("Shooter/TurretActualDegRobot", m_turret.getAngle().in(Degrees));
-    Logger.recordOutput("Shooter/TurretTargetDegRobot", m_turretTargetRobotAngle.in(Degrees));
-    Logger.recordOutput("Shooter/TurretErrorDeg", m_lastTurretErrorRobotAngle.in(Degrees));
-    Logger.recordOutput("Shooter/TargetPose2d", m_targetPoseField3d.toPose2d());
-
-    // Distance from robot center to target (2D, Z component ignored)
-    Pose2d targetPose2d = m_targetPoseField3d.toPose2d();
-    Logger.recordOutput(
-        "Shooter/DistanceRobotCenterToTargetDistanceMeters",
-        RobotContainer.getInstance()
-            .getRobotPose2d()
-            .getTranslation()
-            .getDistance(targetPose2d.getTranslation()));
-    // Distance from turret center to target (2D, Z component ignored)
-    if (m_turretPoseField3d != null) {
-      Logger.recordOutput(
-          "Shooter/DistanceTurretToTargetDistanceMeters",
-          m_turretPoseField3d
-              .toPose2d()
-              .getTranslation()
-              .getDistance(targetPose2d.getTranslation()));
-    }
-
-    // Firing solution telemetry
-    if (m_lastFiringSolution != null) {
-      FiringSolution solution = m_lastFiringSolution;
-      Logger.recordOutput("Shooter/FutureRobotPose2d", solution.futurePose);
-      double predictedDistanceMeters =
-          RobotContainer.getInstance()
-              .getRobotPose2d()
-              .getTranslation()
-              .getDistance(solution.futurePose.getTranslation());
-      Logger.recordOutput("Shooter/FutureRobotPoseDistanceMeters", predictedDistanceMeters);
-      Logger.recordOutput("Shooter/TimeOfFlightSec", solution.tofSec);
-      Logger.recordOutput(
-          "Shooter/DistanceFiringSolutionToTargetMeters", solution.distanceToTargetMeters);
-      double hoodTargetAngleDeg =
-          MathUtil.clamp(
-              Radians.of(solution.hoodMechAngleRad).in(Degrees) + m_hoodTrimOffsetDeg,
-              HoodConstants.HOOD_DEGREES_MIN,
-              HoodConstants.HOOD_DEGREES_MAX);
-      Logger.recordOutput("Shooter/HoodTargetAngleDeg", hoodTargetAngleDeg);
-      m_targetHoodAngleDegEntry.set(hoodTargetAngleDeg);
-      Logger.recordOutput("Shooter/HoodActualAngleDeg", m_hood.getAngle().in(Degrees));
-      Logger.recordOutput("Shooter/FlyWheelTargetRPM", solution.flywheelRPM + m_rpmTrimOffsetRpm);
-      Logger.recordOutput(
-          "Shooter/CalculatedTurretAngleDeg", Radians.of(solution.turretAngleRad).in(Degrees));
-
-      Translation2d[] aimRay =
-          buildAimRay(
-              solution.futurePose,
-              solution.turretAngleRad,
-              new Translation2d(TURRET_X_OFFSET_M, TURRET_Y_OFFSET_M),
-              solution.distanceToTargetMeters);
-      Logger.recordOutput("Shooter/CalculatedAimRay", aimRay);
-    }
-
-    // Chassis speeds and sensors
-    ChassisSpeeds chassisSpeeds = RobotContainer.getInstance().getChassisSpeeds();
-    Logger.recordOutput("Shooter/ChassisSpeeds.vxMps", chassisSpeeds.vxMetersPerSecond);
-    Logger.recordOutput("Shooter/ChassisSpeeds.vyMps", chassisSpeeds.vyMetersPerSecond);
-    Logger.recordOutput(
-        "Shooter/ChassisSpeeds.omegaRadPerSec", chassisSpeeds.omegaRadiansPerSecond);
-
-    // On-target and motor readings
-    double actualRpm = m_bottomFlyWheel.getVelocity().in(RPM);
-    m_rpmAverageRpm = RPM_AVERAGE_ALPHA * actualRpm + (1.0 - RPM_AVERAGE_ALPHA) * m_rpmAverageRpm;
-    Logger.recordOutput("Shooter/FlyWheelActualRPM", actualRpm);
-    Logger.recordOutput("Shooter/FlyWheelAverageRPM", m_rpmAverageRpm);
-    Logger.recordOutput("Shooter/KickerActualRPM", m_kicker.getVelocity().in(RPM));
-    Logger.recordOutput("Shooter/KickerTargetRPM", m_kicker.getTargetVelocity().in(RPM));
-    Logger.recordOutput("Shooter/SpindexerActualRPM", m_spindexer.getVelocity().in(RPM));
-    Logger.recordOutput("Shooter/SpindexerTargetRPM", m_spindexer.getTargetVelocity().in(RPM));
-    // Readiness indicators
+    // Readiness indicators (always published)
     Logger.recordOutput("Shooter/IsTurretReady", m_isTurretReady);
     Logger.recordOutput("Shooter/IsBottomFlyWheelReady", m_isBottomFlyWheelReady);
     Logger.recordOutput("Shooter/IsShooterReady", m_isShooterReady);
@@ -894,11 +812,96 @@ public class Shooter extends TimedSubsystem {
     Logger.recordOutput("Shooter/RPMTrimOffsetRpm", m_rpmTrimOffsetRpm);
     Logger.recordOutput("Shooter/HoodTrimOffsetDeg", m_hoodTrimOffsetDeg);
     Logger.recordOutput("Shooter/TurretTrimOffsetDeg", m_turretTrimOffsetDeg);
-    Logger.recordOutput("Shooter/TOF/LaunchCount", m_tofLaunchCount);
-    Logger.recordOutput("Shooter/TOF/ConfirmCount", m_tofConfirmCount);
-    Logger.recordOutput("Shooter/TotalBallsLaunched", m_totalBallsLaunched);
     Logger.recordOutput("Shooter/IsHopperEmpty", m_isHopperEmpty);
     Logger.recordOutput("Shooter/KickerHasFuel", m_kicker.hasFuel());
+
+    if (Constants.VERBOSE_TELEMETRY) {
+      // Basic turret and robot heading
+      if (m_turretPoseField3d != null) {
+        Logger.recordOutput("Shooter/TurretPoseField3d", m_turretPoseField3d);
+      }
+
+      double robotHeadingDeg =
+          RobotContainer.getInstance().getRobotPose2d().getRotation().getDegrees();
+      Logger.recordOutput("Shooter/robotHeadingFieldDeg", robotHeadingDeg);
+
+      Logger.recordOutput("Shooter/TurretActualDegRobot", m_turret.getAngle().in(Degrees));
+      Logger.recordOutput("Shooter/TurretTargetDegRobot", m_turretTargetRobotAngle.in(Degrees));
+      Logger.recordOutput("Shooter/TurretErrorDeg", m_lastTurretErrorRobotAngle.in(Degrees));
+      Logger.recordOutput("Shooter/TargetPose2d", m_targetPoseField3d.toPose2d());
+
+      // Distance from robot center to target (2D, Z component ignored)
+      Pose2d targetPose2d = m_targetPoseField3d.toPose2d();
+      Logger.recordOutput(
+          "Shooter/DistanceRobotCenterToTargetDistanceMeters",
+          RobotContainer.getInstance()
+              .getRobotPose2d()
+              .getTranslation()
+              .getDistance(targetPose2d.getTranslation()));
+      // Distance from turret center to target (2D, Z component ignored)
+      if (m_turretPoseField3d != null) {
+        Logger.recordOutput(
+            "Shooter/DistanceTurretToTargetDistanceMeters",
+            m_turretPoseField3d
+                .toPose2d()
+                .getTranslation()
+                .getDistance(targetPose2d.getTranslation()));
+      }
+
+      // Firing solution telemetry
+      if (m_lastFiringSolution != null) {
+        FiringSolution solution = m_lastFiringSolution;
+        Logger.recordOutput("Shooter/FutureRobotPose2d", solution.futurePose);
+        double predictedDistanceMeters =
+            RobotContainer.getInstance()
+                .getRobotPose2d()
+                .getTranslation()
+                .getDistance(solution.futurePose.getTranslation());
+        Logger.recordOutput("Shooter/FutureRobotPoseDistanceMeters", predictedDistanceMeters);
+        Logger.recordOutput("Shooter/TimeOfFlightSec", solution.tofSec);
+        Logger.recordOutput(
+            "Shooter/DistanceFiringSolutionToTargetMeters", solution.distanceToTargetMeters);
+        double hoodTargetAngleDeg =
+            MathUtil.clamp(
+                Radians.of(solution.hoodMechAngleRad).in(Degrees) + m_hoodTrimOffsetDeg,
+                HoodConstants.HOOD_DEGREES_MIN,
+                HoodConstants.HOOD_DEGREES_MAX);
+        Logger.recordOutput("Shooter/HoodTargetAngleDeg", hoodTargetAngleDeg);
+        m_targetHoodAngleDegEntry.set(hoodTargetAngleDeg);
+        Logger.recordOutput("Shooter/HoodActualAngleDeg", m_hood.getAngle().in(Degrees));
+        Logger.recordOutput("Shooter/FlyWheelTargetRPM", solution.flywheelRPM + m_rpmTrimOffsetRpm);
+        Logger.recordOutput(
+            "Shooter/CalculatedTurretAngleDeg", Radians.of(solution.turretAngleRad).in(Degrees));
+
+        Translation2d[] aimRay =
+            buildAimRay(
+                solution.futurePose,
+                solution.turretAngleRad,
+                new Translation2d(TURRET_X_OFFSET_M, TURRET_Y_OFFSET_M),
+                solution.distanceToTargetMeters);
+        Logger.recordOutput("Shooter/CalculatedAimRay", aimRay);
+      }
+
+      // Chassis speeds and sensors
+      ChassisSpeeds chassisSpeeds = RobotContainer.getInstance().getChassisSpeeds();
+      Logger.recordOutput("Shooter/ChassisSpeeds.vxMps", chassisSpeeds.vxMetersPerSecond);
+      Logger.recordOutput("Shooter/ChassisSpeeds.vyMps", chassisSpeeds.vyMetersPerSecond);
+      Logger.recordOutput(
+          "Shooter/ChassisSpeeds.omegaRadPerSec", chassisSpeeds.omegaRadiansPerSecond);
+
+      // On-target and motor readings
+      double actualRpm = m_bottomFlyWheel.getVelocity().in(RPM);
+      m_rpmAverageRpm = RPM_AVERAGE_ALPHA * actualRpm + (1.0 - RPM_AVERAGE_ALPHA) * m_rpmAverageRpm;
+      Logger.recordOutput("Shooter/FlyWheelActualRPM", actualRpm);
+      Logger.recordOutput("Shooter/FlyWheelAverageRPM", m_rpmAverageRpm);
+      Logger.recordOutput("Shooter/KickerActualRPM", m_kicker.getVelocity().in(RPM));
+      Logger.recordOutput("Shooter/KickerTargetRPM", m_kicker.getTargetVelocity().in(RPM));
+      Logger.recordOutput("Shooter/SpindexerActualRPM", m_spindexer.getVelocity().in(RPM));
+      Logger.recordOutput("Shooter/SpindexerTargetRPM", m_spindexer.getTargetVelocity().in(RPM));
+      Logger.recordOutput("Shooter/TOF/LaunchCount", m_tofLaunchCount);
+      Logger.recordOutput("Shooter/TOF/ConfirmCount", m_tofConfirmCount);
+      Logger.recordOutput("Shooter/TotalBallsLaunched", m_totalBallsLaunched);
+    }
   }
 
   /**
@@ -938,8 +941,10 @@ public class Shooter extends TimedSubsystem {
       m_tofLaunchTimestampsSec[m_tofLaunchCount] = Timer.getFPGATimestamp();
       m_tofLaunchCount++;
       m_totalBallsLaunched++;
-      Logger.recordOutput("Shooter/TOF/LaunchCount", m_tofLaunchCount);
-      Logger.recordOutput("Shooter/TotalBallsLaunched", m_totalBallsLaunched);
+      if (Constants.VERBOSE_TELEMETRY) {
+        Logger.recordOutput("Shooter/TOF/LaunchCount", m_tofLaunchCount);
+        Logger.recordOutput("Shooter/TotalBallsLaunched", m_totalBallsLaunched);
+      }
     }
     m_kickerHadFuelLastLoop = hasFuelNow;
   }
@@ -962,21 +967,28 @@ public class Shooter extends TimedSubsystem {
     return Commands.runOnce(
             () -> {
               if (m_tofLaunchCount == 0) {
-                Logger.recordOutput("Shooter/TOF/ConfirmStatus", "No launches recorded");
+                if (Constants.VERBOSE_TELEMETRY) {
+                  Logger.recordOutput("Shooter/TOF/ConfirmStatus", "No launches recorded");
+                }
                 return;
               }
               if (m_tofConfirmCount >= m_tofLaunchCount) {
-                Logger.recordOutput("Shooter/TOF/ConfirmStatus", "All launches already confirmed");
+                if (Constants.VERBOSE_TELEMETRY) {
+                  Logger.recordOutput(
+                      "Shooter/TOF/ConfirmStatus", "All launches already confirmed");
+                }
                 return;
               }
               double arrivalTimeSec = Timer.getFPGATimestamp();
               m_tofMeasuredSec[m_tofConfirmCount] =
                   arrivalTimeSec - m_tofLaunchTimestampsSec[m_tofConfirmCount];
-              Logger.recordOutput(
-                  "Shooter/TOF/Ball" + (m_tofConfirmCount + 1) + "Sec",
-                  m_tofMeasuredSec[m_tofConfirmCount]);
-              Logger.recordOutput(
-                  "Shooter/TOF/ConfirmStatus", "Ball " + (m_tofConfirmCount + 1) + " confirmed");
+              if (Constants.VERBOSE_TELEMETRY) {
+                Logger.recordOutput(
+                    "Shooter/TOF/Ball" + (m_tofConfirmCount + 1) + "Sec",
+                    m_tofMeasuredSec[m_tofConfirmCount]);
+                Logger.recordOutput(
+                    "Shooter/TOF/ConfirmStatus", "Ball " + (m_tofConfirmCount + 1) + " confirmed");
+              }
               m_tofConfirmCount++;
               if (m_tofConfirmCount >= TOF_MAX_SHOTS) {
                 logTofResults();
@@ -987,6 +999,7 @@ public class Shooter extends TimedSubsystem {
 
   /** Logs all per-ball TOFs, average, and std dev. Called on session end or after 5 confirms. */
   private void logTofResults() {
+    if (!Constants.VERBOSE_TELEMETRY) return;
     int validCount = 0;
     double sum = 0.0;
     for (int i = 0; i < m_tofConfirmCount; i++) {
@@ -1124,7 +1137,9 @@ public class Shooter extends TimedSubsystem {
     double yawRad = turretPoseFR.getRotation().getZ();
     // double yawRad = m_lastFiringSolution.turretAngleRad;
 
-    Logger.recordOutput("Shooter/LaunchFuelYawFieldDeg", Radians.of(yawRad).in(Degrees));
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("Shooter/LaunchFuelYawFieldDeg", Radians.of(yawRad).in(Degrees));
+    }
 
     Translation3d initialPosition = turretPoseFR.getTranslation();
     FuelSim.getInstance().spawnFuel(initialPosition, launchVel(vel, hoodAngleRad, yawRad));
@@ -1444,12 +1459,16 @@ public class Shooter extends TimedSubsystem {
         .setAngle(Degrees.of(HoodConstants.HOOD_DEGREES_MIN))
         .beforeStarting(
             () -> {
-              Logger.recordOutput("Shooter/Hood/IsRetracted", true);
-              Logger.recordOutput("Shooter/Hood/RetractReason", reason);
+              if (Constants.VERBOSE_TELEMETRY) {
+                Logger.recordOutput("Shooter/Hood/IsRetracted", true);
+                Logger.recordOutput("Shooter/Hood/RetractReason", reason);
+              }
             })
         .finallyDo(
             interrupted -> {
-              Logger.recordOutput("Shooter/Hood/IsRetracted", false);
+              if (Constants.VERBOSE_TELEMETRY) {
+                Logger.recordOutput("Shooter/Hood/IsRetracted", false);
+              }
             });
   }
 

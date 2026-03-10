@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants;
 import frc.robot.subsystems.TimedSubsystem;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -237,16 +238,20 @@ public class Hood extends TimedSubsystem {
 
   @Override
   protected void periodicImpl() {
-    Logger.recordOutput("Hood/IsStubbed", !m_isReal);
-    Logger.recordOutput("Hood/IsCalibrated", m_isCalibrated);
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("Hood/IsStubbed", !m_isReal);
+      Logger.recordOutput("Hood/IsCalibrated", m_isCalibrated);
+    }
 
     if (hood != null) {
       hood.updateTelemetry();
 
-      Logger.recordOutput(
-          "Hood/HoodTargetAngleDegrees",
-          this.hood.getMechanismSetpoint().map(a -> a.in(Degrees)).orElse(Double.NaN));
-      Logger.recordOutput("Hood/HoodCurrentDegrees", this.hood.getAngle().in(Degrees));
+      if (Constants.VERBOSE_TELEMETRY) {
+        Logger.recordOutput(
+            "Hood/HoodTargetAngleDegrees",
+            this.hood.getMechanismSetpoint().map(a -> a.in(Degrees)).orElse(Double.NaN));
+        Logger.recordOutput("Hood/HoodCurrentDegrees", this.hood.getAngle().in(Degrees));
+      }
     }
   }
 

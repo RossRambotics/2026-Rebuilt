@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.subsystems.climb.ClimbElevator;
 import frc.robot.subsystems.climb.ClimbElevatorConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -63,7 +64,9 @@ public final class ClimbCommands {
             Commands.runOnce(
                 () -> {
                   tiltHooked[0] = false;
-                  Logger.recordOutput("Climb/SuperFast/TiltHooked", false);
+                  if (Constants.VERBOSE_TELEMETRY) {
+                    Logger.recordOutput("Climb/SuperFast/TiltHooked", false);
+                  }
                 }),
 
             // Phase 1: Pathfind to the approach pose.
@@ -99,7 +102,12 @@ public final class ClimbCommands {
 
     Pose2d targetPose = flipIfRed(approachSpot.pose);
     return AutoBuilder.pathfindToPose(targetPose, approachConstraints)
-        .beforeStarting(() -> Logger.recordOutput("Climb/SuperFast/ApproachTarget", targetPose));
+        .beforeStarting(
+            () -> {
+              if (Constants.VERBOSE_TELEMETRY) {
+                Logger.recordOutput("Climb/SuperFast/ApproachTarget", targetPose);
+              }
+            });
   }
 
   /**
@@ -147,7 +155,12 @@ public final class ClimbCommands {
 
     Command passCmd =
         AutoBuilder.pathfindToPose(passPose, passConstraints)
-            .beforeStarting(() -> Logger.recordOutput("Climb/SuperFast/PassTarget", passPose));
+            .beforeStarting(
+                () -> {
+                  if (Constants.VERBOSE_TELEMETRY) {
+                    Logger.recordOutput("Climb/SuperFast/PassTarget", passPose);
+                  }
+                });
 
     Command tiltSentinel =
         Commands.waitUntil(
@@ -157,9 +170,11 @@ public final class ClimbCommands {
                   if (!interrupted) {
                     // Sentinel ended naturally — tilt threshold crossed.
                     tiltHooked[0] = true;
-                    Logger.recordOutput("Climb/SuperFast/TiltHooked", true);
-                    Logger.recordOutput(
-                        "Climb/SuperFast/TiltMagAtHookRad", drive.getTiltMagnitudeRad());
+                    if (Constants.VERBOSE_TELEMETRY) {
+                      Logger.recordOutput("Climb/SuperFast/TiltHooked", true);
+                      Logger.recordOutput(
+                          "Climb/SuperFast/TiltMagAtHookRad", drive.getTiltMagnitudeRad());
+                    }
                   }
                 });
 

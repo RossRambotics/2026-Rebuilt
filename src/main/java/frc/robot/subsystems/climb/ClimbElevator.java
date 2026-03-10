@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants;
 import frc.robot.subsystems.TimedSubsystem;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -287,20 +288,24 @@ public class ClimbElevator extends TimedSubsystem {
 
   @Override
   protected void periodicImpl() {
-    Logger.recordOutput("ClimbElevator/IsStubbed", !m_isReal);
-    Logger.recordOutput("ClimbElevator/IsCalibrated", m_isCalibrated);
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("ClimbElevator/IsStubbed", !m_isReal);
+      Logger.recordOutput("ClimbElevator/IsCalibrated", m_isCalibrated);
+    }
 
     if (elevator != null) {
       elevator.updateTelemetry();
 
-      Logger.recordOutput("Climb/ElevatorCurrentHeightM", elevator.getHeight().in(Meters));
-      Logger.recordOutput(
-          "Climb/ElevatorTargetHeightM",
-          elevator
-              .getMotor()
-              .getMechanismPositionSetpoint()
-              .map(sp -> elevator.getMotor().getConfig().convertFromMechanism(sp).in(Meters))
-              .orElse(Double.NaN));
+      if (Constants.VERBOSE_TELEMETRY) {
+        Logger.recordOutput("Climb/ElevatorCurrentHeightM", elevator.getHeight().in(Meters));
+        Logger.recordOutput(
+            "Climb/ElevatorTargetHeightM",
+            elevator
+                .getMotor()
+                .getMechanismPositionSetpoint()
+                .map(sp -> elevator.getMotor().getConfig().convertFromMechanism(sp).in(Meters))
+                .orElse(Double.NaN));
+      }
     }
   }
 

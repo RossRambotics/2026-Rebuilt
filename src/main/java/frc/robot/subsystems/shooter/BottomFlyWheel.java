@@ -23,6 +23,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.subsystems.TimedSubsystem;
 import java.util.Map;
 import java.util.TreeMap;
@@ -258,7 +259,9 @@ public class BottomFlyWheel extends TimedSubsystem {
 
   @Override
   protected void periodicImpl() {
-    Logger.recordOutput("BottomFlyWheel/IsStubbed", !m_isReal);
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("BottomFlyWheel/IsStubbed", !m_isReal);
+    }
 
     // 1. Update Telemetry
     if (shooter != null) {

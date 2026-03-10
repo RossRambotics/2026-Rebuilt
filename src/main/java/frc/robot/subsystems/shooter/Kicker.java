@@ -22,6 +22,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.subsystems.TimedSubsystem;
 import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
@@ -119,7 +120,9 @@ public class Kicker extends TimedSubsystem {
 
   @Override
   protected void periodicImpl() {
-    Logger.recordOutput("Kicker/IsStubbed", !m_isReal);
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("Kicker/IsStubbed", !m_isReal);
+    }
     Logger.recordOutput("Kicker/HasFuel", hasFuel());
     Logger.recordOutput("Kicker/FuelDistanceM", getFuelDistanceM());
 

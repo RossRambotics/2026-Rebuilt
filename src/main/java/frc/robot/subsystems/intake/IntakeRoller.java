@@ -17,6 +17,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.subsystems.TimedSubsystem;
 import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
@@ -110,7 +111,9 @@ public class IntakeRoller extends TimedSubsystem {
 
   @Override
   protected void periodicImpl() {
-    Logger.recordOutput("IntakeRoller/IsStubbed", !m_isReal);
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("IntakeRoller/IsStubbed", !m_isReal);
+    }
 
     if (roller != null) {
       roller.updateTelemetry();

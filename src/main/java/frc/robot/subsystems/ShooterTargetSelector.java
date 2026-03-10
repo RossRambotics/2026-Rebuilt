@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.commands.ShootingTarget;
 import frc.robot.subsystems.shooter.Shooter;
 import org.littletonrobotics.junction.Logger;
@@ -31,7 +32,9 @@ public class ShooterTargetSelector extends TimedSubsystem {
   @Override
   protected void periodicImpl() {
     Logger.recordOutput("ShooterTargetSelector/SelectedTarget", m_selectedTarget.displayName);
-    Logger.recordOutput("ShooterTargetSelector/IsAutoEnabled", m_isAutoEnabled);
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("ShooterTargetSelector/IsAutoEnabled", m_isAutoEnabled);
+    }
   }
 
   // ── Selection API ──────────────────────────────────────────────────────────
