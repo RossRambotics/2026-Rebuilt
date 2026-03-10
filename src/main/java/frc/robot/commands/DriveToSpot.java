@@ -207,8 +207,7 @@ public class DriveToSpot extends Command {
               blueTrenchY,
               travelDir,
               trenchHeading,
-              true,
-              start.getX());
+              true);
         }
         if (targetZone == Zone.RED_HOME) {
           addTrenchWaypoints(
@@ -218,8 +217,7 @@ public class DriveToSpot extends Command {
               redTrenchY,
               travelDir,
               trenchHeading,
-              true,
-              start.getX());
+              true);
         }
       } else {
         // Blue moving -X (uncommon): leaving RED_HOME crosses the red trench;
@@ -232,8 +230,7 @@ public class DriveToSpot extends Command {
               redTrenchY,
               travelDir,
               trenchHeading,
-              false,
-              start.getX());
+              false);
         }
         if (targetZone == Zone.BLUE_HOME) {
           addTrenchWaypoints(
@@ -243,8 +240,7 @@ public class DriveToSpot extends Command {
               blueTrenchY,
               travelDir,
               trenchHeading,
-              false,
-              start.getX());
+              false);
         }
       }
 
@@ -304,8 +300,7 @@ public class DriveToSpot extends Command {
               blueTrenchY,
               travelDir,
               trenchHeading,
-              true,
-              start.getX());
+              true);
         }
         if (targetZone == Zone.RED_HOME) {
           addTrenchWaypoints(
@@ -315,8 +310,7 @@ public class DriveToSpot extends Command {
               redTrenchY,
               travelDir,
               trenchHeading,
-              true,
-              start.getX());
+              true);
         }
       } else {
         // Red going -X in blue-frame = leaving RED_HOME toward neutral/blue (most
@@ -330,8 +324,7 @@ public class DriveToSpot extends Command {
               redTrenchY,
               travelDir,
               trenchHeading,
-              false,
-              start.getX());
+              false);
         }
         if (targetZone == Zone.BLUE_HOME) {
           addTrenchWaypoints(
@@ -341,8 +334,7 @@ public class DriveToSpot extends Command {
               blueTrenchY,
               travelDir,
               trenchHeading,
-              false,
-              start.getX());
+              false);
         }
       }
 
@@ -381,11 +373,6 @@ public class DriveToSpot extends Command {
    * Appends approach and exit waypoints for one trench crossing, and registers a {@link
    * RotationTarget} at the approach position.
    *
-   * <p>If the robot has already passed the nominal approach point (e.g., a Red robot that starts
-   * inside RED_HOME close to the red trench boundary), the approach waypoint and its {@link
-   * RotationTarget} are skipped and only the exit waypoint is inserted. This prevents PathPlanner
-   * from generating a backwards detour to reach a waypoint that is already behind the robot.
-   *
    * <p>The approach waypoint index in the waypoint list equals {@code poses.size()} before the
    * waypoint is added (since {@code waypointsFromPoses} produces one entry per pose).
    *
@@ -396,7 +383,6 @@ public class DriveToSpot extends Command {
    * @param travelDir path tangent direction (direction of travel)
    * @param robotHeading desired robot heading through the trench (intake-leading)
    * @param forwardX true if traveling in the +X direction
-   * @param startX robot's starting X coordinate (meters, blue-frame)
    */
   private void addTrenchWaypoints(
       List<Pose2d> poses,
@@ -405,22 +391,13 @@ public class DriveToSpot extends Command {
       double trenchY,
       Rotation2d travelDir,
       Rotation2d robotHeading,
-      boolean forwardX,
-      double startX) {
+      boolean forwardX) {
     double approachX = forwardX ? trenchX - TRENCH_APPROACH_M : trenchX + TRENCH_APPROACH_M;
     double exitX = forwardX ? trenchX + TRENCH_EXIT_M : trenchX - TRENCH_EXIT_M;
 
-    // Only insert the approach if it is actually ahead of the robot in the travel
-    // direction.
-    // For +X travel: ahead means approachX > startX.
-    // For -X travel: ahead means approachX < startX.
-    boolean approachIsAhead = forwardX ? (startX < approachX) : (startX > approachX);
-    if (approachIsAhead) {
-      double approachIdx = poses.size();
-      poses.add(new Pose2d(approachX, trenchY, travelDir));
-      rotTargets.add(new RotationTarget(approachIdx, robotHeading));
-    }
-
+    double approachIdx = poses.size();
+    poses.add(new Pose2d(approachX, trenchY, travelDir));
+    rotTargets.add(new RotationTarget(approachIdx, robotHeading));
     poses.add(new Pose2d(exitX, trenchY, travelDir));
   }
 }
