@@ -30,6 +30,7 @@ This guide covers what you need to drive and operate the robot effectively. Read
 | **Left Bumper (LB)** | Retract intake arm |
 | **Right Trigger (RT)** | **Auto Shoot** — full predictive targeting; toggle on to start, toggle off to stop |
 | **Right Bumper (RB)** | **Manual Shoot** — runs kicker and spindexer only; use when manually aimed |
+| **A Button** | **Turret-Servo Fallback Shoot** — hold when turret is inoperable; locks turret to 0°, rotates robot chassis to aim, fires when aligned. Left stick still drives. Release to return to normal. |
 | **B Button** | **Auto Drive to Fuel** — hold to drive backward toward detected game pieces and auto-deploy intake; release to stop |
 | **Y Button** | Drive to selected spot (operator selects the spot on button box first) |
 | **X Button** | Lock wheels in X pattern — defensive stance |
@@ -112,6 +113,39 @@ Automatic mode is the default and preferred way to shoot. The robot handles all 
 - Kicker and spindexer only engage once all three are within tolerance (turret ±2°, hood ±2°, flywheel ±150 RPM).
 - Once feeding starts, it continues even if tolerance is briefly lost — but stops immediately if the turret can no longer physically reach the target angle (e.g. robot is facing the wrong way). Feeding resumes automatically once the turret is back on target.
 - Drive speed is reduced to 50% and rotation is heavily limited.
+
+### Auto-Drive Between Intake and Shooting Position (Y Button)
+
+The Y button is a one-press transit between the neutral zone and a shooting position. It reads the robot's current field position and automatically selects the right destination — no operator input needed.
+
+**Selection logic (instant, on every Y press):**
+- **Robot in home zone (near your hub):** selects the neutral-side hub shooting position and drives there.
+- **Robot in neutral or opponent zone:** selects the shooting position on the same side of the field as the robot (top half → top corridor spot, bottom half → bottom corridor spot) and drives there.
+
+The top/bottom split picks whichever trench corridor the robot is already aligned with, so the path naturally goes through the nearest trench.
+
+**Typical collect-and-score cycle:**
+
+1. Robot starts near the hub. Driver presses **Y** — robot drives through the nearest trench to the neutral-zone shooting position.
+2. Driver presses **RT** to shoot. LEDs go green when ready.
+3. After shooting, driver drives into the neutral zone to collect fuel (LT or B button).
+4. When ready to return, driver presses **Y** again — robot picks the correct corridor based on its current Y position and drives to the shooting spot.
+5. Repeat.
+
+> **Y is hold-to-run.** Release at any time to take manual control. The robot stops smoothly mid-path.
+
+> **Y auto-selects on every press.** If the robot crosses the field Y midline between presses, it will switch corridors automatically.
+
+### Chassis Aim — Spinning Toward Target (A Button)
+
+Holding **A** locks the robot chassis rotation toward the current shooting target (turret locked to 0°, robot body rotates to aim). The left stick still drives normally.
+
+This is useful when:
+- The **turret is at or near its rotation limit** — rotating the chassis opens up a better turret angle for the next shot.
+- You want to **pre-orient the robot** toward the target before toggling RT, so the turret has less travel to cover.
+- The **turret is inoperable** — A fires using chassis rotation as the sole aiming mechanism (see [Turret-Servo Fallback](#problem-turret-is-stuck--inoperable-fallback-shoot-mode) in troubleshooting).
+
+The robot will fire automatically once aligned and all other systems are ready — the same readiness logic as auto shoot. Release A to return to normal free-rotation drive and standard turret tracking.
 
 ### Hood Auto-Retract in Trench Zones
 
@@ -225,6 +259,19 @@ The field widget is your first indicator of a pose problem. If the green square 
   - Hood did not reach target angle — operator press **Shooter / Retract Hood** then re-engage.
   - Flywheel did not reach target RPM — check if shooter was just turned ON (give it 2–3 seconds to spin up).
   - Shooter is OFF — operator press **Shooter / Normal Targeting** to re-enable the shooter.
+
+### Problem: Turret Is Stuck / Inoperable (Fallback Shoot Mode)
+
+If the turret cannot move (mechanical jam, motor fault), the robot can still shoot using the **A button** turret-servo fallback:
+
+1. Driver holds **A button** — turret locks to 0° (straight ahead relative to robot), robot chassis rotates to face the target, hood and flywheel spin up normally.
+2. Left stick still drives — the robot will steer toward the required heading while you translate.
+3. Watch the LEDs — middle LEDs will go **GREEN** and fire once the robot heading is within 2° of the required aim angle.
+4. Release **A** when done — normal turret targeting and free rotation resume.
+
+> **Note:** In this mode the robot rotates to aim rather than the turret. Drive smoothly and avoid large rotation inputs that fight the heading servo. Turret trim (D-pad) still affects the required heading, so existing trim corrections carry over.
+
+> **Turret servo mode does NOT work in autonomous.** It is teleop-only.
 
 ### Problem: Robot Won't Drive to Spots Correctly (Y Button)
 
@@ -490,7 +537,8 @@ SHOTS CONSISTENTLY MISSING
 │   └─ Operator: Reseed from Vision if tags briefly seen
 │
 ├─ Middle LEDs stay RED after toggling RT on?
-│   ├─ Turret stuck? → Operator: Turret Center, then re-enable
+│   ├─ Turret stuck/inoperable? → Driver: hold A (turret-servo fallback) instead of RT
+│   ├─ Turret stuck but movable? → Operator: Turret Center, then re-enable RT
 │   ├─ Hood stuck? → Operator: Retract Hood, then re-engage
 │   ├─ Flywheel slow? → Wait 2-3 sec for spin-up
 │   └─ Shooter off? → Operator: Normal Targeting button
@@ -523,6 +571,7 @@ INTAKE JAMMED
 
 | Date | Change |
 |------|--------|
+| 2026-03-11 | **A button** — new turret-servo fallback shoot mode: hold A when turret is inoperable; robot chassis rotates to aim with turret locked at 0° |
 | 2026-03-06 | **RPM trim** step reduced from ±100 to ±50 RPM per press (`Shooter/RPM +50`, `Shooter/RPM -50`) |
 | 2026-03-06 | **Hood trim** added: `Shooter/Hood +1deg`, `Shooter/Hood -1deg`, `Shooter/Hood Trim Reset` — trims the firing solution hood angle without affecting retract commands |
 | 2026-03-06 | **Average RPM** (`Shooter/FlyWheelAverageRPM`) added to telemetry — EMA-smoothed flywheel RPM for stable dashboard reading |

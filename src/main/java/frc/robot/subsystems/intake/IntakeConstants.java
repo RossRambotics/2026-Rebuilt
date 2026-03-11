@@ -80,7 +80,7 @@ public final class IntakeConstants {
   // Intake roller — PID / motion
   // ---------------------------------------------------------------------------
   // TODO: Tune PID gains on hardware
-  public static final double ROLLER_KP = 0.0;
+  public static final double ROLLER_KP = 0.5;
   public static final double ROLLER_KI = 0.0;
   public static final double ROLLER_KD = 0.0;
   public static final double ROLLER_MAX_VEL_RPS = 100.0;

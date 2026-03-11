@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants;
 import frc.robot.subsystems.TimedSubsystem;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -248,16 +249,20 @@ public class IntakeDeployArm extends TimedSubsystem {
 
   @Override
   protected void periodicImpl() {
-    Logger.recordOutput("IntakeDeployArm/IsStubbed", !m_isReal);
-    Logger.recordOutput("IntakeDeployArm/IsCalibrated", m_isCalibrated);
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("IntakeDeployArm/IsStubbed", !m_isReal);
+      Logger.recordOutput("IntakeDeployArm/IsCalibrated", m_isCalibrated);
+    }
 
     if (arm != null) {
       arm.updateTelemetry();
 
-      Logger.recordOutput(
-          "Intake/ArmTargetAngleDeg",
-          arm.getMechanismSetpoint().map(a -> a.in(Degrees)).orElse(Double.NaN));
-      Logger.recordOutput("Intake/ArmCurrentAngleDeg", arm.getAngle().in(Degrees));
+      if (Constants.VERBOSE_TELEMETRY) {
+        Logger.recordOutput(
+            "Intake/ArmTargetAngleDeg",
+            arm.getMechanismSetpoint().map(a -> a.in(Degrees)).orElse(Double.NaN));
+        Logger.recordOutput("Intake/ArmCurrentAngleDeg", arm.getAngle().in(Degrees));
+      }
     }
   }
 

@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.subsystems.TimedSubsystem;
 import org.littletonrobotics.junction.Logger;
 
@@ -55,6 +56,27 @@ public class Intake extends TimedSubsystem {
                 m_deployArm.setDutyCycle(0.0),
                 m_roller.setVelocity(RPM.of(IntakeConstants.ROLLER_INTAKE_RPM))))
         .withName("Intake/Deploy");
+  }
+
+  /**
+   * Kick off arm deploy and roller spin-up, then finish immediately.
+   *
+   * <p>Schedules the arm burst sequence and roller as independent background commands so the caller
+   * (e.g. a PathPlanner NamedCommand) finishes in one cycle without holding subsystem requirements.
+   * Safe to trigger multiple times across auto runs.
+   */
+  public Command getDeployInstantCmd() {
+    return Commands.runOnce(
+            () -> {
+              Commands.sequence(
+                      m_deployArm
+                          .setDutyCycle(IntakeConstants.DEPLOY_BURST_DUTY_CYCLE)
+                          .withTimeout(IntakeConstants.DEPLOY_BURST_SEC),
+                      m_deployArm.setDutyCycle(0.0))
+                  .schedule();
+              m_roller.setVelocity(RPM.of(IntakeConstants.ROLLER_INTAKE_RPM)).schedule();
+            })
+        .withName("Intake/StartIntake");
   }
 
   /**
@@ -145,6 +167,8 @@ public class Intake extends TimedSubsystem {
 
   @Override
   protected void periodicImpl() {
-    Logger.recordOutput("Intake/IsStubbed", !m_isReal);
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("Intake/IsStubbed", !m_isReal);
+    }
   }
 }

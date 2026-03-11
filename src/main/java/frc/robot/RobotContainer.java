@@ -25,12 +25,12 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AutoDriveToFuel;
 import frc.robot.commands.AutoTargetSelector;
-import frc.robot.commands.ClimbCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToSpot;
 import frc.robot.commands.FieldSpot;
@@ -86,9 +86,16 @@ public class RobotContainer {
 
   public Shooter m_shooter = null;
 
+  // Shared AutoShoot command instance — used by the driver trigger toggle and by
+  // the "Shoot.Start" / "Shoot.Stop" PathPlanner named commands.
+  private Command m_autoShootCmd = null;
+
   public ShooterTargetSelector m_targetSelector = null;
 
   public Intake m_intake = null;
+
+  // Shared roller-on command — used by IntakeRoller.Start / IntakeRoller.Stop named commands.
+  private Command m_rollerOnCmd = null;
 
   public ClimbElevator m_climbElevator = null;
 
@@ -104,8 +111,10 @@ public class RobotContainer {
     instance = this;
 
     m_shooter = new Shooter(true);
+    m_autoShootCmd = m_shooter.getAutoShootCmd();
     m_targetSelector = new ShooterTargetSelector(m_shooter);
     m_intake = new Intake(true);
+    m_rollerOnCmd = m_intake.getRollerOnCmd();
     m_climbElevator = new ClimbElevator(false);
 
     switch (Constants.currentMode) {
@@ -145,6 +154,8 @@ public class RobotContainer {
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
+        DriverStation.silenceJoystickConnectionWarning(true);
+
         drive =
             new Drive(
                 new GyroIO() {},
@@ -209,17 +220,35 @@ public class RobotContainer {
     // bundle
     m_ledSubsystem = new LEDSubsystem(true, m_subsystems);
 
-    // Register SuperFastClimb as PathPlanner named commands for use in .auto files.
-    // Must be registered before AutoBuilder.buildAutoChooser().
+    // // Register SuperFastClimb as PathPlanner named commands for use in .auto
+    // files.
+    // // Must be registered before AutoBuilder.buildAutoChooser().
+    // NamedCommands.registerCommand(
+    // "SuperFastClimb/Left",
+    // ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_LEFT));
+    // NamedCommands.registerCommand(
+    // "SuperFastClimb/Center",
+    // ClimbCommands.superFastClimb(drive, m_climbElevator,
+    // FieldSpot.CLIMB_CENTER));
+    // NamedCommands.registerCommand(
+    // "SuperFastClimb/Right",
+    // ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_RIGHT));
+    NamedCommands.registerCommand("Intake.Deploy", m_intake.getDeployInstantCmd());
+    // Shoot.Start / Shoot.Stop: instant commands for use in PathPlanner auto
+    // routines.
+    // They schedule/cancel the same shared AutoShoot command instance used by the
+    // driver trigger,
+    // so the toggle state stays consistent across both teleop and auto use.
     NamedCommands.registerCommand(
-        "SuperFastClimb/Left",
-        ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_LEFT));
+        "Shoot.Start",
+        Commands.runOnce(() -> CommandScheduler.getInstance().schedule(m_autoShootCmd)));
+    NamedCommands.registerCommand("Shoot.Stop", Commands.runOnce(m_autoShootCmd::cancel));
+    // IntakeRoller.Start / IntakeRoller.Stop: instant commands to run or stop the roller alone
+    // (arm is not affected). Cancellation lets the default getRollerOffCmd() resume automatically.
     NamedCommands.registerCommand(
-        "SuperFastClimb/Center",
-        ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_CENTER));
-    NamedCommands.registerCommand(
-        "SuperFastClimb/Right",
-        ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_RIGHT));
+        "IntakeRoller.Start",
+        Commands.runOnce(() -> CommandScheduler.getInstance().schedule(m_rollerOnCmd)));
+    NamedCommands.registerCommand("IntakeRoller.Stop", Commands.runOnce(m_rollerOnCmd::cancel));
 
     NamedCommands.registerCommand("Intake.Deploy", m_intake.getDeployArmCmd().withTimeout(0.5));
     NamedCommands.registerCommand("Intake.Start", m_intake.getRollerOnCmd());
@@ -298,30 +327,49 @@ public class RobotContainer {
     // Right trigger (toggle): auto shoot — predictive targeting mode
     // Hood and flywheel override their idle defaults; kicker and spindexer engage
     // once ready.
-    controller.rightTrigger().toggleOnTrue(m_shooter.getAutoShootCmd());
+    controller.rightTrigger().toggleOnTrue(m_autoShootCmd);
 
     // Right bumper (hold): manual shoot — kicker and spindexer only
     // Assumes turret, hood, and flywheel are already at the correct setpoints.
     controller.rightBumper().whileTrue(m_shooter.getManualShootCmd());
 
-    // Y button: drive to the currently selected field spot via PathPlanner
-    // on-the-fly pathfinding.
-    // Use the button box (see TODO below) to select a spot before pressing Y.
-    controller.y().whileTrue(new DriveToSpot(drive, m_spotSelector));
+    // Y button: auto-select a target spot based on robot position, then drive to
+    // it.
+    // Blue/Red home zone → HUB_NEUTRAL; Neutral zone → SHOOTING_TOP/BOTTOM by field
+    // half.
+    controller
+        .y()
+        .whileTrue(
+            Commands.sequence(
+                Commands.runOnce(() -> m_spotSelector.autoSelectForRobot(drive.getPose())),
+                new DriveToSpot(drive, m_spotSelector)));
 
     // TODO: Wire button box buttons to spot selection once hardware is available.
     // Example bindings (replace JoystickButton refs with your actual button box
     // inputs):
-    // buttonBox.button(1).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_LEFT));
-    // buttonBox.button(2).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_RIGHT));
-    // buttonBox.button(3).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_LEFT));
-    // buttonBox.button(4).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_RIGHT));
+    // buttonBox.button(1).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.BLUE_TRENCH_TOP));
+    // buttonBox.button(2).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.BLUE_TRENCH_BOTTOM));
+    // buttonBox.button(3).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.RED_TRENCH_TOP));
+    // buttonBox.button(4).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.RED_TRENCH_BOTTOM));
     // buttonBox.button(5).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.HUB_ALLIANCE));
     // buttonBox.button(6).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.HUB_NEUTRAL));
     // buttonBox.button(7).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_LEFT));
     // buttonBox.button(8).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_CENTER));
     // buttonBox.button(9).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_RIGHT));
     // buttonBox.button(10).onTrue(m_spotSelector.cmdClearSelection());
+
+    // A button (hold): turret-servo fallback shoot.
+    // Locks turret to 0°, rotates robot to aim, fires when drive heading is aligned.
+    // Replaces normal auto-shoot when turret is inoperable.
+    controller
+        .a()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                    drive,
+                    () -> -controller.getLeftY(),
+                    () -> -controller.getLeftX(),
+                    () -> m_shooter.getRobotHeadingForTurretServo())
+                .alongWith(m_shooter.getTurretServoShootCmd()));
 
     // B button (hold): auto-drive toward detected game pieces and deploy intake.
     // Release to cancel. Intake stays deployed after release — retract manually if
@@ -378,10 +426,10 @@ public class RobotContainer {
    */
   private void configureSpotSelectorDashboard() {
     var tab = Shuffleboard.getTab("SpotSelector");
-    tab.add("Alliance Trench Left", m_spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_LEFT));
-    tab.add("Alliance Trench Right", m_spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_RIGHT));
-    tab.add("Opponent Trench Left", m_spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_LEFT));
-    tab.add("Opponent Trench Right", m_spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_RIGHT));
+    tab.add("Blue Trench Top", m_spotSelector.cmdSelectSpot(FieldSpot.BLUE_TRENCH_TOP));
+    tab.add("Blue Trench Bottom", m_spotSelector.cmdSelectSpot(FieldSpot.BLUE_TRENCH_BOTTOM));
+    tab.add("Red Trench Top", m_spotSelector.cmdSelectSpot(FieldSpot.RED_TRENCH_TOP));
+    tab.add("Red Trench Bottom", m_spotSelector.cmdSelectSpot(FieldSpot.RED_TRENCH_BOTTOM));
     tab.add("Hub Alliance", m_spotSelector.cmdSelectSpot(FieldSpot.HUB_ALLIANCE));
     tab.add("Hub Neutral", m_spotSelector.cmdSelectSpot(FieldSpot.HUB_NEUTRAL));
     tab.add("Climb Left", m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_LEFT));
@@ -396,7 +444,14 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    Command selected = autoChooser.get();
+    // PathPlannerAuto instances are single-use — WPILib marks composed commands as
+    // non-reusable. Rebuild from the auto name so a fresh command tree is created
+    // every autonomous period.
+    if (selected instanceof PathPlannerAuto) {
+      return new PathPlannerAuto(selected.getName());
+    }
+    return selected;
   }
 
   /**

@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.6767760342368048,
-        "y": 4.054407988587732
+        "x": 1.6,
+        "y": 4.035
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.5769900142653346,
-        "y": 4.002653352353782
+        "x": 1.85,
+        "y": 4.035
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.3515406562054205,
-        "y": 0.6644793152639101
+        "x": 1.6,
+        "y": 4.035
       },
       "prevControl": {
-        "x": 1.0372895863052776,
-        "y": 0.6774179743223987
+        "x": 1.35,
+        "y": 4.035
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,20 +31,7 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Auto.Shoot",
-      "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": 1.0,
-      "command": null
-    },
-    {
-      "name": "Raise.Climb",
-      "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": 1.0,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

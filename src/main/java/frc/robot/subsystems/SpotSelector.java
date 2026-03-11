@@ -5,9 +5,13 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.Constants;
 import frc.robot.commands.FieldSpot;
+import frc.robot.commands.FieldSpot.Zone;
 import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
@@ -33,11 +37,13 @@ public class SpotSelector extends TimedSubsystem {
 
   @Override
   protected void periodicImpl() {
-    Logger.recordOutput("SpotSelector/SelectedName", getSelectedName());
     Logger.recordOutput("SpotSelector/HasTarget", getSelectedPose().isPresent());
     Logger.recordOutput("SpotSelector/IsAutoDriving", m_isAutoDriving);
-    Logger.recordOutput(
-        "SpotSelector/SelectedPose", FieldSpot.flipIfRed(getSelectedPose().orElse(new Pose2d())));
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("SpotSelector/SelectedName", getSelectedName());
+      Logger.recordOutput(
+          "SpotSelector/SelectedPose", FieldSpot.flipIfRed(getSelectedPose().orElse(new Pose2d())));
+    }
   }
 
   // ── Auto-drive state (set by DriveToSpot) ─────────────────────────────────
@@ -85,6 +91,14 @@ public class SpotSelector extends TimedSubsystem {
   // ── Accessors ──────────────────────────────────────────────────────────────
 
   /**
+   * Returns the selected {@link FieldSpot}, or empty if a custom pose or nothing is selected.
+   * Useful for callers that need zone or display information beyond the raw pose.
+   */
+  public Optional<FieldSpot> getSelectedSpot() {
+    return Optional.ofNullable(m_selectedSpot);
+  }
+
+  /**
    * Returns the selected target pose, or {@link Optional#empty()} if nothing is selected. {@link
    * frc.robot.commands.DriveToSpot} exits immediately when empty.
    */
@@ -107,6 +121,79 @@ public class SpotSelector extends TimedSubsystem {
       return m_customName;
     }
     return "None";
+  }
+
+  // ── Auto-selection ─────────────────────────────────────────────────────────
+
+  /**
+   * Selects a target spot automatically based on the robot's current field position.
+   *
+   * <p>Poses are always in Blue-alliance coordinates (as returned by {@code drive.getPose()}).
+   * Dispatches to the alliance-specific implementation.
+   *
+   * <ul>
+   *   <li>Blue in {@link Zone#BLUE_HOME} / Red in {@link Zone#RED_HOME} → {@link
+   *       FieldSpot#HUB_NEUTRAL}
+   *   <li>Top half of field (Y &ge; {@link FieldSpot#Y_SPLIT_M}) → {@link FieldSpot#SHOOTING_TOP}
+   *   <li>Bottom half of field (Y &lt; {@link FieldSpot#Y_SPLIT_M}) → {@link
+   *       FieldSpot#SHOOTING_BOTTOM}
+   * </ul>
+   *
+   * @param robotPose current robot pose in Blue-alliance coordinates
+   */
+  public void autoSelectForRobot(Pose2d robotPose) {
+    boolean isRed = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
+    if (isRed) {
+      autoSelectForRobotRed(robotPose);
+    } else {
+      autoSelectForRobotBlue(robotPose);
+    }
+  }
+
+  /**
+   * Auto-selection logic for the <strong>Blue alliance</strong>.
+   *
+   * <p>Blue's home zone is {@link Zone#BLUE_HOME} (X &lt; {@link FieldSpot#BLUE_TRENCH_X_M}). When
+   * in the home zone, selects {@link FieldSpot#HUB_NEUTRAL} to score. Otherwise, selects the
+   * shooting position on the same half of the field as the robot:
+   *
+   * <ul>
+   *   <li>Top half (Y &ge; {@link FieldSpot#Y_SPLIT_M}) → {@link FieldSpot#SHOOTING_TOP}
+   *   <li>Bottom half → {@link FieldSpot#SHOOTING_BOTTOM}
+   * </ul>
+   */
+  private void autoSelectForRobotBlue(Pose2d robotPose) {
+    if (FieldSpot.getZone(robotPose.getX()) == Zone.BLUE_HOME) {
+      selectSpot(FieldSpot.HUB_NEUTRAL);
+      return;
+    }
+    // High Y (blue-frame) = TOP half of field — select the TOP shooting position.
+    boolean topHalf = robotPose.getY() >= FieldSpot.Y_SPLIT_M;
+    selectSpot(topHalf ? FieldSpot.SHOOTING_TOP : FieldSpot.SHOOTING_BOTTOM);
+  }
+
+  /**
+   * Auto-selection logic for the <strong>Red alliance</strong>.
+   *
+   * <p>Red's home zone is {@link Zone#RED_HOME} (X &gt; {@link FieldSpot#RED_TRENCH_X_M} in
+   * Blue-alliance frame). When in the home zone, selects {@link FieldSpot#HUB_NEUTRAL} to score.
+   * Otherwise, selects the shooting position on the same half of the field as the robot.
+   *
+   * <p>TOP/BOTTOM is determined by the robot's Y in blue-frame — the same check as for Blue —
+   * because TOP and BOTTOM refer to absolute field positions (high Y / low Y in blue-frame). After
+   * PathPlanner's alliance flip, the correct physical corridor is selected automatically without
+   * any inversion of the Y comparison.
+   */
+  private void autoSelectForRobotRed(Pose2d robotPose) {
+    if (FieldSpot.getZone(robotPose.getX()) == Zone.RED_HOME) {
+      selectSpot(FieldSpot.HUB_NEUTRAL);
+      return;
+    }
+    // High Y in blue-frame = TOP half of field — same physical meaning for both
+    // alliances.
+    // PathPlanner flips SHOOTING_TOP to the correct side for Red automatically.
+    boolean topHalf = robotPose.getY() < FieldSpot.Y_SPLIT_M;
+    selectSpot(topHalf ? FieldSpot.SHOOTING_TOP : FieldSpot.SHOOTING_BOTTOM);
   }
 
   // ── Command factories (for button box bindings) ────────────────────────────

@@ -20,6 +20,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.Constants;
 import frc.robot.subsystems.TimedSubsystem;
 import frc.robot.subsystems.vision.VisionIO.PoseObservationType;
 import java.util.Arrays;
@@ -109,28 +110,30 @@ public class Vision extends TimedSubsystem {
     // don't block future lower-tag-count (but still valid) observations
     bestMegatag1TagCount = 0;
 
-    // Initialize logging values
-    List<Pose3d> allTagPoses = new LinkedList<>();
-    List<Pose3d> allRobotPoses = new LinkedList<>();
-    List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
-    List<Pose3d> allRobotPosesRejected = new LinkedList<>();
+    // Initialize logging values — only allocated when verbose
+    List<Pose3d> allTagPoses = Constants.VERBOSE_TELEMETRY ? new LinkedList<>() : null;
+    List<Pose3d> allRobotPoses = Constants.VERBOSE_TELEMETRY ? new LinkedList<>() : null;
+    List<Pose3d> allRobotPosesAccepted = Constants.VERBOSE_TELEMETRY ? new LinkedList<>() : null;
+    List<Pose3d> allRobotPosesRejected = Constants.VERBOSE_TELEMETRY ? new LinkedList<>() : null;
 
     // Loop over cameras
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
       // Update disconnected alert
       disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
-      // Initialize logging values
-      List<Pose3d> tagPoses = new LinkedList<>();
-      List<Pose3d> robotPoses = new LinkedList<>();
-      List<Pose3d> robotPosesAccepted = new LinkedList<>();
-      List<Pose3d> robotPosesRejected = new LinkedList<>();
+      // Initialize per-camera logging values — only allocated when verbose
+      List<Pose3d> tagPoses = Constants.VERBOSE_TELEMETRY ? new LinkedList<>() : null;
+      List<Pose3d> robotPoses = Constants.VERBOSE_TELEMETRY ? new LinkedList<>() : null;
+      List<Pose3d> robotPosesAccepted = Constants.VERBOSE_TELEMETRY ? new LinkedList<>() : null;
+      List<Pose3d> robotPosesRejected = Constants.VERBOSE_TELEMETRY ? new LinkedList<>() : null;
 
-      // Add tag poses
-      for (int tagId : inputs[cameraIndex].tagIds) {
-        var tagPose = aprilTagLayout.getTagPose(tagId);
-        if (tagPose.isPresent()) {
-          tagPoses.add(tagPose.get());
+      // Add tag poses (verbose only)
+      if (Constants.VERBOSE_TELEMETRY) {
+        for (int tagId : inputs[cameraIndex].tagIds) {
+          var tagPose = aprilTagLayout.getTagPose(tagId);
+          if (tagPose.isPresent()) {
+            tagPoses.add(tagPose.get());
+          }
         }
       }
 
@@ -150,12 +153,14 @@ public class Vision extends TimedSubsystem {
                 || observation.pose().getY() < 0.0
                 || observation.pose().getY() > aprilTagLayout.getFieldWidth();
 
-        // Add pose to log
-        robotPoses.add(observation.pose());
-        if (rejectPose) {
-          robotPosesRejected.add(observation.pose());
-        } else {
-          robotPosesAccepted.add(observation.pose());
+        // Add pose to log (verbose only)
+        if (Constants.VERBOSE_TELEMETRY) {
+          robotPoses.add(observation.pose());
+          if (rejectPose) {
+            robotPosesRejected.add(observation.pose());
+          } else {
+            robotPosesAccepted.add(observation.pose());
+          }
         }
 
         // Skip if rejected
@@ -202,23 +207,25 @@ public class Vision extends TimedSubsystem {
         }
       }
 
-      // Log camera metadata
-      Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/TagPoses",
-          tagPoses.toArray(new Pose3d[0]));
-      Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPoses",
-          robotPoses.toArray(new Pose3d[0]));
-      Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesAccepted",
-          robotPosesAccepted.toArray(new Pose3d[0]));
-      Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesRejected",
-          robotPosesRejected.toArray(new Pose3d[0]));
-      allTagPoses.addAll(tagPoses);
-      allRobotPoses.addAll(robotPoses);
-      allRobotPosesAccepted.addAll(robotPosesAccepted);
-      allRobotPosesRejected.addAll(robotPosesRejected);
+      // Log camera metadata (verbose only)
+      if (Constants.VERBOSE_TELEMETRY) {
+        Logger.recordOutput(
+            "Vision/Camera" + Integer.toString(cameraIndex) + "/TagPoses",
+            tagPoses.toArray(new Pose3d[0]));
+        Logger.recordOutput(
+            "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPoses",
+            robotPoses.toArray(new Pose3d[0]));
+        Logger.recordOutput(
+            "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesAccepted",
+            robotPosesAccepted.toArray(new Pose3d[0]));
+        Logger.recordOutput(
+            "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPosesRejected",
+            robotPosesRejected.toArray(new Pose3d[0]));
+        allTagPoses.addAll(tagPoses);
+        allRobotPoses.addAll(robotPoses);
+        allRobotPosesAccepted.addAll(robotPosesAccepted);
+        allRobotPosesRejected.addAll(robotPosesRejected);
+      }
     }
 
     // Gyro yaw validation (every cycle)
@@ -257,22 +264,24 @@ public class Vision extends TimedSubsystem {
       }
     }
 
-    // Log yaw values, agreement, and mode
-    Logger.recordOutput("Vision/GyroYawDeg", gyroYawDeg);
-    for (int i = 0; i < io.length; i++) {
-      Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(i) + "/Megatag1YawDeg", latestMegatag1YawDeg[i]);
-    }
+    // Log essential yaw status (always published)
     Logger.recordOutput("Vision/IsGyroYawGood", isGyroYawGood);
     Logger.recordOutput("Vision/GyroMode", visionGyroMode ? "VisionGyro" : "NormalGyro");
 
-    // Log summary data
-    Logger.recordOutput("Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[0]));
-    Logger.recordOutput("Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[0]));
-    Logger.recordOutput(
-        "Vision/Summary/RobotPosesAccepted", allRobotPosesAccepted.toArray(new Pose3d[0]));
-    Logger.recordOutput(
-        "Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));
+    // Log verbose yaw values and summary data
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("Vision/GyroYawDeg", gyroYawDeg);
+      for (int i = 0; i < io.length; i++) {
+        Logger.recordOutput(
+            "Vision/Camera" + Integer.toString(i) + "/Megatag1YawDeg", latestMegatag1YawDeg[i]);
+      }
+      Logger.recordOutput("Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[0]));
+      Logger.recordOutput("Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[0]));
+      Logger.recordOutput(
+          "Vision/Summary/RobotPosesAccepted", allRobotPosesAccepted.toArray(new Pose3d[0]));
+      Logger.recordOutput(
+          "Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));
+    }
   }
 
   /** Enables VisionGyro mode — MegaTag 1 yaw monitoring active, reseed available. */
@@ -301,8 +310,10 @@ public class Vision extends TimedSubsystem {
     double beforeYawDeg = currentPose.getRotation().getDegrees();
     double afterYawDeg = bestMegatag1Pose.getRotation().getDegrees();
     poseResetter.accept(new Pose2d(currentPose.getTranslation(), bestMegatag1Pose.getRotation()));
-    Logger.recordOutput("Vision/ReseedBeforeYawDeg", beforeYawDeg);
-    Logger.recordOutput("Vision/ReseedAfterYawDeg", afterYawDeg);
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("Vision/ReseedBeforeYawDeg", beforeYawDeg);
+      Logger.recordOutput("Vision/ReseedAfterYawDeg", afterYawDeg);
+    }
     return true;
   }
 

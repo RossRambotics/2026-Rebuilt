@@ -3,6 +3,7 @@ package frc.robot.subsystems.gamepiece;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.Constants;
 import frc.robot.subsystems.TimedSubsystem;
 import org.littletonrobotics.junction.Logger;
 
@@ -68,12 +69,14 @@ public class GamePieceVisionSubsystem extends TimedSubsystem {
       m_smoothedYawDeg = 0.0;
     }
 
-    Logger.recordOutput("GamePieceVision/TargetCount", m_inputs.targetYawsDeg.length);
-    Logger.recordOutput("GamePieceVision/TotalAreaPercent", totalAreaPercent);
-    Logger.recordOutput("GamePieceVision/SmoothedYawDeg", m_smoothedYawDeg);
-    Logger.recordOutput("GamePieceVision/IsStubbed", !(m_io instanceof GamePieceVisionIOPhoton));
-    Logger.recordOutput("GamePieceVision/IsStale", isStale());
     Logger.recordOutput("GamePieceVision/IsReadyToChase", isReadyToChase());
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("GamePieceVision/TargetCount", m_inputs.targetYawsDeg.length);
+      Logger.recordOutput("GamePieceVision/TotalAreaPercent", totalAreaPercent);
+      Logger.recordOutput("GamePieceVision/SmoothedYawDeg", m_smoothedYawDeg);
+      Logger.recordOutput("GamePieceVision/IsStubbed", !(m_io instanceof GamePieceVisionIOPhoton));
+      Logger.recordOutput("GamePieceVision/IsStale", isStale());
+    }
   }
 
   // ---------------------------------------------------------------------------

@@ -5,6 +5,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.gamepiece.GamePieceVisionConstants;
 import frc.robot.subsystems.gamepiece.GamePieceVisionSubsystem;
@@ -77,8 +78,10 @@ public class AutoDriveToFuel extends Command {
     m_deployCommand = m_intake.getDeployCmd();
     CommandScheduler.getInstance().schedule(m_deployCommand);
 
-    Logger.recordOutput("AutoDriveToFuel/State", "Initialized");
-    Logger.recordOutput("AutoDriveToFuel/EndReason", "None");
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("AutoDriveToFuel/State", "Initialized");
+      Logger.recordOutput("AutoDriveToFuel/EndReason", "None");
+    }
   }
 
   @Override
@@ -88,8 +91,9 @@ public class AutoDriveToFuel extends Command {
     double forwardSpeedMps;
     double omegaRadPerSec;
 
+    double yawErrorDeg = 0.0;
     if (hasTarget) {
-      double yawErrorDeg = -m_gamePieceVision.getYawRobotDeg();
+      yawErrorDeg = -m_gamePieceVision.getYawRobotDeg();
       // Rear-facing camera: positive camera yaw = piece is to camera's right =
       // robot's LEFT.
       // Turn left (CCW = positive omega) to align the rear intake with the piece.
@@ -100,26 +104,24 @@ public class AutoDriveToFuel extends Command {
               GamePieceVisionConstants.MAX_OMEGA_RAD_PER_SEC);
       // Drive backward so the rear intake approaches the piece.
       forwardSpeedMps = -GamePieceVisionConstants.CHASE_SPEED_MPS;
-
-      Logger.recordOutput("AutoDriveToFuel/State", "Chasing");
-      Logger.recordOutput("AutoDriveToFuel/YawErrorDeg", yawErrorDeg);
     } else {
       // No target visible — stop to avoid driving blind.
       omegaRadPerSec = 0.0;
       forwardSpeedMps = GamePieceVisionConstants.TARGET_LOST_COAST_MPS;
-
-      Logger.recordOutput("AutoDriveToFuel/State", "TargetLost");
-      Logger.recordOutput("AutoDriveToFuel/YawErrorDeg", 0.0);
     }
 
     // Robot-centric speeds: vx is negative (backward toward intake), vomega steers
     // rear to target.
     m_drive.runVelocity(new ChassisSpeeds(forwardSpeedMps, 0.0, omegaRadPerSec));
 
-    Logger.recordOutput("AutoDriveToFuel/ForwardSpeedMps", forwardSpeedMps);
-    Logger.recordOutput("AutoDriveToFuel/OmegaRadPerSec", omegaRadPerSec);
-    Logger.recordOutput("AutoDriveToFuel/HasTarget", hasTarget);
-    Logger.recordOutput("AutoDriveToFuel/TimeoutElapsedSec", m_timeoutTimer.get());
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("AutoDriveToFuel/State", hasTarget ? "Chasing" : "TargetLost");
+      Logger.recordOutput("AutoDriveToFuel/YawErrorDeg", yawErrorDeg);
+      Logger.recordOutput("AutoDriveToFuel/ForwardSpeedMps", forwardSpeedMps);
+      Logger.recordOutput("AutoDriveToFuel/OmegaRadPerSec", omegaRadPerSec);
+      Logger.recordOutput("AutoDriveToFuel/HasTarget", hasTarget);
+      Logger.recordOutput("AutoDriveToFuel/TimeoutElapsedSec", m_timeoutTimer.get());
+    }
   }
 
   @Override
@@ -127,7 +129,9 @@ public class AutoDriveToFuel extends Command {
     // The driver terminates by releasing the button (whileTrue binding).
     // Safety timeout prevents indefinite running if the button is held too long.
     if (m_timeoutTimer.hasElapsed(GamePieceVisionConstants.CHASE_TIMEOUT_SEC)) {
-      Logger.recordOutput("AutoDriveToFuel/EndReason", "Timeout");
+      if (Constants.VERBOSE_TELEMETRY) {
+        Logger.recordOutput("AutoDriveToFuel/EndReason", "Timeout");
+      }
       return true;
     }
     return false;
@@ -144,6 +148,8 @@ public class AutoDriveToFuel extends Command {
       m_deployCommand = null;
     }
 
-    Logger.recordOutput("AutoDriveToFuel/State", interrupted ? "Interrupted" : "Completed");
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("AutoDriveToFuel/State", interrupted ? "Interrupted" : "Completed");
+    }
   }
 }

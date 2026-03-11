@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants;
 import frc.robot.subsystems.TimedSubsystem;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -93,14 +94,14 @@ public class Turret extends TimedSubsystem {
           new SmartMotorControllerConfig(this)
               .withControlMode(ControlMode.CLOSED_LOOP)
               .withClosedLoopController(
-                  150, 0, 0, DegreesPerSecond.of(200), DegreesPerSecondPerSecond.of(600))
+                  8, 0, 0.15, DegreesPerSecond.of(200), DegreesPerSecondPerSecond.of(250))
               .withSimClosedLoopController(
                   25, 0, 0, DegreesPerSecond.of(360), DegreesPerSecondPerSecond.of(900))
               .withGearing(new MechanismGearing(GearBox.fromReductionStages(16.0)))
               .withIdleMode(MotorMode.BRAKE)
               .withMotorInverted(true)
               .withTelemetry("TurretMotor", TelemetryVerbosity.LOW)
-              .withStatorCurrentLimit(Amps.of(40))
+              .withStatorCurrentLimit(Amps.of(18))
               .withClosedLoopRampRate(Seconds.of(0.25))
               .withOpenLoopRampRate(Seconds.of(0.25));
 
@@ -231,8 +232,10 @@ public class Turret extends TimedSubsystem {
 
   @Override
   protected void periodicImpl() {
-    Logger.recordOutput("Turret/IsStubbed", !m_isReal);
-    Logger.recordOutput("Turret/IsCalibrated", m_isCalibrated);
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("Turret/IsStubbed", !m_isReal);
+      Logger.recordOutput("Turret/IsCalibrated", m_isCalibrated);
+    }
 
     if (turret != null) {
       turret.updateTelemetry();

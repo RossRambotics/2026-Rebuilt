@@ -102,15 +102,17 @@ public class Robot extends LoggedRobot {
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
 
-    // Log GC deltas — non-zero values indicate GC ran during this loop cycle.
-    long totalGcCount =
-        gcBeans.stream().mapToLong(GarbageCollectorMXBean::getCollectionCount).sum();
-    long totalGcTimeMs =
-        gcBeans.stream().mapToLong(GarbageCollectorMXBean::getCollectionTime).sum();
-    Logger.recordOutput("Timing/GC/CollectionsDelta", totalGcCount - lastGcCount);
-    Logger.recordOutput("Timing/GC/TimeDeltaMs", totalGcTimeMs - lastGcTimeMs);
-    lastGcCount = totalGcCount;
-    lastGcTimeMs = totalGcTimeMs;
+    // Log GC deltas — non-zero values indicate GC ran during this loop cycle (verbose only).
+    if (Constants.VERBOSE_TELEMETRY) {
+      long totalGcCount =
+          gcBeans.stream().mapToLong(GarbageCollectorMXBean::getCollectionCount).sum();
+      long totalGcTimeMs =
+          gcBeans.stream().mapToLong(GarbageCollectorMXBean::getCollectionTime).sum();
+      Logger.recordOutput("Timing/GC/CollectionsDelta", totalGcCount - lastGcCount);
+      Logger.recordOutput("Timing/GC/TimeDeltaMs", totalGcTimeMs - lastGcTimeMs);
+      lastGcCount = totalGcCount;
+      lastGcTimeMs = totalGcTimeMs;
+    }
   }
 
   /** This function is called once when the robot is disabled. */

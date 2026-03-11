@@ -119,32 +119,37 @@ public class OperatorControls {
   private void configureButtonBox() {
     // ── Spots ───────────────────────────────────────────────────────────────
     SmartDashboard.putData(
-        "Spots/Alliance Trench Left", spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_LEFT));
+        "Spots/Shooting Top", spotSelector.cmdSelectSpot(FieldSpot.SHOOTING_TOP));
     SmartDashboard.putData(
-        "Spots/Alliance Trench Right", spotSelector.cmdSelectSpot(FieldSpot.ALLIANCE_TRENCH_RIGHT));
+        "Spots/Shooting Bottom", spotSelector.cmdSelectSpot(FieldSpot.SHOOTING_BOTTOM));
     SmartDashboard.putData(
-        "Spots/Opponent Trench Left", spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_LEFT));
-    SmartDashboard.putData(
-        "Spots/Opponent Trench Right", spotSelector.cmdSelectSpot(FieldSpot.OPPONENT_TRENCH_RIGHT));
+        "Spots/Red Trench Bottom", spotSelector.cmdSelectSpot(FieldSpot.RED_TRENCH_BOTTOM));
     SmartDashboard.putData(
         "Spots/Hub Alliance", spotSelector.cmdSelectSpot(FieldSpot.HUB_ALLIANCE));
     SmartDashboard.putData("Spots/Hub Neutral", spotSelector.cmdSelectSpot(FieldSpot.HUB_NEUTRAL));
-    SmartDashboard.putData("Spots/Climb Left", spotSelector.cmdSelectSpot(FieldSpot.CLIMB_LEFT));
-    SmartDashboard.putData(
-        "Spots/Climb Center", spotSelector.cmdSelectSpot(FieldSpot.CLIMB_CENTER));
-    SmartDashboard.putData("Spots/Climb Right", spotSelector.cmdSelectSpot(FieldSpot.CLIMB_RIGHT));
-    SmartDashboard.putData("Spots/Clear Selection", spotSelector.cmdClearSelection());
+    // SmartDashboard.putData("Spots/Climb Left",
+    // spotSelector.cmdSelectSpot(FieldSpot.CLIMB_LEFT));
+    // SmartDashboard.putData(
+    // "Spots/Climb Center", spotSelector.cmdSelectSpot(FieldSpot.CLIMB_CENTER));
+    // SmartDashboard.putData("Spots/Climb Right",
+    // spotSelector.cmdSelectSpot(FieldSpot.CLIMB_RIGHT));
+    // SmartDashboard.putData("Spots/Clear Selection",
+    // spotSelector.cmdClearSelection());
 
     // ── Climb ────────────────────────────────────────────────────────────────
-    SmartDashboard.putData(
-        "Climb/Left", ClimbCommands.superFastClimb(drive, climbElevator, FieldSpot.CLIMB_LEFT));
-    SmartDashboard.putData(
-        "Climb/Center", ClimbCommands.superFastClimb(drive, climbElevator, FieldSpot.CLIMB_CENTER));
-    SmartDashboard.putData(
-        "Climb/Right", ClimbCommands.superFastClimb(drive, climbElevator, FieldSpot.CLIMB_RIGHT));
-    SmartDashboard.putData("Climb/Extend Arm", climbElevator.getExtendCmd());
-    SmartDashboard.putData("Climb/Retract Arm", climbElevator.getRetractCmd());
-    SmartDashboard.putData("Climb/Robot Climb", climbElevator.getRobotClimbCmd());
+    // SmartDashboard.putData(
+    // "Climb/Left", ClimbCommands.superFastClimb(drive, climbElevator,
+    // FieldSpot.CLIMB_LEFT));
+    // SmartDashboard.putData(
+    // "Climb/Center", ClimbCommands.superFastClimb(drive, climbElevator,
+    // FieldSpot.CLIMB_CENTER));
+    // SmartDashboard.putData(
+    // "Climb/Right", ClimbCommands.superFastClimb(drive, climbElevator,
+    // FieldSpot.CLIMB_RIGHT));
+    // SmartDashboard.putData("Climb/Extend Arm", climbElevator.getExtendCmd());
+    // SmartDashboard.putData("Climb/Retract Arm", climbElevator.getRetractCmd());
+    // SmartDashboard.putData("Climb/Robot Climb",
+    // climbElevator.getRobotClimbCmd());
 
     // ── Shooter ──────────────────────────────────────────────────────────────
     SmartDashboard.putData("Shooter/Normal Targeting", shooter.getEnableNormalTargetingModeCmd());
