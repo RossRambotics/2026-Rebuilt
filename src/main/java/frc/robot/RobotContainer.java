@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -86,6 +87,10 @@ public class RobotContainer {
 
   public Shooter m_shooter = null;
 
+  // Shared AutoShoot command instance — used by the driver trigger toggle and by
+  // the "Shoot.Start" / "Shoot.Stop" PathPlanner named commands.
+  private Command m_autoShootCmd = null;
+
   public ShooterTargetSelector m_targetSelector = null;
 
   public Intake m_intake = null;
@@ -104,6 +109,7 @@ public class RobotContainer {
     instance = this;
 
     m_shooter = new Shooter(true);
+    m_autoShootCmd = m_shooter.getAutoShootCmd();
     m_targetSelector = new ShooterTargetSelector(m_shooter);
     m_intake = new Intake(true);
     m_climbElevator = new ClimbElevator(false);
@@ -222,7 +228,15 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "SuperFastClimb/Right",
         ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_RIGHT));
-    NamedCommands.registerCommand("Intake.Deploy", m_intake.getStartIntakeCmd());
+    NamedCommands.registerCommand("Intake.Deploy", m_intake.getDeployInstantCmd());
+    NamedCommands.registerCommand("Intake.Start", getAutonomousCommand());
+    // Shoot.Start / Shoot.Stop: instant commands for use in PathPlanner auto routines.
+    // They schedule/cancel the same shared AutoShoot command instance used by the driver trigger,
+    // so the toggle state stays consistent across both teleop and auto use.
+    NamedCommands.registerCommand(
+        "Shoot.Start",
+        Commands.runOnce(() -> CommandScheduler.getInstance().schedule(m_autoShootCmd)));
+    NamedCommands.registerCommand("Shoot.Stop", Commands.runOnce(m_autoShootCmd::cancel));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -298,7 +312,7 @@ public class RobotContainer {
     // Right trigger (toggle): auto shoot — predictive targeting mode
     // Hood and flywheel override their idle defaults; kicker and spindexer engage
     // once ready.
-    controller.rightTrigger().toggleOnTrue(m_shooter.getAutoShootCmd());
+    controller.rightTrigger().toggleOnTrue(m_autoShootCmd);
 
     // Right bumper (hold): manual shoot — kicker and spindexer only
     // Assumes turret, hood, and flywheel are already at the correct setpoints.

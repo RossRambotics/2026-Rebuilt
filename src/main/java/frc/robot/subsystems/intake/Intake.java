@@ -65,7 +65,7 @@ public class Intake extends TimedSubsystem {
    * (e.g. a PathPlanner NamedCommand) finishes in one cycle without holding subsystem requirements.
    * Safe to trigger multiple times across auto runs.
    */
-  public Command getStartIntakeCmd() {
+  public Command getDeployInstantCmd() {
     return Commands.runOnce(
             () -> {
               Commands.sequence(
