@@ -23,6 +23,17 @@ Named commands registered in `RobotContainer.java` for use as event markers in P
 - `Shoot.Start` and `Shoot.Stop` share the same command instance as the driver's right trigger toggle. Starting shooting from auto and then cancelling via the driver trigger (or vice versa) works correctly.
 - The SuperFastClimb named commands (`SuperFastClimb/Left`, `SuperFastClimb/Center`, `SuperFastClimb/Right`) are defined in `ClimbCommands.java` but are currently **commented out** in `RobotContainer.java` and not available.
 
+## Tips
+
+**Tip: Use event markers to control when shooting starts and stops.**
+Place a `Shoot.Start` event marker at the point on the path where you want the shooter to begin spinning up and feeding. Place `Shoot.Stop` when you want it to end. Because both commands are instant, the path keeps moving — the shooter runs in the background and fires as soon as it's ready. You can tune the marker placement forward on the path to give the flywheel time to reach speed before the robot arrives at the shot location.
+
+**Tip: Use rotation targets to drive through the trench intake-first.**
+In PathPlanner, set a rotation target on the path segment that passes through the trench so the robot is rotated with the **intake facing the direction of travel**. This keeps the intake in position to collect fuel as the robot moves through the trench without requiring a separate deploy command.
+
+**Tip: Use rotation targets to face the hub while shooting.**
+When the robot is at its shooting position, set a rotation target that points the **shooter side toward the hub**. The turret still auto-aims within its range, but pre-rotating the chassis toward the target gives the turret a shorter path to the aim angle, speeds up readiness, and avoids turret hard-stop limits.
+
 ## Trench Zone Warning — Shoot.Start / Shoot.Stop
 
 The robot has an **automatic hood retract** that fires whenever the robot enters a trench zone (triggered by field position). This retract will interrupt `Shoot.Start`'s AutoShoot sequence because both require the Hood subsystem. The PathPlanner path itself continues unaffected, but the shoot sequence stops.

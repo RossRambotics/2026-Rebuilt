@@ -114,6 +114,39 @@ Automatic mode is the default and preferred way to shoot. The robot handles all 
 - Once feeding starts, it continues even if tolerance is briefly lost — but stops immediately if the turret can no longer physically reach the target angle (e.g. robot is facing the wrong way). Feeding resumes automatically once the turret is back on target.
 - Drive speed is reduced to 50% and rotation is heavily limited.
 
+### Auto-Drive Between Intake and Shooting Position (Y Button)
+
+The Y button is a one-press transit between the neutral zone and a shooting position. It reads the robot's current field position and automatically selects the right destination — no operator input needed.
+
+**Selection logic (instant, on every Y press):**
+- **Robot in home zone (near your hub):** selects the neutral-side hub shooting position and drives there.
+- **Robot in neutral or opponent zone:** selects the shooting position on the same side of the field as the robot (top half → top corridor spot, bottom half → bottom corridor spot) and drives there.
+
+The top/bottom split picks whichever trench corridor the robot is already aligned with, so the path naturally goes through the nearest trench.
+
+**Typical collect-and-score cycle:**
+
+1. Robot starts near the hub. Driver presses **Y** — robot drives through the nearest trench to the neutral-zone shooting position.
+2. Driver presses **RT** to shoot. LEDs go green when ready.
+3. After shooting, driver drives into the neutral zone to collect fuel (LT or B button).
+4. When ready to return, driver presses **Y** again — robot picks the correct corridor based on its current Y position and drives to the shooting spot.
+5. Repeat.
+
+> **Y is hold-to-run.** Release at any time to take manual control. The robot stops smoothly mid-path.
+
+> **Y auto-selects on every press.** If the robot crosses the field Y midline between presses, it will switch corridors automatically.
+
+### Chassis Aim — Spinning Toward Target (A Button)
+
+Holding **A** locks the robot chassis rotation toward the current shooting target (turret locked to 0°, robot body rotates to aim). The left stick still drives normally.
+
+This is useful when:
+- The **turret is at or near its rotation limit** — rotating the chassis opens up a better turret angle for the next shot.
+- You want to **pre-orient the robot** toward the target before toggling RT, so the turret has less travel to cover.
+- The **turret is inoperable** — A fires using chassis rotation as the sole aiming mechanism (see [Turret-Servo Fallback](#problem-turret-is-stuck--inoperable-fallback-shoot-mode) in troubleshooting).
+
+The robot will fire automatically once aligned and all other systems are ready — the same readiness logic as auto shoot. Release A to return to normal free-rotation drive and standard turret tracking.
+
 ### Hood Auto-Retract in Trench Zones
 
 The hood automatically lowers to a safe angle when the robot enters the trench zones on either side of the field. No button press needed. If the hood does not retract when entering a trench, use the **Shooter / Retract Hood** button on the button box.
