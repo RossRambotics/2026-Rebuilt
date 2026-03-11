@@ -31,7 +31,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AutoDriveToFuel;
 import frc.robot.commands.AutoTargetSelector;
-import frc.robot.commands.ClimbCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.DriveToSpot;
 import frc.robot.commands.FieldSpot;
@@ -217,21 +216,24 @@ public class RobotContainer {
     // bundle
     m_ledSubsystem = new LEDSubsystem(true, m_subsystems);
 
-    // Register SuperFastClimb as PathPlanner named commands for use in .auto files.
-    // Must be registered before AutoBuilder.buildAutoChooser().
-    NamedCommands.registerCommand(
-        "SuperFastClimb/Left",
-        ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_LEFT));
-    NamedCommands.registerCommand(
-        "SuperFastClimb/Center",
-        ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_CENTER));
-    NamedCommands.registerCommand(
-        "SuperFastClimb/Right",
-        ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_RIGHT));
+    // // Register SuperFastClimb as PathPlanner named commands for use in .auto
+    // files.
+    // // Must be registered before AutoBuilder.buildAutoChooser().
+    // NamedCommands.registerCommand(
+    // "SuperFastClimb/Left",
+    // ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_LEFT));
+    // NamedCommands.registerCommand(
+    // "SuperFastClimb/Center",
+    // ClimbCommands.superFastClimb(drive, m_climbElevator,
+    // FieldSpot.CLIMB_CENTER));
+    // NamedCommands.registerCommand(
+    // "SuperFastClimb/Right",
+    // ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_RIGHT));
     NamedCommands.registerCommand("Intake.Deploy", m_intake.getDeployInstantCmd());
-    NamedCommands.registerCommand("Intake.Start", getAutonomousCommand());
-    // Shoot.Start / Shoot.Stop: instant commands for use in PathPlanner auto routines.
-    // They schedule/cancel the same shared AutoShoot command instance used by the driver trigger,
+    // Shoot.Start / Shoot.Stop: instant commands for use in PathPlanner auto
+    // routines.
+    // They schedule/cancel the same shared AutoShoot command instance used by the
+    // driver trigger,
     // so the toggle state stays consistent across both teleop and auto use.
     NamedCommands.registerCommand(
         "Shoot.Start",
