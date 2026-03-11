@@ -221,6 +221,9 @@ public class RobotContainer {
         "SuperFastClimb/Right",
         ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_RIGHT));
 
+    NamedCommands.registerCommand("Intake.Deploy", m_intake.getDeployArmCmd().withTimeout(0.5));
+    NamedCommands.registerCommand("Intake.Start", m_intake.getRollerOnCmd());
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
