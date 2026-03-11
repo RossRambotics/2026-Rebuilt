@@ -30,6 +30,7 @@ This guide covers what you need to drive and operate the robot effectively. Read
 | **Left Bumper (LB)** | Retract intake arm |
 | **Right Trigger (RT)** | **Auto Shoot** — full predictive targeting; toggle on to start, toggle off to stop |
 | **Right Bumper (RB)** | **Manual Shoot** — runs kicker and spindexer only; use when manually aimed |
+| **A Button** | **Turret-Servo Fallback Shoot** — hold when turret is inoperable; locks turret to 0°, rotates robot chassis to aim, fires when aligned. Left stick still drives. Release to return to normal. |
 | **B Button** | **Auto Drive to Fuel** — hold to drive backward toward detected game pieces and auto-deploy intake; release to stop |
 | **Y Button** | Drive to selected spot (operator selects the spot on button box first) |
 | **X Button** | Lock wheels in X pattern — defensive stance |
@@ -225,6 +226,19 @@ The field widget is your first indicator of a pose problem. If the green square 
   - Hood did not reach target angle — operator press **Shooter / Retract Hood** then re-engage.
   - Flywheel did not reach target RPM — check if shooter was just turned ON (give it 2–3 seconds to spin up).
   - Shooter is OFF — operator press **Shooter / Normal Targeting** to re-enable the shooter.
+
+### Problem: Turret Is Stuck / Inoperable (Fallback Shoot Mode)
+
+If the turret cannot move (mechanical jam, motor fault), the robot can still shoot using the **A button** turret-servo fallback:
+
+1. Driver holds **A button** — turret locks to 0° (straight ahead relative to robot), robot chassis rotates to face the target, hood and flywheel spin up normally.
+2. Left stick still drives — the robot will steer toward the required heading while you translate.
+3. Watch the LEDs — middle LEDs will go **GREEN** and fire once the robot heading is within 2° of the required aim angle.
+4. Release **A** when done — normal turret targeting and free rotation resume.
+
+> **Note:** In this mode the robot rotates to aim rather than the turret. Drive smoothly and avoid large rotation inputs that fight the heading servo. Turret trim (D-pad) still affects the required heading, so existing trim corrections carry over.
+
+> **Turret servo mode does NOT work in autonomous.** It is teleop-only.
 
 ### Problem: Robot Won't Drive to Spots Correctly (Y Button)
 
@@ -490,7 +504,8 @@ SHOTS CONSISTENTLY MISSING
 │   └─ Operator: Reseed from Vision if tags briefly seen
 │
 ├─ Middle LEDs stay RED after toggling RT on?
-│   ├─ Turret stuck? → Operator: Turret Center, then re-enable
+│   ├─ Turret stuck/inoperable? → Driver: hold A (turret-servo fallback) instead of RT
+│   ├─ Turret stuck but movable? → Operator: Turret Center, then re-enable RT
 │   ├─ Hood stuck? → Operator: Retract Hood, then re-engage
 │   ├─ Flywheel slow? → Wait 2-3 sec for spin-up
 │   └─ Shooter off? → Operator: Normal Targeting button
@@ -523,6 +538,7 @@ INTAKE JAMMED
 
 | Date | Change |
 |------|--------|
+| 2026-03-11 | **A button** — new turret-servo fallback shoot mode: hold A when turret is inoperable; robot chassis rotates to aim with turret locked at 0° |
 | 2026-03-06 | **RPM trim** step reduced from ±100 to ±50 RPM per press (`Shooter/RPM +50`, `Shooter/RPM -50`) |
 | 2026-03-06 | **Hood trim** added: `Shooter/Hood +1deg`, `Shooter/Hood -1deg`, `Shooter/Hood Trim Reset` — trims the firing solution hood angle without affecting retract commands |
 | 2026-03-06 | **Average RPM** (`Shooter/FlyWheelAverageRPM`) added to telemetry — EMA-smoothed flywheel RPM for stable dashboard reading |

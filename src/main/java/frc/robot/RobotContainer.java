@@ -94,6 +94,9 @@ public class RobotContainer {
 
   public Intake m_intake = null;
 
+  // Shared roller-on command — used by IntakeRoller.Start / IntakeRoller.Stop named commands.
+  private Command m_rollerOnCmd = null;
+
   public ClimbElevator m_climbElevator = null;
 
   public LEDSubsystem m_ledSubsystem = null;
@@ -111,6 +114,7 @@ public class RobotContainer {
     m_autoShootCmd = m_shooter.getAutoShootCmd();
     m_targetSelector = new ShooterTargetSelector(m_shooter);
     m_intake = new Intake(true);
+    m_rollerOnCmd = m_intake.getRollerOnCmd();
     m_climbElevator = new ClimbElevator(false);
 
     switch (Constants.currentMode) {
@@ -239,6 +243,12 @@ public class RobotContainer {
         "Shoot.Start",
         Commands.runOnce(() -> CommandScheduler.getInstance().schedule(m_autoShootCmd)));
     NamedCommands.registerCommand("Shoot.Stop", Commands.runOnce(m_autoShootCmd::cancel));
+    // IntakeRoller.Start / IntakeRoller.Stop: instant commands to run or stop the roller alone
+    // (arm is not affected). Cancellation lets the default getRollerOffCmd() resume automatically.
+    NamedCommands.registerCommand(
+        "IntakeRoller.Start",
+        Commands.runOnce(() -> CommandScheduler.getInstance().schedule(m_rollerOnCmd)));
+    NamedCommands.registerCommand("IntakeRoller.Stop", Commands.runOnce(m_rollerOnCmd::cancel));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -345,18 +355,18 @@ public class RobotContainer {
     // buttonBox.button(9).onTrue(m_spotSelector.cmdSelectSpot(FieldSpot.CLIMB_RIGHT));
     // buttonBox.button(10).onTrue(m_spotSelector.cmdClearSelection());
 
-    // A button (hold): pathfind to the start of "Left_Alliance_Neutral", then run
-    // it.
-    // Release to cancel.
-    PathPlannerAuto leftAllianceNeutral = new PathPlannerAuto("Left_Alliance_Neutral");
+    // A button (hold): turret-servo fallback shoot.
+    // Locks turret to 0°, rotates robot to aim, fires when drive heading is aligned.
+    // Replaces normal auto-shoot when turret is inoperable.
     controller
         .a()
         .whileTrue(
-            Commands.sequence(
-                // AutoBuilder.pathfindToPose(
-                // leftAllianceNeutral.getStartingPose(),
-                // new PathConstraints(4.0, 3.0, Math.toRadians(540), Math.toRadians(720))),
-                leftAllianceNeutral));
+            DriveCommands.joystickDriveAtAngle(
+                    drive,
+                    () -> -controller.getLeftY(),
+                    () -> -controller.getLeftX(),
+                    () -> m_shooter.getRobotHeadingForTurretServo())
+                .alongWith(m_shooter.getTurretServoShootCmd()));
 
     // B button (hold): auto-drive toward detected game pieces and deploy intake.
     // Release to cancel. Intake stays deployed after release — retract manually if

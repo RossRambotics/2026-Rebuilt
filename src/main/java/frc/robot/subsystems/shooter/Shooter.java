@@ -78,6 +78,7 @@ public class Shooter extends TimedSubsystem {
   // redundant fields
   private FiringSolution m_lastFiringSolution = null;
   private boolean m_isShooting = false;
+  private boolean m_isTurretServoMode = false;
 
   // Persistent in-match RPM offset accumulated by the trim buttons.
   // Added inside every flywheel velocity calculation (auto and fixed).
@@ -323,6 +324,24 @@ public class Shooter extends TimedSubsystem {
           }
           return Degrees.of(0);
         });
+  }
+
+  /**
+   * Computes the robot heading that places the turret (at 0° robot-relative) on target.
+   *
+   * <p>In servo mode the turret is locked to 0°, so the robot itself must rotate to aim. The
+   * required heading is: fieldAngleToTarget + turretTrimOffset. Returns {@link Rotation2d#kZero} if
+   * turret pose is not yet available.
+   */
+  public Rotation2d getRobotHeadingForTurretServo() {
+    if (m_turretPoseField3d == null) {
+      return Rotation2d.kZero;
+    }
+    Pose2d turretPos = m_turretPoseField3d.toPose2d();
+    Translation2d delta =
+        m_targetPoseField3d.toPose2d().getTranslation().minus(turretPos.getTranslation());
+    Rotation2d fieldAngleToTarget = new Rotation2d(Math.atan2(delta.getY(), delta.getX()));
+    return fieldAngleToTarget.plus(Rotation2d.fromDegrees(m_turretTrimOffsetDeg));
   }
 
   private Command getDynamicHoodCommand() {
@@ -737,11 +756,20 @@ public class Shooter extends TimedSubsystem {
    */
   private void updateReadiness() {
     if (m_lastFiringSolution != null) {
-      // Turret ready when the turret error is within tolerance (debounced)
-      boolean rawTurretReady =
-          m_lastFiringSolution.isTurretFeasible()
-              && Math.abs(m_lastTurretErrorRobotAngle.in(Degrees)) < TURRET_ANGLE_TOLERANCE_DEG;
-      m_isTurretReady = m_turretReadyDebouncer.calculate(rawTurretReady);
+      if (m_isTurretServoMode) {
+        // Servo mode: turret is at 0°; check drive heading alignment instead
+        Rotation2d requiredHeading = getRobotHeadingForTurretServo();
+        Rotation2d currentHeading = RobotContainer.getInstance().getRobotPose2d().getRotation();
+        double headingErrorDeg = Math.abs(requiredHeading.minus(currentHeading).getDegrees());
+        boolean rawServoReady = headingErrorDeg < TURRET_ANGLE_TOLERANCE_DEG;
+        m_isTurretReady = m_turretReadyDebouncer.calculate(rawServoReady);
+      } else {
+        // Normal mode: check turret angle error
+        boolean rawTurretReady =
+            m_lastFiringSolution.isTurretFeasible()
+                && Math.abs(m_lastTurretErrorRobotAngle.in(Degrees)) < TURRET_ANGLE_TOLERANCE_DEG;
+        m_isTurretReady = m_turretReadyDebouncer.calculate(rawTurretReady);
+      }
 
       // Bottom flywheel readiness: compare current RPM to the trimmed target (the
       // actual
@@ -814,6 +842,10 @@ public class Shooter extends TimedSubsystem {
     Logger.recordOutput("Shooter/TurretTrimOffsetDeg", m_turretTrimOffsetDeg);
     Logger.recordOutput("Shooter/IsHopperEmpty", m_isHopperEmpty);
     Logger.recordOutput("Shooter/KickerHasFuel", m_kicker.hasFuel());
+    Logger.recordOutput("Shooter/IsTurretServoMode", m_isTurretServoMode);
+    Logger.recordOutput(
+        "Shooter/TurretServoRobotHeadingDeg",
+        m_turretPoseField3d != null ? getRobotHeadingForTurretServo().getDegrees() : 0.0);
 
     if (Constants.VERBOSE_TELEMETRY) {
       // Basic turret and robot heading
@@ -1401,6 +1433,91 @@ public class Shooter extends TimedSubsystem {
               logTofResults();
             })
         .withName("AutoShoot");
+  }
+
+  /**
+   * TURRET-SERVO FALLBACK mode — activated by holding the A button.
+   *
+   * <p>Locks the turret to 0° robot-relative and relies on the drive chassis rotating to aim. Hood
+   * and flywheel continue to use the firing-solution LUT for distance-based setpoints. {@link
+   * #m_isTurretServoMode} is set so that {@link #updateReadiness()} checks drive heading alignment
+   * (within 2°) instead of turret angle error. Once aligned, kicker and spindexer fire.
+   *
+   * <p>Use when the turret is mechanically or electrically inoperable. Pair with {@link
+   * DriveCommands#joystickDriveAtAngle} passing {@link #getRobotHeadingForTurretServo()} as the
+   * heading supplier so the drive actively steers to the required heading.
+   */
+  public Command getTurretServoShootCmd() {
+    final double[] lastLaunchTimeSec = {0.0};
+    Command feedCmd =
+        m_kicker.setVelocity(RPM.of(KICKER_SHOOT_RPM)).alongWith(m_spindexer.getRunCmd());
+    if (Constants.currentMode == Constants.Mode.SIM) {
+      feedCmd =
+          feedCmd.alongWith(
+              Commands.run(
+                  () -> {
+                    double nowSec = Timer.getFPGATimestamp();
+                    if (nowSec - lastLaunchTimeSec[0] >= AUTO_SHOOT_INTERVAL_SEC) {
+                      launchFuelSim();
+                      lastLaunchTimeSec[0] = nowSec;
+                    }
+                  }));
+    }
+
+    return Commands.parallel(
+            // Turret locked to 0° — robot rotation provides the aim
+            m_turret.setAngle(Degrees.of(0)),
+            // Hood from firing solution (same as AutoShoot)
+            m_hood.setAngle(
+                () -> {
+                  if (m_lastFiringSolution != null) {
+                    double trimmedDeg =
+                        MathUtil.clamp(
+                            Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees)
+                                + m_hoodTrimOffsetDeg,
+                            HoodConstants.HOOD_DEGREES_MIN,
+                            HoodConstants.HOOD_DEGREES_MAX);
+                    return Degrees.of(trimmedDeg);
+                  }
+                  return Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
+                }),
+            // Flywheel from firing solution (same as AutoShoot)
+            m_bottomFlyWheel.setVelocity(
+                () ->
+                    m_lastFiringSolution != null
+                        ? RPM.of(m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm)
+                        : RPM.of(IDLE_FLYWHEEL_RPM + m_rpmTrimOffsetRpm)),
+            // Feed when heading-aligned; stop if firing solution becomes infeasible
+            Commands.sequence(
+                    Commands.waitUntil(() -> m_isShooterReady),
+                    feedCmd.until(
+                        () ->
+                            m_lastFiringSolution == null
+                                || !m_lastFiringSolution.isTurretFeasible()))
+                .repeatedly())
+        .beforeStarting(
+            () -> {
+              m_isTurretServoMode = true;
+              m_isShooting = true;
+              m_tofLaunchCount = 0;
+              m_tofConfirmCount = 0;
+              m_kickerHadFuelLastLoop = false;
+              m_hopperSeenSinceShootStart = false;
+              m_isHopperEmpty = false;
+              Arrays.fill(m_tofLaunchTimestampsSec, 0.0);
+              Arrays.fill(m_tofMeasuredSec, -1.0);
+            })
+        .finallyDo(
+            () -> {
+              m_isTurretServoMode = false;
+              m_isShooting = false;
+              while (m_tofConfirmCount < m_tofLaunchCount) {
+                m_tofMeasuredSec[m_tofConfirmCount] = 0.0;
+                m_tofConfirmCount++;
+              }
+              logTofResults();
+            })
+        .withName("TurretServoShoot");
   }
 
   public boolean isShooting() {
