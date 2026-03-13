@@ -5,33 +5,27 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "Intake.Deploy"
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "Left_Trench_Collect_Path_1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Left_Trench_Collect_Path_2"
+            "pathName": "Left_Alliance_Neutral"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 2.0
+            "waitTime": 3.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Left_Trench_Collect_Path_3"
+            "pathName": "Left Pass - 2nd Path "
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
           }
         },
         {

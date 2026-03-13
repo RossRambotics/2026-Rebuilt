@@ -186,7 +186,7 @@ public class Shooter extends TimedSubsystem {
 
   /** Creates a new Shooter. */
   public Shooter(boolean isReal) {
-    m_turret = new Turret(false);
+    m_turret = new Turret(isReal);
     m_hood = new Hood(isReal);
     m_bottomFlyWheel = new BottomFlyWheel(isReal);
     m_kicker = new Kicker(isReal);
@@ -843,6 +843,9 @@ public class Shooter extends TimedSubsystem {
     Logger.recordOutput("Shooter/IsHopperEmpty", m_isHopperEmpty);
     Logger.recordOutput("Shooter/KickerHasFuel", m_kicker.hasFuel());
     Logger.recordOutput("Shooter/IsTurretServoMode", m_isTurretServoMode);
+    Logger.recordOutput("Shooter/TurretActualDegRobot", m_turret.getAngle().in(Degrees));
+    Logger.recordOutput("Shooter/TurretErrorDeg", m_lastTurretErrorRobotAngle.in(Degrees));
+
     Logger.recordOutput(
         "Shooter/TurretServoRobotHeadingDeg",
         m_turretPoseField3d != null ? getRobotHeadingForTurretServo().getDegrees() : 0.0);
@@ -857,9 +860,7 @@ public class Shooter extends TimedSubsystem {
           RobotContainer.getInstance().getRobotPose2d().getRotation().getDegrees();
       Logger.recordOutput("Shooter/robotHeadingFieldDeg", robotHeadingDeg);
 
-      Logger.recordOutput("Shooter/TurretActualDegRobot", m_turret.getAngle().in(Degrees));
       Logger.recordOutput("Shooter/TurretTargetDegRobot", m_turretTargetRobotAngle.in(Degrees));
-      Logger.recordOutput("Shooter/TurretErrorDeg", m_lastTurretErrorRobotAngle.in(Degrees));
       Logger.recordOutput("Shooter/TargetPose2d", m_targetPoseField3d.toPose2d());
 
       // Distance from robot center to target (2D, Z component ignored)
