@@ -126,6 +126,8 @@
       "/Shuffleboard/Spindexer/Spindexer/Spindexer Dynamic": "Command",
       "/Shuffleboard/SpotSelector/Alliance Trench Left": "Command",
       "/Shuffleboard/SpotSelector/Alliance Trench Right": "Command",
+      "/Shuffleboard/SpotSelector/Blue Trench Bottom": "Command",
+      "/Shuffleboard/SpotSelector/Blue Trench Top": "Command",
       "/Shuffleboard/SpotSelector/Clear Selection": "Command",
       "/Shuffleboard/SpotSelector/Climb Center": "Command",
       "/Shuffleboard/SpotSelector/Climb Left": "Command",
@@ -134,6 +136,8 @@
       "/Shuffleboard/SpotSelector/Hub Neutral": "Command",
       "/Shuffleboard/SpotSelector/Opponent Trench Left": "Command",
       "/Shuffleboard/SpotSelector/Opponent Trench Right": "Command",
+      "/Shuffleboard/SpotSelector/Red Trench Bottom": "Command",
+      "/Shuffleboard/SpotSelector/Red Trench Top": "Command",
       "/Shuffleboard/YAMS_SysID/Hood SysId": "Command",
       "/Shuffleboard/YAMS_SysID/InstantCommand": "Command",
       "/SmartDashboard/Alerts": "Alerts",
@@ -250,7 +254,10 @@
       "/SmartDashboard/Spots/Hub Alliance": "Command",
       "/SmartDashboard/Spots/Hub Neutral": "Command",
       "/SmartDashboard/Spots/Opponent Trench Left": "Command",
-      "/SmartDashboard/Spots/Opponent Trench Right": "Command"
+      "/SmartDashboard/Spots/Opponent Trench Right": "Command",
+      "/SmartDashboard/Spots/Red Trench Bottom": "Command",
+      "/SmartDashboard/Spots/Shooting Bottom": "Command",
+      "/SmartDashboard/Spots/Shooting Top": "Command"
     },
     "windows": {
       "/SmartDashboard/Auto Choices": {

@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants;
 import frc.robot.subsystems.TimedSubsystem;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -232,10 +231,11 @@ public class Turret extends TimedSubsystem {
 
   @Override
   protected void periodicImpl() {
-    if (Constants.VERBOSE_TELEMETRY) {
-      Logger.recordOutput("Turret/IsStubbed", !m_isReal);
-      Logger.recordOutput("Turret/IsCalibrated", m_isCalibrated);
-    }
+    // Always publish basic boolean status so external dashboards (Elastic,
+    // AdvantageKit views, etc.) can read real-time calibration state even when
+    // verbose telemetry is disabled.
+    Logger.recordOutput("Turret/IsStubbed", !m_isReal);
+    Logger.recordOutput("Turret/IsCalibrated", m_isCalibrated);
 
     if (turret != null) {
       turret.updateTelemetry();

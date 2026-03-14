@@ -166,13 +166,13 @@
   "eventMarkers": [
     {
       "name": "Auto.Shoot",
-      "waypointRelativePos": 3.5,
-      "endWaypointRelativePos": 4.0,
+      "waypointRelativePos": 3.7272113436867085,
+      "endWaypointRelativePos": null,
       "command": null
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
+    "maxVelocity": 1.0,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -189,5 +189,5 @@
     "velocity": 0,
     "rotation": 178.86600000000004
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

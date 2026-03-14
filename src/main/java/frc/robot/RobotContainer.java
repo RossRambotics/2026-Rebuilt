@@ -94,7 +94,8 @@ public class RobotContainer {
 
   public Intake m_intake = null;
 
-  // Shared roller-on command — used by IntakeRoller.Start / IntakeRoller.Stop named commands.
+  // Shared roller-on command — used by IntakeRoller.Start / IntakeRoller.Stop
+  // named commands.
   private Command m_rollerOnCmd = null;
 
   public ClimbElevator m_climbElevator = null;
@@ -243,8 +244,10 @@ public class RobotContainer {
         "Shoot.Start",
         Commands.runOnce(() -> CommandScheduler.getInstance().schedule(m_autoShootCmd)));
     NamedCommands.registerCommand("Shoot.Stop", Commands.runOnce(m_autoShootCmd::cancel));
-    // IntakeRoller.Start / IntakeRoller.Stop: instant commands to run or stop the roller alone
-    // (arm is not affected). Cancellation lets the default getRollerOffCmd() resume automatically.
+    // IntakeRoller.Start / IntakeRoller.Stop: instant commands to run or stop the
+    // roller alone
+    // (arm is not affected). Cancellation lets the default getRollerOffCmd() resume
+    // automatically.
     NamedCommands.registerCommand(
         "IntakeRoller.Start",
         Commands.runOnce(() -> CommandScheduler.getInstance().schedule(m_rollerOnCmd)));
@@ -252,6 +255,7 @@ public class RobotContainer {
 
     NamedCommands.registerCommand("Intake.Deploy", m_intake.getDeployArmCmd().withTimeout(0.5));
     NamedCommands.registerCommand("Intake.Start", m_intake.getRollerOnCmd());
+    NamedCommands.registerCommand("Auto.Shoot", m_shooter.getAutoShootCmd());
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -359,7 +363,8 @@ public class RobotContainer {
     // buttonBox.button(10).onTrue(m_spotSelector.cmdClearSelection());
 
     // A button (hold): turret-servo fallback shoot.
-    // Locks turret to 0°, rotates robot to aim, fires when drive heading is aligned.
+    // Locks turret to 0°, rotates robot to aim, fires when drive heading is
+    // aligned.
     // Replaces normal auto-shoot when turret is inoperable.
     controller
         .a()

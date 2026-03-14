@@ -238,10 +238,11 @@ public class Hood extends TimedSubsystem {
 
   @Override
   protected void periodicImpl() {
-    if (Constants.VERBOSE_TELEMETRY) {
-      Logger.recordOutput("Hood/IsStubbed", !m_isReal);
-      Logger.recordOutput("Hood/IsCalibrated", m_isCalibrated);
-    }
+    // Always publish basic boolean status so external dashboards (Elastic,
+    // AdvantageKit views, etc.) can read real-time calibration state even when
+    // verbose telemetry is disabled.
+    Logger.recordOutput("Hood/IsStubbed", !m_isReal);
+    Logger.recordOutput("Hood/IsCalibrated", m_isCalibrated);
 
     if (hood != null) {
       hood.updateTelemetry();
