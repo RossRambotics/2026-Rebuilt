@@ -478,7 +478,7 @@ public class RobotContainer {
    */
   public void publishAutoStartPose() {
     Optional<Pose2d> autoStart = getSelectedAutoStartPose();
-    Logger.recordOutput("AutoStart/Pose", autoStart.orElse(new Pose2d()));
+    Logger.recordOutput("AutoStart/Pose", FieldSpot.flipIfRed(autoStart.orElse(new Pose2d())));
   }
 
   public Pose2d getRobotPose2d() {

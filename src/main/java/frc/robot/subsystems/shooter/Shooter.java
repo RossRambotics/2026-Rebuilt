@@ -845,6 +845,7 @@ public class Shooter extends TimedSubsystem {
     Logger.recordOutput("Shooter/IsTurretServoMode", m_isTurretServoMode);
     Logger.recordOutput("Shooter/TurretActualDegRobot", m_turret.getAngle().in(Degrees));
     Logger.recordOutput("Shooter/TurretErrorDeg", m_lastTurretErrorRobotAngle.in(Degrees));
+    Logger.recordOutput("Shooter/TargetPose2d", m_targetPoseField3d.toPose2d());
 
     Logger.recordOutput(
         "Shooter/TurretServoRobotHeadingDeg",
@@ -861,7 +862,6 @@ public class Shooter extends TimedSubsystem {
       Logger.recordOutput("Shooter/robotHeadingFieldDeg", robotHeadingDeg);
 
       Logger.recordOutput("Shooter/TurretTargetDegRobot", m_turretTargetRobotAngle.in(Degrees));
-      Logger.recordOutput("Shooter/TargetPose2d", m_targetPoseField3d.toPose2d());
 
       // Distance from robot center to target (2D, Z component ignored)
       Pose2d targetPose2d = m_targetPoseField3d.toPose2d();

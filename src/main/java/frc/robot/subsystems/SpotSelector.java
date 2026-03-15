@@ -39,11 +39,10 @@ public class SpotSelector extends TimedSubsystem {
   protected void periodicImpl() {
     Logger.recordOutput("SpotSelector/HasTarget", getSelectedPose().isPresent());
     Logger.recordOutput("SpotSelector/IsAutoDriving", m_isAutoDriving);
-    if (Constants.VERBOSE_TELEMETRY) {
-      Logger.recordOutput("SpotSelector/SelectedName", getSelectedName());
-      Logger.recordOutput(
-          "SpotSelector/SelectedPose", FieldSpot.flipIfRed(getSelectedPose().orElse(new Pose2d())));
-    }
+    Logger.recordOutput(
+        "SpotSelector/SelectedPose", FieldSpot.flipIfRed(getSelectedPose().orElse(new Pose2d())));
+    Logger.recordOutput("SpotSelector/SelectedName", getSelectedName());
+    if (Constants.VERBOSE_TELEMETRY) {}
   }
 
   // ── Auto-drive state (set by DriveToSpot) ─────────────────────────────────
