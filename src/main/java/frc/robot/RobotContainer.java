@@ -234,6 +234,7 @@ public class RobotContainer {
     // NamedCommands.registerCommand(
     // "SuperFastClimb/Right",
     // ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_RIGHT));
+
     NamedCommands.registerCommand("Intake.Deploy", m_intake.getDeployInstantCmd());
     // Shoot.Start / Shoot.Stop: instant commands for use in PathPlanner auto
     // routines.
@@ -253,9 +254,14 @@ public class RobotContainer {
         Commands.runOnce(() -> CommandScheduler.getInstance().schedule(m_rollerOnCmd)));
     NamedCommands.registerCommand("IntakeRoller.Stop", Commands.runOnce(m_rollerOnCmd::cancel));
 
-    NamedCommands.registerCommand("Intake.Deploy", m_intake.getDeployArmCmd().withTimeout(0.5));
-    NamedCommands.registerCommand("Intake.Start", m_intake.getRollerOnCmd());
-    NamedCommands.registerCommand("Auto.Shoot", m_shooter.getAutoShootCmd());
+    // in case an old auto doesn't get fixed to the correct commands, these won't
+    // block.
+    NamedCommands.registerCommand(
+        "Intake.Start",
+        Commands.runOnce(() -> CommandScheduler.getInstance().schedule(m_rollerOnCmd)));
+    NamedCommands.registerCommand(
+        "Auto.Shoot",
+        Commands.runOnce(() -> CommandScheduler.getInstance().schedule(m_autoShootCmd)));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
