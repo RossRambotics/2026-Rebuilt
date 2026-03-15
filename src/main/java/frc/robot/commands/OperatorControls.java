@@ -206,6 +206,8 @@ public class OperatorControls {
     // ── Intake & Spindexer ───────────────────────────────────────────────────
     SmartDashboard.putData(
         "Intake/Auto Drive To Fuel", new AutoDriveToFuel(drive, intake, gamePieceVision));
+    // Use the instant variant so the Dashboard button schedules deploy+roller
+    // spin-up as background commands and the card returns immediately.
     SmartDashboard.putData("Intake/Deploy", intake.getDeployCmd());
     SmartDashboard.putData("Intake/Retract", intake.getRetractCmd());
     SmartDashboard.putData("Intake/Roller On", intake.getRollerOnCmd());

@@ -15,12 +15,6 @@
           "data": {
             "pathName": "Back Up - Center"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot.Start"
-          }
         }
       ]
     }

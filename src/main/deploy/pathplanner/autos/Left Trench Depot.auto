@@ -15,12 +15,6 @@
           "data": {
             "pathName": "Left Side Collect + Shoot"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Auto.Shoot"
-          }
         }
       ]
     }

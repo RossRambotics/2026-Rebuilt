@@ -76,7 +76,7 @@ public class Intake extends TimedSubsystem {
                   .schedule();
               m_roller.setVelocity(RPM.of(IntakeConstants.ROLLER_INTAKE_RPM)).schedule();
             })
-        .withName("Intake/StartIntake");
+        .withName("Intake/RollerOn");
   }
 
   /**
