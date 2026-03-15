@@ -11,12 +11,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "Intake.Start"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "Left Bump Collect + Shoot"

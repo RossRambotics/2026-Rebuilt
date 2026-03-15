@@ -255,7 +255,6 @@ public class RobotContainer {
 
     NamedCommands.registerCommand("Intake.Deploy", m_intake.getDeployArmCmd().withTimeout(0.5));
     NamedCommands.registerCommand("Intake.Start", m_intake.getRollerOnCmd());
-    NamedCommands.registerCommand("Auto.Shoot", m_shooter.getAutoShootCmd());
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());

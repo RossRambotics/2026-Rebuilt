@@ -18,15 +18,24 @@ public class SpeedNanny extends TimedSubsystem {
   // based on max
   // acceleration
 
-  private final double m_kMaxAcceleration = 30.0;
+  private final double m_kMaxAcceleration = 50.0;
   private final double m_kMaxSpeed =
       TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired
   // top speed
+  // Increase rotational capability: target is faster turning. Values expressed in
+  // rotations/sec and rotations/sec^2 then converted to rad/s and rad/s^2.
+  // Previously: 1.0 rps (≈6.28 rad/s) and 1.5 rps/s (≈9.42 rad/s^2).
+  // New defaults provide more responsive rotation on the field.
   private double m_kMaxAngularRate =
-      RotationsPerSecond.of(1.0).in(RadiansPerSecond); // 3/4 of a rotation per second
+      RotationsPerSecond.of(1.5).in(RadiansPerSecond); // 2.0 rotations per second
+  // (~12.57 rad/s)
   // max angular velocity
+
   private double m_kMaxAngularAcceleration =
-      RotationsPerSecondPerSecond.of(1.5).in(RadiansPerSecondPerSecond); // rad/s^2
+      RotationsPerSecondPerSecond.of(2.0).in(RadiansPerSecondPerSecond); // 3.0
+  // rps/s
+  // (~18.85
+  // rad/s^2)
 
   private double m_speedLimit = m_kMaxSpeed;
   private double m_accelerationLimit = m_kMaxAcceleration;
