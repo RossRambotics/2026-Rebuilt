@@ -5,7 +5,8 @@
 package frc.robot.subsystems.intake;
 
 public final class IntakeConstants {
-  private IntakeConstants() {}
+  private IntakeConstants() {
+  }
 
   // ---------------------------------------------------------------------------
   // CAN IDs
@@ -17,7 +18,7 @@ public final class IntakeConstants {
   // Deploy arm — target angles
   // ---------------------------------------------------------------------------
   // TODO: Tune deploy/retract angles on hardware
-  public static final double DEPLOY_ANGLE_DEG = -26.0;
+  public static final double DEPLOY_ANGLE_DEG = -35.0;
   public static final double RETRACT_ANGLE_DEG = 110.0;
 
   // Tolerance used when detecting that the arm has reached the deploy position
@@ -112,8 +113,8 @@ public final class IntakeConstants {
   // TODO: Tune burst duty cycles and durations on hardware
   // Negative drives toward DEPLOY_ANGLE_DEG, positive toward RETRACT_ANGLE_DEG
   public static final double DEPLOY_BURST_DUTY_CYCLE = -8.0;
-  public static final double RETRACT_BURST_DUTY_CYCLE = 5.0;
-  public static final double DEPLOY_BURST_SEC = 0.8;
+  public static final double RETRACT_BURST_DUTY_CYCLE = 2.5;
+  public static final double DEPLOY_BURST_SEC = 1.0;
   public static final double RETRACT_BURST_SEC = 0.3;
 
   // ---------------------------------------------------------------------------
