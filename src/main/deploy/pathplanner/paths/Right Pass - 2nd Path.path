@@ -86,8 +86,8 @@
   ],
   "eventMarkers": [
     {
-      "name": "Auto.Shoot",
-      "waypointRelativePos": 0.3424317617866022,
+      "name": "Shoot.Start",
+      "waypointRelativePos": 0.20256583389601618,
       "endWaypointRelativePos": null,
       "command": null
     }

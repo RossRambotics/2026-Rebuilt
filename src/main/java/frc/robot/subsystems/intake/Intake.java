@@ -92,7 +92,7 @@ public class Intake extends TimedSubsystem {
             m_deployArm
                 .setDutyCycle(IntakeConstants.DEPLOY_BURST_DUTY_CYCLE)
                 .withTimeout(IntakeConstants.DEPLOY_BURST_SEC),
-            m_deployArm.setDutyCycle(0.0))
+            m_deployArm.setDutyCycle(0.0).withTimeout(.1))
         .withName("Intake/DeployArm");
   }
 

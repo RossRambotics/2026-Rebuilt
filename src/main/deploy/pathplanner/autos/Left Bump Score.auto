@@ -19,7 +19,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Auto.Shoot"
+            "name": "Shoot.Start"
           }
         },
         {
@@ -37,7 +37,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Auto.Shoot"
+            "name": "Shoot.Start"
           }
         }
       ]

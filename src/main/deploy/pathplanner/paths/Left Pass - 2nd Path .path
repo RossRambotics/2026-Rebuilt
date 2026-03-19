@@ -57,7 +57,7 @@
       },
       "nextControl": {
         "x": 5.872817921333329,
-        "y": 0.6434751005854245
+        "y": 0.6434751005854246
       },
       "isLocked": false,
       "linkedName": null
@@ -121,7 +121,7 @@
   ],
   "eventMarkers": [
     {
-      "name": "Auto.Shoot",
+      "name": "Shoot.Start",
       "waypointRelativePos": 1.2532072923700182,
       "endWaypointRelativePos": null,
       "command": null

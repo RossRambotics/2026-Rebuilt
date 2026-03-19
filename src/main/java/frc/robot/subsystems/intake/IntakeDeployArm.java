@@ -126,9 +126,9 @@ public class IntakeDeployArm extends TimedSubsystem {
               .withHardLimit(
                   Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG),
                   Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG))
-              .withSoftLimits(
-                  Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG),
-                  Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG))
+              // .withSoftLimits(
+              // Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG),
+              // Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG))
               .withTelemetry("IntakeDeployArmMech", TelemetryVerbosity.LOW)
               // TODO: Update arm length and mass once known
               .withLength(Meters.of(IntakeConstants.ARM_LENGTH_M))

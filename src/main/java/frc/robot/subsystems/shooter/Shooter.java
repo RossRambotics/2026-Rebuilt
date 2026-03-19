@@ -1667,12 +1667,15 @@ public class Shooter extends TimedSubsystem {
    */
   public Command getRPMTrimCmd(double deltaRpm) {
     return Commands.runOnce(() -> m_rpmTrimOffsetRpm += deltaRpm)
-        .withName("RPMTrim/" + (deltaRpm > 0 ? "+" : "") + (int) deltaRpm);
+        .withName("RPMTrim/" + (deltaRpm > 0 ? "+" : "") + (int) deltaRpm)
+        .ignoringDisable(true);
   }
 
   /** Resets the RPM trim offset to zero. */
   public Command getRPMTrimResetCmd() {
-    return Commands.runOnce(() -> m_rpmTrimOffsetRpm = 0.0).withName("RPMTrim/Reset");
+    return Commands.runOnce(() -> m_rpmTrimOffsetRpm = 0.0)
+        .withName("RPMTrim/Reset")
+        .ignoringDisable(m_hopperSeenSinceShootStart);
   }
 
   /**

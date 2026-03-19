@@ -5,8 +5,7 @@
 package frc.robot.subsystems.intake;
 
 public final class IntakeConstants {
-  private IntakeConstants() {
-  }
+  private IntakeConstants() {}
 
   // ---------------------------------------------------------------------------
   // CAN IDs
