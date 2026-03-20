@@ -3,6 +3,7 @@ package frc.robot.subsystems.leds;
 import static frc.robot.subsystems.leds.LEDConstants.*;
 
 import com.ctre.phoenix6.configs.CANdleConfiguration;
+import com.ctre.phoenix6.controls.EmptyAnimation;
 import com.ctre.phoenix6.controls.SolidColor;
 import com.ctre.phoenix6.controls.StrobeAnimation;
 import com.ctre.phoenix6.hardware.CANdle;
@@ -52,6 +53,16 @@ public class LEDSubsystem extends TimedSubsystem {
       new StrobeAnimation(GROUP3_ACTIVE_START, GROUP3_ACTIVE_END)
           .withSlot(SLOT_GAMEPIECE)
           .withFrameRate(STROBE_FRAME_RATE_HZ);
+
+  // EmptyAnimation clears a CANdle animation slot. Pre-allocated so we don't
+  // allocate on the periodic path.
+  private final EmptyAnimation m_emptyGroup3 = new EmptyAnimation(SLOT_GAMEPIECE);
+
+  // Track whether Group 3 is currently running a slot animation so we can
+  // explicitly clear the slot before transitioning back to solid color.
+  // SolidColor is not a slot-based control and does not cancel a running
+  // animation slot on its own.
+  private boolean m_group3Strobing = false;
 
   /**
    * Creates the LED subsystem.
@@ -190,6 +201,9 @@ public class LEDSubsystem extends TimedSubsystem {
   private void updateGamePieceGroup() {
     if (DriverStation.isDisabled()) {
       RGBWColor allianceColor = getAllianceColor();
+      if (m_group3Strobing) {
+        clearGroup3Animation();
+      }
       setSolid(m_solidGroup3, allianceColor);
       if (Constants.VERBOSE_TELEMETRY) {
         Logger.recordOutput("LEDs/Group3/Color", colorName(allianceColor));
@@ -204,7 +218,11 @@ public class LEDSubsystem extends TimedSubsystem {
 
     if (inBlinkWindow) {
       setStrobe(m_strobeGroup3, baseColor);
+      m_group3Strobing = true;
     } else {
+      if (m_group3Strobing) {
+        clearGroup3Animation();
+      }
       setSolid(m_solidGroup3, baseColor);
     }
 
@@ -268,6 +286,16 @@ public class LEDSubsystem extends TimedSubsystem {
     if (color == MAROON) return "MAROON";
     if (color == OFF) return "OFF";
     return "UNKNOWN";
+  }
+
+  /**
+   * Clears the Group 3 animation slot so a subsequent SolidColor control takes visual effect.
+   * No-ops when not on real hardware.
+   */
+  private void clearGroup3Animation() {
+    m_group3Strobing = false;
+    if (!m_isReal) return;
+    m_candle.setControl(m_emptyGroup3);
   }
 
   /**
