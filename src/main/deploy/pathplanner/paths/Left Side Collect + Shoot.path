@@ -64,44 +64,12 @@
     },
     {
       "anchor": {
-        "x": 1.604,
+        "x": 2.4127469879518073,
         "y": 7.389807228915663
       },
       "prevControl": {
-        "x": 3.8770602409638544,
-        "y": 7.291457831325301
-      },
-      "nextControl": {
-        "x": 0.7711390453472262,
-        "y": 7.425842953658224
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 0.7954457831325303,
-        "y": 7.389807228915663
-      },
-      "prevControl": {
-        "x": 0.7954457831325303,
-        "y": 7.942629209988764
-      },
-      "nextControl": {
-        "x": 0.7954457831325303,
-        "y": 6.952698795180724
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 0.7954457831325303,
-        "y": 4.7453012048192775
-      },
-      "prevControl": {
-        "x": 0.8282289156626504,
-        "y": 5.41189156626506
+        "x": 2.871710843373494,
+        "y": 7.335168674698796
       },
       "nextControl": null,
       "isLocked": false,
@@ -118,27 +86,15 @@
       "rotationDegrees": 83.99099404250548
     },
     {
-      "waypointRelativePos": 3.4,
+      "waypointRelativePos": 3.1,
       "rotationDegrees": -90.10584886330699
-    },
-    {
-      "waypointRelativePos": 4.05,
-      "rotationDegrees": -56.810084765992684
-    },
-    {
-      "waypointRelativePos": 4.65,
-      "rotationDegrees": 90.0
-    },
-    {
-      "waypointRelativePos": 5.75,
-      "rotationDegrees": 88.89155808073885
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
       "minWaypointRelativePos": 0.7444168734491229,
-      "maxWaypointRelativePos": 6.0,
+      "maxWaypointRelativePos": 2.2272952853598103,
       "constraints": {
         "maxVelocity": 1.0,
         "maxAcceleration": 3.0,
@@ -150,14 +106,7 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Shoot.Start",
-      "waypointRelativePos": 3.7272113436867085,
-      "endWaypointRelativePos": 6.0,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -168,7 +117,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.9710219310792184
+    "rotation": -61.07357416474646
   },
   "reversed": false,
   "folder": null,
