@@ -16,48 +16,64 @@
     },
     {
       "anchor": {
-        "x": 6.270228915662651,
-        "y": 6.275180722891566
+        "x": 6.212753209700427,
+        "y": 7.224379457917262
       },
       "prevControl": {
-        "x": 6.390433734939759,
-        "y": 7.652072289156626
+        "x": 6.225691868758916,
+        "y": 7.5506207311414
       },
       "nextControl": {
-        "x": 6.229594810228346,
-        "y": 5.809735515189533
+        "x": 6.19132554602367,
+        "y": 6.684092535715874
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.270228915662651,
-        "y": 4.69066265060241
+        "x": 6.212753209700427,
+        "y": 4.132039942938659
       },
       "prevControl": {
-        "x": 6.283351672754957,
-        "y": 4.2313661523717565
+        "x": 6.251569186875892,
+        "y": 3.653309557774608
       },
       "nextControl": {
-        "x": 6.259301204819276,
-        "y": 5.073132530120482
+        "x": 6.1349527569287545,
+        "y": 5.091578860455932
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.8440481927710834,
-        "y": 7.389807228915663
+        "x": 7.035168674698796,
+        "y": 7.224379457917262
       },
       "prevControl": {
-        "x": 6.768926100492358,
-        "y": 7.312734069938889
+        "x": 7.404192563238513,
+        "y": 6.279411538998811
       },
       "nextControl": {
-        "x": 4.794987951807229,
-        "y": 7.477228915662651
+        "x": 6.776395493529039,
+        "y": 7.887025866662084
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.4956348074179737,
+        "y": 7.53490727532097
+      },
+      "prevControl": {
+        "x": 3.7441057410863783,
+        "y": 7.562515156839682
+      },
+      "nextControl": {
+        "x": 3.247163873749569,
+        "y": 7.507299393802258
       },
       "isLocked": false,
       "linkedName": null
@@ -68,24 +84,8 @@
         "y": 7.389807228915663
       },
       "prevControl": {
-        "x": 2.919519578313254,
-        "y": 7.624070030120482
-      },
-      "nextControl": {
-        "x": 1.9059743975903611,
-        "y": 7.1555444277108435
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 2.161409638554217,
-        "y": 6.603012048192771
-      },
-      "prevControl": {
-        "x": 2.0739879518072284,
-        "y": 6.963626506024096
+        "x": 2.3253253012048187,
+        "y": 7.7504216867469875
       },
       "nextControl": null,
       "isLocked": false,
@@ -94,31 +94,23 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.5601659751037344,
-      "rotationDegrees": 0.0
-    },
-    {
-      "waypointRelativePos": 0.7999999999999865,
+      "waypointRelativePos": 1.1194029850746225,
       "rotationDegrees": 90.0
     },
     {
-      "waypointRelativePos": 1.9817427385892064,
+      "waypointRelativePos": 1.9083155650319905,
       "rotationDegrees": 90.0
     },
     {
-      "waypointRelativePos": 2.8979253112032697,
-      "rotationDegrees": 0.0
-    },
-    {
-      "waypointRelativePos": 3.85,
+      "waypointRelativePos": 3.539445628997853,
       "rotationDegrees": 0.0
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.7444168734491229,
-      "maxWaypointRelativePos": 2.2272952853598103,
+      "minWaypointRelativePos": 0.1,
+      "maxWaypointRelativePos": 0.3,
       "constraints": {
         "maxVelocity": 2.0,
         "maxAcceleration": 3.0,
@@ -129,7 +121,18 @@
       }
     }
   ],
-  "pointTowardsZones": [],
+  "pointTowardsZones": [
+    {
+      "fieldPosition": {
+        "x": 8.0,
+        "y": 7.5
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 0.25,
+      "maxWaypointRelativePos": 0.7022282241728667,
+      "name": "Point Towards Zone"
+    }
+  ],
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,

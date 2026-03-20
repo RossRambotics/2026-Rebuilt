@@ -1,7 +1,9 @@
 {
   "download": {
-    "localDir": "C:\\data\\2026\\2026-Rebuilt\\logs\\tuning",
-    "remoteDir": "/home/lvuser/logs/OHCL_Q7",
+    "localDir": "D:\\",
     "serverTeam": "3201"
+  },
+  "output": {
+    "outputFolder": "D:\\"
   }
 }

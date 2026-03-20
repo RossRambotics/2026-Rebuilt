@@ -5,12 +5,6 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "Intake.Deploy"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "Right Side Collect + Shoot"
@@ -25,7 +19,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 5.0
+            "waitTime": 3.0
           }
         },
         {

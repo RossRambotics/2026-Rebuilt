@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "Left Tench - Neutral Zone"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "Intake.Deploy"

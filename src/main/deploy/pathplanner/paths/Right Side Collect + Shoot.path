@@ -112,8 +112,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Shoot.Start",
-      "waypointRelativePos": 3.505707196029768,
+      "name": "Intake.Deploy",
+      "waypointRelativePos": 0.3781228899392295,
       "endWaypointRelativePos": null,
       "command": null
     }
