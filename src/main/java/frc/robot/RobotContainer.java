@@ -398,8 +398,11 @@ public class RobotContainer {
     new OperatorControls(m_subsystems, controller, m_spotSelector, m_targetSelector)
         .configureControls();
 
-    // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // Manual shoot with X button
+    controller.x().onTrue(m_shooter.getAutoFireNowCmd());
+    controller
+        .x()
+        .onFalse(Commands.runOnce(() -> CommandScheduler.getInstance().schedule(m_autoShootCmd)));
 
     // Reset gyro to 0° when Back button is pressed
     controller
