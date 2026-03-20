@@ -235,7 +235,7 @@ public class RobotContainer {
     // "SuperFastClimb/Right",
     // ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_RIGHT));
 
-    NamedCommands.registerCommand("Intake.Deploy", m_intake.getDeployInstantCmd());
+    NamedCommands.registerCommand("Intake.Deploy", m_intake.getDeployArmOnceCmd());
     // Shoot.Start / Shoot.Stop: instant commands for use in PathPlanner auto
     // routines.
     // They schedule/cancel the same shared AutoShoot command instance used by the
@@ -329,7 +329,7 @@ public class RobotContainer {
     // independently.
     // Press 1 — arm deploys, roller starts. Press 2 — roller stops, arm stays
     // deployed.
-    controller.leftTrigger().onTrue(m_intake.getDeployArmCmd());
+    controller.leftTrigger().onTrue(m_intake.getDeployArmOnceCmd());
     controller.leftTrigger().toggleOnTrue(m_intake.getRollerOnCmd());
     // Left bumper: retract intake arm
     controller.leftBumper().onTrue(m_intake.getRetractCmd());

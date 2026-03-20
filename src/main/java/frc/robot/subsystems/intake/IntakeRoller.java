@@ -67,7 +67,7 @@ public class IntakeRoller extends TimedSubsystem {
                       IntakeConstants.ROLLER_SIM_FF_KV,
                       IntakeConstants.ROLLER_SIM_FF_KA))
               .withTelemetry("IntakeRoller", TelemetryVerbosity.LOW)
-              .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
+              .withGearing(new MechanismGearing(GearBox.fromReductionStages(3)))
               .withMotorInverted(true)
               .withIdleMode(MotorMode.COAST)
               .withStatorCurrentLimit(Amps.of(IntakeConstants.ROLLER_STATOR_CURRENT_LIMIT_AMPS));

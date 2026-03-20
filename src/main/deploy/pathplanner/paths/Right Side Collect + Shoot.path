@@ -64,11 +64,11 @@
     },
     {
       "anchor": {
-        "x": 0.7267617689015686,
+        "x": 2.5,
         "y": 0.6583373493975899
       },
       "prevControl": {
-        "x": 1.9288099616726515,
+        "x": 3.7020481927710875,
         "y": 0.6911204819277099
       },
       "nextControl": null,
@@ -113,8 +113,8 @@
   "eventMarkers": [
     {
       "name": "Shoot.Start",
-      "waypointRelativePos": 3.3230769230769246,
-      "endWaypointRelativePos": 4.0,
+      "waypointRelativePos": 3.505707196029768,
+      "endWaypointRelativePos": null,
       "command": null
     }
   ],

@@ -92,7 +92,24 @@ public class Intake extends TimedSubsystem {
             m_deployArm
                 .setDutyCycle(IntakeConstants.DEPLOY_BURST_DUTY_CYCLE)
                 .withTimeout(IntakeConstants.DEPLOY_BURST_SEC),
-            m_deployArm.setDutyCycle(0.0).withTimeout(.1))
+            m_deployArm.setDutyCycle(0.0).withTimeout(0.1),
+            m_deployArm.setDutyCycle(-1.0).withTimeout(0.5))
+        .withName("Intake/DeployArm");
+  }
+
+  private boolean m_deployed = false;
+
+  public Command getDeployArmOnceCmd() {
+    if (m_deployed == true) {
+      return m_deployArm.setDutyCycle(-3).withTimeout(0.2);
+    }
+    m_deployed = true;
+    return Commands.sequence(
+            m_deployArm
+                .setDutyCycle(IntakeConstants.DEPLOY_BURST_DUTY_CYCLE)
+                .withTimeout(IntakeConstants.DEPLOY_BURST_SEC),
+            m_deployArm.setDutyCycle(0.0).withTimeout(0.1),
+            m_deployArm.setDutyCycle(-1.0).withTimeout(0.5))
         .withName("Intake/DeployArm");
   }
 
@@ -134,9 +151,7 @@ public class Intake extends TimedSubsystem {
 
   /** Run the roller in reverse (eject) without moving the arm. */
   public Command getReverseCmd() {
-    return m_roller
-        .setVelocity(RPM.of(IntakeConstants.ROLLER_REVERSE_RPM))
-        .withName("Intake/Reverse");
+    return m_roller.setDutyCycle(-12).withName("Intake/Reverse");
   }
 
   // ---------------------------------------------------------------------------

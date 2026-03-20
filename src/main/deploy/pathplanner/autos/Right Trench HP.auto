@@ -21,6 +21,18 @@
           "data": {
             "name": "Shoot.Start"
           }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 5.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right Side collect + Shoot 2nd"
+          }
         }
       ]
     }
