@@ -64,7 +64,7 @@ public final class IntakeConstants {
   // ---------------------------------------------------------------------------
   // Deploy arm — hardware limits
   // ---------------------------------------------------------------------------
-  public static final double ARM_STATOR_CURRENT_LIMIT_AMPS = 40.0;
+  public static final double ARM_STATOR_CURRENT_LIMIT_AMPS = 20.0;
   // TODO: Update arm length and mass once measured
   public static final double ARM_LENGTH_M = 0.4;
   public static final double ARM_MASS_LBS = 5.0;

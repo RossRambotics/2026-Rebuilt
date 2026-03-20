@@ -7,6 +7,18 @@
         {
           "type": "path",
           "data": {
+            "pathName": "Right Tench - Neutral Zone"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake.Deploy"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
             "pathName": "Right Side Collect + Shoot"
           }
         },

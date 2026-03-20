@@ -95,7 +95,7 @@ public class Intake extends TimedSubsystem {
                 .setDutyCycle(IntakeConstants.DEPLOY_BURST_DUTY_CYCLE)
                 .withTimeout(IntakeConstants.DEPLOY_BURST_SEC),
             m_deployArm.setDutyCycle(0.0).withTimeout(0.1),
-            m_deployArm.setDutyCycle(-1.0).withTimeout(0.5))
+            m_deployArm.setDutyCycle(-1.0))
         .withName("Intake/DeployArm");
   }
 
@@ -103,7 +103,7 @@ public class Intake extends TimedSubsystem {
 
   public Command getDeployArmOnceCmd() {
     if (m_deployed == true) {
-      return m_deployArm.setDutyCycle(-3).withTimeout(0.2);
+      return m_deployArm.setDutyCycle(-1);
     }
     m_deployed = true;
     return Commands.sequence(

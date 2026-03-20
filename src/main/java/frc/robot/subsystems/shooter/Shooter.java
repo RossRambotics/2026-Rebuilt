@@ -175,8 +175,7 @@ public class Shooter extends TimedSubsystem {
   private boolean m_isTurretReady = false;
   private boolean m_isSpeedReady = false;
   private boolean m_isBottomFlyWheelReady = false;
-  private final Debouncer m_bottomFlywheelReadyDebouncer =
-      new Debouncer(BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC); // 100 ms
+  private final Debouncer m_bottomFlywheelReadyDebouncer = new Debouncer(BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC); // 100 ms
   // continuous
   // stability
   // Debouncers for turret and hood readiness
@@ -258,12 +257,11 @@ public class Shooter extends TimedSubsystem {
     }
 
     Angle a = Radians.of(m_lastFiringSolution.turretAngleRad);
-    a =
-        Degrees.of(
-            MathUtil.clamp(
-                a.in(Degrees) + m_turretTrimOffsetDeg,
-                Turret.TURRET_DEGREES_MIN,
-                Turret.TURRET_DEGREES_MAX));
+    a = Degrees.of(
+        MathUtil.clamp(
+            a.in(Degrees) + m_turretTrimOffsetDeg,
+            Turret.TURRET_DEGREES_MIN,
+            Turret.TURRET_DEGREES_MAX));
 
     m_turretTargetRobotAngle = a;
     double turretHeadingDeg = m_turret.getAngle().in(Degrees);
@@ -285,11 +283,10 @@ public class Shooter extends TimedSubsystem {
 
     // clamp the turret target to the rotation available for the turret
     double turretTargetDeg = angleToTarget.getDegrees();
-    turretTargetDeg =
-        MathUtil.clamp(
-            turretTargetDeg + m_turretTrimOffsetDeg,
-            Turret.TURRET_DEGREES_MIN,
-            Turret.TURRET_DEGREES_MAX);
+    turretTargetDeg = MathUtil.clamp(
+        turretTargetDeg + m_turretTrimOffsetDeg,
+        Turret.TURRET_DEGREES_MIN,
+        Turret.TURRET_DEGREES_MAX);
 
     m_turretTargetRobotAngle = Degrees.of(turretTargetDeg);
 
@@ -300,7 +297,8 @@ public class Shooter extends TimedSubsystem {
   }
 
   /**
-   * Command factory: returns a command that aims the turret using the current location (no
+   * Command factory: returns a command that aims the turret using the current
+   * location (no
    * prediction).
    */
   public Command getNormalTargetingCommand() {
@@ -314,7 +312,8 @@ public class Shooter extends TimedSubsystem {
   }
 
   /**
-   * Command factory: returns a command that aims the turret using the predictive firing solution.
+   * Command factory: returns a command that aims the turret using the predictive
+   * firing solution.
    */
   public Command getPredictiveTargetingCommand() {
     return m_turret.setAngle(
@@ -327,10 +326,14 @@ public class Shooter extends TimedSubsystem {
   }
 
   /**
-   * Computes the robot heading that places the turret (at 0° robot-relative) on target.
+   * Computes the robot heading that places the turret (at 0° robot-relative) on
+   * target.
    *
-   * <p>In servo mode the turret is locked to 0°, so the robot itself must rotate to aim. The
-   * required heading is: fieldAngleToTarget + turretTrimOffset. Returns {@link Rotation2d#kZero} if
+   * <p>
+   * In servo mode the turret is locked to 0°, so the robot itself must rotate to
+   * aim. The
+   * required heading is: fieldAngleToTarget + turretTrimOffset. Returns
+   * {@link Rotation2d#kZero} if
    * turret pose is not yet available.
    */
   public Rotation2d getRobotHeadingForTurretServo() {
@@ -338,27 +341,24 @@ public class Shooter extends TimedSubsystem {
       return Rotation2d.kZero;
     }
     Pose2d turretPos = m_turretPoseField3d.toPose2d();
-    Translation2d delta =
-        m_targetPoseField3d.toPose2d().getTranslation().minus(turretPos.getTranslation());
+    Translation2d delta = m_targetPoseField3d.toPose2d().getTranslation().minus(turretPos.getTranslation());
     Rotation2d fieldAngleToTarget = new Rotation2d(Math.atan2(delta.getY(), delta.getX()));
     return fieldAngleToTarget.plus(Rotation2d.fromDegrees(m_turretTrimOffsetDeg));
   }
 
   private Command getDynamicHoodCommand() {
-    Command c =
-        m_hood.setAngle(
-            () -> {
-              if (m_lastFiringSolution != null && m_isTurretActive) {
-                double trimmedDeg =
-                    MathUtil.clamp(
-                        Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees)
-                            + m_hoodTrimOffsetDeg,
-                        HoodConstants.HOOD_DEGREES_MIN,
-                        HoodConstants.HOOD_DEGREES_MAX);
-                return Degrees.of(trimmedDeg);
-              }
-              return Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
-            });
+    Command c = m_hood.setAngle(
+        () -> {
+          if (m_lastFiringSolution != null && m_isTurretActive) {
+            double trimmedDeg = MathUtil.clamp(
+                Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees)
+                    + m_hoodTrimOffsetDeg,
+                HoodConstants.HOOD_DEGREES_MIN,
+                HoodConstants.HOOD_DEGREES_MAX);
+            return Degrees.of(trimmedDeg);
+          }
+          return Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
+        });
     c.addRequirements(m_hood);
     return c;
   }
@@ -385,23 +385,25 @@ public class Shooter extends TimedSubsystem {
     return m_bottomFlyWheel.setVelocity(() -> RPM.of(IDLE_FLYWHEEL_RPM)).withName("Flywheel/Idle");
   }
 
-  /** Returns a Shuffleboard/instant command that sets the turret default to normal targeting. */
+  /**
+   * Returns a Shuffleboard/instant command that sets the turret default to normal
+   * targeting.
+   */
   public Command getEnableNormalTargetingModeCmd() {
-    Command c =
-        Commands.runOnce(() -> m_turret.setDefaultCommand(getNormalTargetingCommand()), m_turret)
-            .ignoringDisable(true);
+    Command c = Commands.runOnce(() -> m_turret.setDefaultCommand(getNormalTargetingCommand()), m_turret)
+        .ignoringDisable(true);
     c.setName("NormalTargeting");
     return c;
   }
 
   /**
-   * Returns a Shuffleboard/instant command that sets the turret default to predictive targeting.
+   * Returns a Shuffleboard/instant command that sets the turret default to
+   * predictive targeting.
    */
   public Command getEnablePredictiveTargetingModeCmd() {
-    Command c =
-        Commands.runOnce(
-                () -> m_turret.setDefaultCommand(getPredictiveTargetingCommand()), m_turret)
-            .ignoringDisable(true);
+    Command c = Commands.runOnce(
+        () -> m_turret.setDefaultCommand(getPredictiveTargetingCommand()), m_turret)
+        .ignoringDisable(true);
     c.setName("PredictiveTargeting");
     return c;
   }
@@ -434,18 +436,18 @@ public class Shooter extends TimedSubsystem {
   }
 
   /**
-   * Compute the firing solution (time-of-flight, turret & hood angles, rpm) and publish telemetry.
+   * Compute the firing solution (time-of-flight, turret & hood angles, rpm) and
+   * publish telemetry.
    * Kept outside of periodic to make the periodic loop cleaner.
    */
   private void updateFiringSolution() {
     // Shooter offset relative to robot center
     Translation2d shooterOffsetRobot = new Translation2d(TURRET_X_OFFSET_M, TURRET_Y_OFFSET_M);
-    FiringSolution solution =
-        calculateFiringSolutionLUT(
-            RobotContainer.getInstance().getRobotPose2d(),
-            RobotContainer.getInstance().getChassisSpeeds(),
-            m_targetPoseField3d.toPose2d().getTranslation(),
-            shooterOffsetRobot);
+    FiringSolution solution = calculateFiringSolutionLUT(
+        RobotContainer.getInstance().getRobotPose2d(),
+        RobotContainer.getInstance().getChassisSpeeds(),
+        m_targetPoseField3d.toPose2d().getTranslation(),
+        shooterOffsetRobot);
 
     // store computed solution for consumers; telemetry will be published in
     // updateTelemetry()
@@ -466,8 +468,8 @@ public class Shooter extends TimedSubsystem {
     if (m_lastFiringSolution != null) {
       tofSec = m_lastFiringSolution.tofSec;
     } else {
-      Translation2d initialShooterFieldPos =
-          currentPose.getTranslation().plus(shooterOffsetRobot.rotateBy(currentPose.getRotation()));
+      Translation2d initialShooterFieldPos = currentPose.getTranslation()
+          .plus(shooterOffsetRobot.rotateBy(currentPose.getRotation()));
       double initialDistanceMeters = initialShooterFieldPos.getDistance(targetFieldPos);
       tofSec = m_bottomFlyWheel.calculateToF(initialDistanceMeters);
     }
@@ -478,10 +480,11 @@ public class Shooter extends TimedSubsystem {
 
     // --- Iterate once or twice ---
     for (int i = 0; i < 2; i++) {
-      futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
-
-      shooterFieldPos =
-          futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
+      // futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
+      futurePose = currentPose;
+      // Changed futurePose to equal currentPose to prevent hood from dropping during
+      // manual shoot
+      shooterFieldPos = futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
 
       distanceMeters = shooterFieldPos.getDistance(targetFieldPos);
 
@@ -490,15 +493,15 @@ public class Shooter extends TimedSubsystem {
     }
 
     // --- Final future pose ---
-    futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
-
-    shooterFieldPos =
-        futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
+    // futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
+    futurePose = currentPose;
+    // Changed futurePose to equal currentPose to prevent hood from dropping during
+    // manual shoot
+    shooterFieldPos = futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
 
     // --- LUT lookup ---
     distanceMeters = shooterFieldPos.getDistance(targetFieldPos);
-    double hoodMechAngleRad =
-        Degrees.of(m_bottomFlyWheel.calculateAngle(distanceMeters)).in(Radians);
+    double hoodMechAngleRad = Degrees.of(m_bottomFlyWheel.calculateAngle(distanceMeters)).in(Radians);
     double flywheelRPM = m_bottomFlyWheel.calculateRPM(distanceMeters);
 
     // --- Turret angle (robot-relative) ---
@@ -506,20 +509,17 @@ public class Shooter extends TimedSubsystem {
 
     // MathUtil.angleModulus normalizes to (-π, π], preventing wrap errors near
     // ±180°
-    double rawTurretAngleRad =
-        MathUtil.angleModulus(
-            Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians());
+    double rawTurretAngleRad = MathUtil.angleModulus(
+        Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians());
 
     double rawTurretAngleDeg = Math.toDegrees(rawTurretAngleRad);
 
-    boolean turretFeasible =
-        rawTurretAngleDeg >= Turret.TURRET_DEGREES_MIN
-            && rawTurretAngleDeg <= Turret.TURRET_DEGREES_MAX;
+    boolean turretFeasible = rawTurretAngleDeg >= Turret.TURRET_DEGREES_MIN
+        && rawTurretAngleDeg <= Turret.TURRET_DEGREES_MAX;
 
-    double turretAngleRad =
-        Math.toRadians(
-            MathUtil.clamp(
-                rawTurretAngleDeg, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX));
+    double turretAngleRad = Math.toRadians(
+        MathUtil.clamp(
+            rawTurretAngleDeg, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX));
 
     return new FiringSolution(
         turretAngleRad,
@@ -547,8 +547,7 @@ public class Shooter extends TimedSubsystem {
     for (int i = 0; i < 2; i++) {
       futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
 
-      shooterFieldPos =
-          futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
+      shooterFieldPos = futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
 
       distanceMeters = shooterFieldPos.getDistance(targetFieldPos);
 
@@ -562,12 +561,11 @@ public class Shooter extends TimedSubsystem {
       // Ball launches perpendicular to hood surface, so convert mech angle to launch
       // angle
       double launchAngleRad = hoodMechToLaunchAngle(hoodMechRad);
-      double tofVacSec =
-          (exitVelocityMps * Math.sin(launchAngleRad)
-                  + Math.sqrt(
-                      Math.pow(exitVelocityMps * Math.sin(launchAngleRad), 2)
-                          + 2 * 9.81 * heightDiffMeters))
-              / 9.81;
+      double tofVacSec = (exitVelocityMps * Math.sin(launchAngleRad)
+          + Math.sqrt(
+              Math.pow(exitVelocityMps * Math.sin(launchAngleRad), 2)
+                  + 2 * 9.81 * heightDiffMeters))
+          / 9.81;
 
       tofSec = tofVacSec * 1.12 * 0.6; // drag correction
     }
@@ -575,13 +573,11 @@ public class Shooter extends TimedSubsystem {
     // --- Final future pose ---
     futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
 
-    shooterFieldPos =
-        futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
+    shooterFieldPos = futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
 
     // --- LUT lookup ---
     distanceMeters = shooterFieldPos.getDistance(targetFieldPos);
-    double hoodMechAngleRad =
-        Degrees.of(m_bottomFlyWheel.calculateAngle(distanceMeters)).in(Radians);
+    double hoodMechAngleRad = Degrees.of(m_bottomFlyWheel.calculateAngle(distanceMeters)).in(Radians);
     double flywheelRPM = m_bottomFlyWheel.calculateRPM(distanceMeters);
 
     // --- Velocity compensation for turret ---
@@ -589,20 +585,17 @@ public class Shooter extends TimedSubsystem {
 
     // MathUtil.angleModulus normalizes to (-π, π], preventing wrap errors near
     // ±180°
-    double rawTurretAngleRad =
-        MathUtil.angleModulus(
-            Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians());
+    double rawTurretAngleRad = MathUtil.angleModulus(
+        Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians());
 
     double rawTurretAngleDeg = Math.toDegrees(rawTurretAngleRad);
 
-    boolean turretFeasible =
-        rawTurretAngleDeg >= Turret.TURRET_DEGREES_MIN
-            && rawTurretAngleDeg <= Turret.TURRET_DEGREES_MAX;
+    boolean turretFeasible = rawTurretAngleDeg >= Turret.TURRET_DEGREES_MIN
+        && rawTurretAngleDeg <= Turret.TURRET_DEGREES_MAX;
 
-    double turretAngleRad =
-        Math.toRadians(
-            MathUtil.clamp(
-                rawTurretAngleDeg, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX));
+    double turretAngleRad = Math.toRadians(
+        MathUtil.clamp(
+            rawTurretAngleDeg, Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX));
 
     return new FiringSolution(
         turretAngleRad,
@@ -617,11 +610,16 @@ public class Shooter extends TimedSubsystem {
   /**
    * Stores the calculated parameters needed to make a shot.
    *
-   * <p>Hood angle convention: {@code hoodMechAngleRad} is the <em>mechanical</em> angle of the hood
-   * from horizontal. At 0° the hood surface is horizontal and the ball launches straight up (90°
-   * above horizontal); at 90° the hood is vertical and the ball launches horizontally. The
+   * <p>
+   * Hood angle convention: {@code hoodMechAngleRad} is the <em>mechanical</em>
+   * angle of the hood
+   * from horizontal. At 0° the hood surface is horizontal and the ball launches
+   * straight up (90°
+   * above horizontal); at 90° the hood is vertical and the ball launches
+   * horizontally. The
    * operating range is [{@link HoodConstants#HOOD_DEGREES_MIN}, {@link
-   * HoodConstants#HOOD_DEGREES_MAX}]. Use {@link #hoodMechToLaunchAngle} to convert to a
+   * HoodConstants#HOOD_DEGREES_MAX}]. Use {@link #hoodMechToLaunchAngle} to
+   * convert to a
    * physics-compatible launch angle when needed.
    */
   public record FiringSolution(
@@ -631,7 +629,8 @@ public class Shooter extends TimedSubsystem {
       Pose2d futurePose,
       double tofSec,
       double distanceToTargetMeters,
-      boolean isTurretFeasible) {}
+      boolean isTurretFeasible) {
+  }
 
   private static final double EFFICIENCY_K = 0.95; // efficiency factor
 
@@ -653,11 +652,16 @@ public class Shooter extends TimedSubsystem {
   /**
    * Converts a mechanical hood angle to a launch angle above horizontal.
    *
-   * <p>The hood launches the ball perpendicular to its surface, so a horizontal hood (0°) fires
-   * straight up (90° above horizontal). The relationship is: launch angle = 90° − hood mech angle.
+   * <p>
+   * The hood launches the ball perpendicular to its surface, so a horizontal hood
+   * (0°) fires
+   * straight up (90° above horizontal). The relationship is: launch angle = 90° −
+   * hood mech angle.
    *
-   * @param hoodMechRad Mechanical hood angle in radians (0 = horizontal, ball fires straight up)
-   * @return Launch angle above horizontal in radians (0 = horizontal shot, π/2 = vertical shot)
+   * @param hoodMechRad Mechanical hood angle in radians (0 = horizontal, ball
+   *                    fires straight up)
+   * @return Launch angle above horizontal in radians (0 = horizontal shot, π/2 =
+   *         vertical shot)
    */
   public static double hoodMechToLaunchAngle(double hoodMechRad) {
     return Math.PI / 2 - hoodMechRad;
@@ -670,17 +674,14 @@ public class Shooter extends TimedSubsystem {
     double theta = start.getRotation().getRadians();
     dtSeconds += POSE_PREDICT_TIMESHIFT_SEC;
 
-    double fieldVx =
-        speeds.vxMetersPerSecond * Math.cos(theta) - speeds.vyMetersPerSecond * Math.sin(theta);
+    double fieldVx = speeds.vxMetersPerSecond * Math.cos(theta) - speeds.vyMetersPerSecond * Math.sin(theta);
 
-    double fieldVy =
-        speeds.vxMetersPerSecond * Math.sin(theta) + speeds.vyMetersPerSecond * Math.cos(theta);
+    double fieldVy = speeds.vxMetersPerSecond * Math.sin(theta) + speeds.vyMetersPerSecond * Math.cos(theta);
 
-    Translation2d newTranslation =
-        start.getTranslation().plus(new Translation2d(fieldVx * dtSeconds, fieldVy * dtSeconds));
+    Translation2d newTranslation = start.getTranslation()
+        .plus(new Translation2d(fieldVx * dtSeconds, fieldVy * dtSeconds));
 
-    Rotation2d newRotation =
-        start.getRotation().plus(new Rotation2d(speeds.omegaRadiansPerSecond * dtSeconds));
+    Rotation2d newRotation = start.getRotation().plus(new Rotation2d(speeds.omegaRadiansPerSecond * dtSeconds));
 
     return new Pose2d(newTranslation, newRotation);
   }
@@ -724,24 +725,22 @@ public class Shooter extends TimedSubsystem {
       double turretAngleRad, // robot-relative turret angle (radians)
       Translation2d shooterOffsetRobot, // robot-relative turret position (meters)
       double distanceMeters // ray length (meters)
-      ) {
+  ) {
     // Turret position in field frame
-    Translation2d turretFieldPos =
-        futureRobotPose
-            .getTranslation()
-            .plus(shooterOffsetRobot.rotateBy(futureRobotPose.getRotation()));
+    Translation2d turretFieldPos = futureRobotPose
+        .getTranslation()
+        .plus(shooterOffsetRobot.rotateBy(futureRobotPose.getRotation()));
 
     // Turret pointing direction in field frame
     double turretFieldAngleRad = futureRobotPose.getRotation().getRadians() + turretAngleRad;
 
     // Ray endpoint
-    Translation2d rayEnd =
-        turretFieldPos.plus(
-            new Translation2d(
-                distanceMeters * Math.cos(turretFieldAngleRad),
-                distanceMeters * Math.sin(turretFieldAngleRad)));
+    Translation2d rayEnd = turretFieldPos.plus(
+        new Translation2d(
+            distanceMeters * Math.cos(turretFieldAngleRad),
+            distanceMeters * Math.sin(turretFieldAngleRad)));
 
-    return new Translation2d[] {turretFieldPos, rayEnd};
+    return new Translation2d[] { turretFieldPos, rayEnd };
   }
 
   private void updateTargetData() {
@@ -751,7 +750,8 @@ public class Shooter extends TimedSubsystem {
   }
 
   /**
-   * Update readiness flags (turret, hood, bottom flywheel, overall shooter) based on the latest
+   * Update readiness flags (turret, hood, bottom flywheel, overall shooter) based
+   * on the latest
    * firing solution and current subsystem sensor readings.
    */
   private void updateReadiness() {
@@ -765,9 +765,8 @@ public class Shooter extends TimedSubsystem {
         m_isTurretReady = m_turretReadyDebouncer.calculate(rawServoReady);
       } else {
         // Normal mode: check turret angle error
-        boolean rawTurretReady =
-            m_lastFiringSolution.isTurretFeasible()
-                && Math.abs(m_lastTurretErrorRobotAngle.in(Degrees)) < TURRET_ANGLE_TOLERANCE_DEG;
+        boolean rawTurretReady = m_lastFiringSolution.isTurretFeasible()
+            && Math.abs(m_lastTurretErrorRobotAngle.in(Degrees)) < TURRET_ANGLE_TOLERANCE_DEG;
         m_isTurretReady = m_turretReadyDebouncer.calculate(rawTurretReady);
       }
 
@@ -785,11 +784,10 @@ public class Shooter extends TimedSubsystem {
       // Hood readiness: compare current hood angle to trimmed target (degrees,
       // debounced)
       double currentHoodDeg = m_hood.getAngle().in(Degrees);
-      double targetHoodDeg =
-          MathUtil.clamp(
-              Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees) + m_hoodTrimOffsetDeg,
-              HoodConstants.HOOD_DEGREES_MIN,
-              HoodConstants.HOOD_DEGREES_MAX);
+      double targetHoodDeg = MathUtil.clamp(
+          Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees) + m_hoodTrimOffsetDeg,
+          HoodConstants.HOOD_DEGREES_MIN,
+          HoodConstants.HOOD_DEGREES_MAX);
       boolean rawHoodReady = Math.abs(currentHoodDeg - targetHoodDeg) < HOOD_ANGLE_TOLERANCE_DEG;
       m_isHoodReady = m_hoodReadyDebouncer.calculate(rawHoodReady);
 
@@ -799,8 +797,7 @@ public class Shooter extends TimedSubsystem {
 
       // Shooter as-a-whole is ready when turret, hood, bottom flywheel, and speed are
       // ready
-      m_isShooterReady =
-          m_isTurretReady && m_isHoodReady && m_isBottomFlyWheelReady && m_isSpeedReady;
+      m_isShooterReady = m_isTurretReady && m_isHoodReady && m_isBottomFlyWheelReady && m_isSpeedReady;
     } else {
       m_isShooterReady = false;
     }
@@ -809,19 +806,16 @@ public class Shooter extends TimedSubsystem {
   private void updateTurretPose() {
     // Updates the turret pose in field relative coordinates
     Pose2d robotPose2d = RobotContainer.getInstance().getRobotPose2d();
-    Pose2d turretPose2d =
-        new Pose2d(
-            robotPose2d.getTranslation().getX() + TURRET_X_OFFSET_M,
-            robotPose2d.getTranslation().getY() + TURRET_Y_OFFSET_M,
-            Rotation2d.fromDegrees(m_turret.getAngle().in(Degrees)));
-    turretPose2d =
-        turretPose2d.rotateAround(
-            new Translation2d(
-                robotPose2d.getTranslation().getX(), robotPose2d.getTranslation().getY()),
-            robotPose2d.getRotation()); // turret offset
-    Pose3d turretPosed3d =
-        new Pose3d(turretPose2d)
-            .plus(new Transform3d(0.0, 0.0, TURRET_Z_OFFSET_M, new Rotation3d()));
+    Pose2d turretPose2d = new Pose2d(
+        robotPose2d.getTranslation().getX() + TURRET_X_OFFSET_M,
+        robotPose2d.getTranslation().getY() + TURRET_Y_OFFSET_M,
+        Rotation2d.fromDegrees(m_turret.getAngle().in(Degrees)));
+    turretPose2d = turretPose2d.rotateAround(
+        new Translation2d(
+            robotPose2d.getTranslation().getX(), robotPose2d.getTranslation().getY()),
+        robotPose2d.getRotation()); // turret offset
+    Pose3d turretPosed3d = new Pose3d(turretPose2d)
+        .plus(new Transform3d(0.0, 0.0, TURRET_Z_OFFSET_M, new Rotation3d()));
 
     m_turretPoseField3d = turretPosed3d;
   }
@@ -859,8 +853,7 @@ public class Shooter extends TimedSubsystem {
         Logger.recordOutput("Shooter/TurretPoseField3d", m_turretPoseField3d);
       }
 
-      double robotHeadingDeg =
-          RobotContainer.getInstance().getRobotPose2d().getRotation().getDegrees();
+      double robotHeadingDeg = RobotContainer.getInstance().getRobotPose2d().getRotation().getDegrees();
       Logger.recordOutput("Shooter/robotHeadingFieldDeg", robotHeadingDeg);
 
       Logger.recordOutput("Shooter/TurretTargetDegRobot", m_turretTargetRobotAngle.in(Degrees));
@@ -887,20 +880,18 @@ public class Shooter extends TimedSubsystem {
       if (m_lastFiringSolution != null) {
         FiringSolution solution = m_lastFiringSolution;
         Logger.recordOutput("Shooter/FutureRobotPose2d", solution.futurePose);
-        double predictedDistanceMeters =
-            RobotContainer.getInstance()
-                .getRobotPose2d()
-                .getTranslation()
-                .getDistance(solution.futurePose.getTranslation());
+        double predictedDistanceMeters = RobotContainer.getInstance()
+            .getRobotPose2d()
+            .getTranslation()
+            .getDistance(solution.futurePose.getTranslation());
         Logger.recordOutput("Shooter/FutureRobotPoseDistanceMeters", predictedDistanceMeters);
         Logger.recordOutput("Shooter/TimeOfFlightSec", solution.tofSec);
         Logger.recordOutput(
             "Shooter/DistanceFiringSolutionToTargetMeters", solution.distanceToTargetMeters);
-        double hoodTargetAngleDeg =
-            MathUtil.clamp(
-                Radians.of(solution.hoodMechAngleRad).in(Degrees) + m_hoodTrimOffsetDeg,
-                HoodConstants.HOOD_DEGREES_MIN,
-                HoodConstants.HOOD_DEGREES_MAX);
+        double hoodTargetAngleDeg = MathUtil.clamp(
+            Radians.of(solution.hoodMechAngleRad).in(Degrees) + m_hoodTrimOffsetDeg,
+            HoodConstants.HOOD_DEGREES_MIN,
+            HoodConstants.HOOD_DEGREES_MAX);
         Logger.recordOutput("Shooter/HoodTargetAngleDeg", hoodTargetAngleDeg);
         m_targetHoodAngleDegEntry.set(hoodTargetAngleDeg);
         Logger.recordOutput("Shooter/HoodActualAngleDeg", m_hood.getAngle().in(Degrees));
@@ -908,12 +899,11 @@ public class Shooter extends TimedSubsystem {
         Logger.recordOutput(
             "Shooter/CalculatedTurretAngleDeg", Radians.of(solution.turretAngleRad).in(Degrees));
 
-        Translation2d[] aimRay =
-            buildAimRay(
-                solution.futurePose,
-                solution.turretAngleRad,
-                new Translation2d(TURRET_X_OFFSET_M, TURRET_Y_OFFSET_M),
-                solution.distanceToTargetMeters);
+        Translation2d[] aimRay = buildAimRay(
+            solution.futurePose,
+            solution.turretAngleRad,
+            new Translation2d(TURRET_X_OFFSET_M, TURRET_Y_OFFSET_M),
+            solution.distanceToTargetMeters);
         Logger.recordOutput("Shooter/CalculatedAimRay", aimRay);
       }
 
@@ -940,10 +930,14 @@ public class Shooter extends TimedSubsystem {
   }
 
   /**
-   * Detects ball launches via CANrange falling edge (ball leaving the kicker sensor view).
-   * Edge-triggered — one event per ball departure. Records the launch timestamp in {@code
-   * m_tofLaunchTimestampsSec} and increments {@code m_tofLaunchCount}. Also manages hopper-empty
-   * detection: if no ball has been seen for {@link #HOPPER_EMPTY_TIMEOUT_SEC} after at least one
+   * Detects ball launches via CANrange falling edge (ball leaving the kicker
+   * sensor view).
+   * Edge-triggered — one event per ball departure. Records the launch timestamp
+   * in {@code
+   * m_tofLaunchTimestampsSec} and increments {@code m_tofLaunchCount}. Also
+   * manages hopper-empty
+   * detection: if no ball has been seen for {@link #HOPPER_EMPTY_TIMEOUT_SEC}
+   * after at least one
    * was detected this shoot session, {@code m_isHopperEmpty} is set true.
    */
   private void updateTofTracking() {
@@ -957,8 +951,7 @@ public class Shooter extends TimedSubsystem {
 
     // Hopper empty: shooting active, seen at least one ball, nothing for 1+ second
     if (m_isShooting && m_hopperSeenSinceShootStart) {
-      m_isHopperEmpty =
-          (Timer.getFPGATimestamp() - m_hopperLastSeenTimestampSec) > HOPPER_EMPTY_TIMEOUT_SEC;
+      m_isHopperEmpty = (Timer.getFPGATimestamp() - m_hopperLastSeenTimestampSec) > HOPPER_EMPTY_TIMEOUT_SEC;
     } else if (!m_isShooting) {
       m_isHopperEmpty = false;
       m_hopperSeenSinceShootStart = false;
@@ -984,57 +977,69 @@ public class Shooter extends TimedSubsystem {
     m_kickerHadFuelLastLoop = hasFuelNow;
   }
 
-  /** True if no fuel has been detected at the kicker for {@link #HOPPER_EMPTY_TIMEOUT_SEC}. */
+  /**
+   * True if no fuel has been detected at the kicker for
+   * {@link #HOPPER_EMPTY_TIMEOUT_SEC}.
+   */
   public boolean isHopperEmpty() {
     return m_isHopperEmpty;
   }
 
   /**
-   * Records the arrival time for the next unconfirmed launch, computing the empirical TOF.
+   * Records the arrival time for the next unconfirmed launch, computing the
+   * empirical TOF.
    *
-   * <p>Map this command to a button-box button. Press once per ball, in order, as each ball visibly
-   * arrives at the target. After {@link #TOF_MAX_SHOTS} confirmations, logs average and std dev.
+   * <p>
+   * Map this command to a button-box button. Press once per ball, in order, as
+   * each ball visibly
+   * arrives at the target. After {@link #TOF_MAX_SHOTS} confirmations, logs
+   * average and std dev.
    * Autoshoot resets the session automatically on each trigger press.
    *
-   * <p>Unconfirmed launches at trigger release are zeroed out and excluded from session stats.
+   * <p>
+   * Unconfirmed launches at trigger release are zeroed out and excluded from
+   * session stats.
    */
   public Command getTofConfirmCmd() {
     return Commands.runOnce(
-            () -> {
-              if (m_tofLaunchCount == 0) {
-                if (Constants.VERBOSE_TELEMETRY) {
-                  Logger.recordOutput("Shooter/TOF/ConfirmStatus", "No launches recorded");
-                }
-                return;
-              }
-              if (m_tofConfirmCount >= m_tofLaunchCount) {
-                if (Constants.VERBOSE_TELEMETRY) {
-                  Logger.recordOutput(
-                      "Shooter/TOF/ConfirmStatus", "All launches already confirmed");
-                }
-                return;
-              }
-              double arrivalTimeSec = Timer.getFPGATimestamp();
-              m_tofMeasuredSec[m_tofConfirmCount] =
-                  arrivalTimeSec - m_tofLaunchTimestampsSec[m_tofConfirmCount];
-              if (Constants.VERBOSE_TELEMETRY) {
-                Logger.recordOutput(
-                    "Shooter/TOF/Ball" + (m_tofConfirmCount + 1) + "Sec",
-                    m_tofMeasuredSec[m_tofConfirmCount]);
-                Logger.recordOutput(
-                    "Shooter/TOF/ConfirmStatus", "Ball " + (m_tofConfirmCount + 1) + " confirmed");
-              }
-              m_tofConfirmCount++;
-              if (m_tofConfirmCount >= TOF_MAX_SHOTS) {
-                logTofResults();
-              }
-            })
+        () -> {
+          if (m_tofLaunchCount == 0) {
+            if (Constants.VERBOSE_TELEMETRY) {
+              Logger.recordOutput("Shooter/TOF/ConfirmStatus", "No launches recorded");
+            }
+            return;
+          }
+          if (m_tofConfirmCount >= m_tofLaunchCount) {
+            if (Constants.VERBOSE_TELEMETRY) {
+              Logger.recordOutput(
+                  "Shooter/TOF/ConfirmStatus", "All launches already confirmed");
+            }
+            return;
+          }
+          double arrivalTimeSec = Timer.getFPGATimestamp();
+          m_tofMeasuredSec[m_tofConfirmCount] = arrivalTimeSec - m_tofLaunchTimestampsSec[m_tofConfirmCount];
+          if (Constants.VERBOSE_TELEMETRY) {
+            Logger.recordOutput(
+                "Shooter/TOF/Ball" + (m_tofConfirmCount + 1) + "Sec",
+                m_tofMeasuredSec[m_tofConfirmCount]);
+            Logger.recordOutput(
+                "Shooter/TOF/ConfirmStatus", "Ball " + (m_tofConfirmCount + 1) + " confirmed");
+          }
+          m_tofConfirmCount++;
+          if (m_tofConfirmCount >= TOF_MAX_SHOTS) {
+            logTofResults();
+          }
+        })
         .withName("TOF/Confirm");
   }
 
-  /** Logs all per-ball TOFs, average, and std dev. Called on session end or after 5 confirms. */
+  /**
+   * Logs all per-ball TOFs, average, and std dev. Called on session end or after
+   * 5 confirms.
+   */
   private void logTofResults() {
-    if (!Constants.VERBOSE_TELEMETRY) return;
+    if (!Constants.VERBOSE_TELEMETRY)
+      return;
     int validCount = 0;
     double sum = 0.0;
     for (int i = 0; i < m_tofConfirmCount; i++) {
@@ -1045,7 +1050,8 @@ public class Shooter extends TimedSubsystem {
         validCount++;
       }
     }
-    if (validCount == 0) return;
+    if (validCount == 0)
+      return;
     double avgSec = sum / validCount;
     Logger.recordOutput("Shooter/TOF/ShotCount", validCount);
     Logger.recordOutput("Shooter/TOF/AverageSec", avgSec);
@@ -1062,12 +1068,11 @@ public class Shooter extends TimedSubsystem {
   }
 
   public Command getSetTargetCmd(ShootingTarget target) {
-    Command c =
-        Commands.runOnce(
-                () -> {
-                  this.setTargetPose(target.displayName, target.getFieldPose3d());
-                })
-            .ignoringDisable(true);
+    Command c = Commands.runOnce(
+        () -> {
+          this.setTargetPose(target.displayName, target.getFieldPose3d());
+        })
+        .ignoringDisable(true);
     c.setName("Target/" + target.displayName);
 
     return c;
@@ -1187,31 +1192,42 @@ public class Shooter extends TimedSubsystem {
   /**
    * Computes the initial field-relative velocity of a launched fuel game piece.
    *
-   * <p>The resulting velocity includes:
+   * <p>
+   * The resulting velocity includes:
    *
    * <ul>
-   *   <li>The velocity imparted by the shooter, based on exit speed, hood angle, and turret yaw
-   *       (all field-relative).
-   *   <li>The current translational velocity of the robot, converted to field-relative coordinates
-   *       and added to the shot.
+   * <li>The velocity imparted by the shooter, based on exit speed, hood angle,
+   * and turret yaw
+   * (all field-relative).
+   * <li>The current translational velocity of the robot, converted to
+   * field-relative coordinates
+   * and added to the shot.
    * </ul>
    *
-   * <p>Coordinate conventions:
+   * <p>
+   * Coordinate conventions:
    *
    * <ul>
-   *   <li>X/Y are field-relative (WPILib standard: +X forward, +Y left).
-   *   <li>Z is vertical and is affected only by the hood angle.
-   *   <li>{@code turretYawRad} is a field-relative yaw angle.
+   * <li>X/Y are field-relative (WPILib standard: +X forward, +Y left).
+   * <li>Z is vertical and is affected only by the hood angle.
+   * <li>{@code turretYawRad} is a field-relative yaw angle.
    * </ul>
    *
-   * <p>Robot angular velocity (omega) is intentionally ignored; only linear chassis velocity is
+   * <p>
+   * Robot angular velocity (omega) is intentionally ignored; only linear chassis
+   * velocity is
    * applied to the fuel at launch.
    *
-   * @param vel_ms Shooter exit velocity in meters per second
-   * @param launchAngleAboveHorizontalRad Launch angle in radians above horizontal (0 = horizontal
-   *     shot, π/2 = straight up). Use {@link #hoodMechToLaunchAngle} to convert from a mechanical
-   *     hood angle.
-   * @param turretYawRad Turret yaw angle in radians, field-relative
+   * @param vel_ms                        Shooter exit velocity in meters per
+   *                                      second
+   * @param launchAngleAboveHorizontalRad Launch angle in radians above horizontal
+   *                                      (0 = horizontal
+   *                                      shot, π/2 = straight up). Use
+   *                                      {@link #hoodMechToLaunchAngle} to
+   *                                      convert from a mechanical
+   *                                      hood angle.
+   * @param turretYawRad                  Turret yaw angle in radians,
+   *                                      field-relative
    * @return Field-relative velocity vector of the fuel at launch
    */
   private Translation3d launchVel(
@@ -1225,10 +1241,8 @@ public class Shooter extends TimedSubsystem {
     // Robot field velocity
     ChassisSpeeds speeds = RobotContainer.getInstance().getChassisSpeeds();
     double theta = RobotContainer.getInstance().getRobotPose2d().getRotation().getRadians();
-    double robotVxField =
-        speeds.vxMetersPerSecond * Math.cos(theta) - speeds.vyMetersPerSecond * Math.sin(theta);
-    double robotVyField =
-        speeds.vxMetersPerSecond * Math.sin(theta) + speeds.vyMetersPerSecond * Math.cos(theta);
+    double robotVxField = speeds.vxMetersPerSecond * Math.cos(theta) - speeds.vyMetersPerSecond * Math.sin(theta);
+    double robotVyField = speeds.vxMetersPerSecond * Math.sin(theta) + speeds.vyMetersPerSecond * Math.cos(theta);
 
     // Add robot motion
     vx += robotVxField;
@@ -1238,22 +1252,28 @@ public class Shooter extends TimedSubsystem {
   }
 
   /**
-   * Returns a command that manually controls the turret rotation at a constant rate.
+   * Returns a command that manually controls the turret rotation at a constant
+   * rate.
    *
-   * <p>The {@code inputSupplier} should return a value from -1.0 to +1.0 (like a joystick axis).
-   * Positive values rotate the turret to the right (positive degrees), negative to the left. The
+   * <p>
+   * The {@code inputSupplier} should return a value from -1.0 to +1.0 (like a
+   * joystick axis).
+   * Positive values rotate the turret to the right (positive degrees), negative
+   * to the left. The
    * turret angle is clamped to [{@link Turret#TURRET_DEGREES_MIN}, {@link
    * Turret#TURRET_DEGREES_MAX}].
    *
-   * <p>While this command is running, auto-targeting is paused. When it ends, auto-targeting
+   * <p>
+   * While this command is running, auto-targeting is paused. When it ends,
+   * auto-targeting
    * resumes automatically.
    *
    * @param inputSupplier supplier returning -1.0 to +1.0 (e.g., joystick axis)
    * @return a command that manually controls the turret
    */
   public Command getManualTurretCmd(Supplier<Double> inputSupplier) {
-    double[] angleDeg = {0.0};
-    double[] lastTimeSec = {0.0};
+    double[] angleDeg = { 0.0 };
+    double[] lastTimeSec = { 0.0 };
 
     return m_turret
         .setAngle(
@@ -1262,11 +1282,11 @@ public class Shooter extends TimedSubsystem {
               double dtSec = nowSec - lastTimeSec[0];
               lastTimeSec[0] = nowSec;
               // Skip first tick to avoid a large dt jump
-              if (dtSec > 0.1) dtSec = 0.0;
+              if (dtSec > 0.1)
+                dtSec = 0.0;
 
               angleDeg[0] += inputSupplier.get() * MANUAL_TURRET_RATE_DEG_PER_SEC * dtSec;
-              angleDeg[0] =
-                  MathUtil.clamp(angleDeg[0], Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX);
+              angleDeg[0] = MathUtil.clamp(angleDeg[0], Turret.TURRET_DEGREES_MIN, Turret.TURRET_DEGREES_MAX);
               return Degrees.of(angleDeg[0]);
             })
         .beforeStarting(
@@ -1279,19 +1299,25 @@ public class Shooter extends TimedSubsystem {
   /**
    * Returns a command that manually controls the hood pitch at a constant rate.
    *
-   * <p>The {@code inputSupplier} should return a value from -1.0 to +1.0 (like a joystick axis).
-   * Positive values raise the hood (increase angle), negative values lower it. The hood angle is
-   * clamped to [{@link HoodConstants#HOOD_DEGREES_MIN}, {@link HoodConstants#HOOD_DEGREES_MAX}].
+   * <p>
+   * The {@code inputSupplier} should return a value from -1.0 to +1.0 (like a
+   * joystick axis).
+   * Positive values raise the hood (increase angle), negative values lower it.
+   * The hood angle is
+   * clamped to [{@link HoodConstants#HOOD_DEGREES_MIN},
+   * {@link HoodConstants#HOOD_DEGREES_MAX}].
    *
-   * <p>While this command is running, auto-aiming is paused. When it ends, auto-aiming resumes
+   * <p>
+   * While this command is running, auto-aiming is paused. When it ends,
+   * auto-aiming resumes
    * automatically.
    *
    * @param inputSupplier supplier returning -1.0 to +1.0 (e.g., joystick axis)
    * @return a command that manually controls the hood
    */
   public Command getManualHoodCmd(Supplier<Double> inputSupplier) {
-    double[] angleDeg = {0.0};
-    double[] lastTimeSec = {0.0};
+    double[] angleDeg = { 0.0 };
+    double[] lastTimeSec = { 0.0 };
 
     return m_hood
         .setAngle(
@@ -1299,12 +1325,12 @@ public class Shooter extends TimedSubsystem {
               double nowSec = Timer.getFPGATimestamp();
               double dtSec = nowSec - lastTimeSec[0];
               lastTimeSec[0] = nowSec;
-              if (dtSec > 0.1) dtSec = 0.0;
+              if (dtSec > 0.1)
+                dtSec = 0.0;
 
               angleDeg[0] += inputSupplier.get() * MANUAL_HOOD_RATE_DEG_PER_SEC * dtSec;
-              angleDeg[0] =
-                  MathUtil.clamp(
-                      angleDeg[0], HoodConstants.HOOD_DEGREES_MIN, HoodConstants.HOOD_DEGREES_MAX);
+              angleDeg[0] = MathUtil.clamp(
+                  angleDeg[0], HoodConstants.HOOD_DEGREES_MIN, HoodConstants.HOOD_DEGREES_MAX);
               return Degrees.of(angleDeg[0]);
             })
         .beforeStarting(
@@ -1315,21 +1341,27 @@ public class Shooter extends TimedSubsystem {
   }
 
   /**
-   * Returns a command that manually controls the flywheel speed at a constant rate.
+   * Returns a command that manually controls the flywheel speed at a constant
+   * rate.
    *
-   * <p>The {@code inputSupplier} should return a value from -1.0 to +1.0 (like a joystick axis).
-   * Positive values increase RPM, negative values decrease it. The RPM is clamped to [0, {@link
+   * <p>
+   * The {@code inputSupplier} should return a value from -1.0 to +1.0 (like a
+   * joystick axis).
+   * Positive values increase RPM, negative values decrease it. The RPM is clamped
+   * to [0, {@link
    * #MANUAL_FLYWHEEL_MAX_RPM}].
    *
-   * <p>While this command is running, the automatic flywheel speed control is paused. When it ends,
+   * <p>
+   * While this command is running, the automatic flywheel speed control is
+   * paused. When it ends,
    * auto control resumes automatically.
    *
    * @param inputSupplier supplier returning -1.0 to +1.0 (e.g., joystick axis)
    * @return a command that manually controls the flywheel
    */
   public Command getManualFlywheelCmd(Supplier<Double> inputSupplier) {
-    double[] rpmValue = {0.0};
-    double[] lastTimeSec = {0.0};
+    double[] rpmValue = { 0.0 };
+    double[] lastTimeSec = { 0.0 };
 
     return m_bottomFlyWheel
         .setVelocity(
@@ -1337,7 +1369,8 @@ public class Shooter extends TimedSubsystem {
               double nowSec = Timer.getFPGATimestamp();
               double dtSec = nowSec - lastTimeSec[0];
               lastTimeSec[0] = nowSec;
-              if (dtSec > 0.1) dtSec = 0.0;
+              if (dtSec > 0.1)
+                dtSec = 0.0;
 
               rpmValue[0] += inputSupplier.get() * MANUAL_FLYWHEEL_RATE_RPM_PER_SEC * dtSec;
               rpmValue[0] = MathUtil.clamp(rpmValue[0], 0, MANUAL_FLYWHEEL_MAX_RPM);
@@ -1353,66 +1386,68 @@ public class Shooter extends TimedSubsystem {
   /**
    * PREDICTIVE TARGETING mode — triggered by right trigger.
    *
-   * <p>Overrides the hood and flywheel idle defaults with targeting-derived setpoints from the
-   * firing solution, then gates the kicker and spindexer on {@link #isReady()}. When the trigger is
-   * released, hood and flywheel default commands (idle) resume and kicker/spindexer default
+   * <p>
+   * Overrides the hood and flywheel idle defaults with targeting-derived
+   * setpoints from the
+   * firing solution, then gates the kicker and spindexer on {@link #isReady()}.
+   * When the trigger is
+   * released, hood and flywheel default commands (idle) resume and
+   * kicker/spindexer default
    * commands (stop) resume automatically.
    *
-   * <p>In SIM mode, also spawns FuelSim projectiles on the {@link #AUTO_SHOOT_INTERVAL_SEC} timer
-   * once the shooter is ready (same behaviour as the original sim-only implementation).
+   * <p>
+   * In SIM mode, also spawns FuelSim projectiles on the
+   * {@link #AUTO_SHOOT_INTERVAL_SEC} timer
+   * once the shooter is ready (same behaviour as the original sim-only
+   * implementation).
    */
   public Command getAutoShootCmd() {
     // Build the feed command: in SIM also launch fuel projectiles on a timer.
-    final double[] lastLaunchTimeSec = {0.0};
-    Command feedCmd =
-        m_kicker.setVelocity(RPM.of(KICKER_SHOOT_RPM)).alongWith(m_spindexer.getRunCmd());
+    final double[] lastLaunchTimeSec = { 0.0 };
+    Command feedCmd = m_kicker.setVelocity(RPM.of(KICKER_SHOOT_RPM)).alongWith(m_spindexer.getRunCmd());
     if (Constants.currentMode == Constants.Mode.SIM) {
-      feedCmd =
-          feedCmd.alongWith(
-              Commands.run(
-                  () -> {
-                    double nowSec = Timer.getFPGATimestamp();
-                    if (nowSec - lastLaunchTimeSec[0] >= AUTO_SHOOT_INTERVAL_SEC) {
-                      launchFuelSim();
-                      lastLaunchTimeSec[0] = nowSec;
-                    }
-                  }));
+      feedCmd = feedCmd.alongWith(
+          Commands.run(
+              () -> {
+                double nowSec = Timer.getFPGATimestamp();
+                if (nowSec - lastLaunchTimeSec[0] >= AUTO_SHOOT_INTERVAL_SEC) {
+                  launchFuelSim();
+                  lastLaunchTimeSec[0] = nowSec;
+                }
+              }));
     }
 
     return Commands.parallel(
-            // Override turret default: preempts any locked turret command (e.g.
-            // TurretCenter)
-            // so the turret resumes predictive targeting as soon as AutoShoot is triggered.
-            getPredictiveTargetingCommand(),
-            // Override hood idle default: command targeting angle from firing solution
-            m_hood.setAngle(
-                () -> {
-                  if (m_lastFiringSolution != null) {
-                    double trimmedDeg =
-                        MathUtil.clamp(
-                            Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees)
-                                + m_hoodTrimOffsetDeg,
-                            HoodConstants.HOOD_DEGREES_MIN,
-                            HoodConstants.HOOD_DEGREES_MAX);
-                    return Degrees.of(trimmedDeg);
-                  }
-                  return Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
-                }),
-            // Override flywheel idle default: command targeting RPM from firing solution
-            m_bottomFlyWheel.setVelocity(
-                () ->
-                    m_lastFiringSolution != null
-                        ? RPM.of(m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm)
-                        : RPM.of(IDLE_FLYWHEEL_RPM + m_rpmTrimOffsetRpm)),
-            // Kicker + spindexer (+ sim fuel launch): wait until ready, feed until turret
-            // infeasible, then loop back to wait for ready again.
-            Commands.sequence(
-                    Commands.waitUntil(() -> m_isShooterReady),
-                    feedCmd.until(
-                        () ->
-                            m_lastFiringSolution == null
-                                || !m_lastFiringSolution.isTurretFeasible()))
-                .repeatedly())
+        // Override turret default: preempts any locked turret command (e.g.
+        // TurretCenter)
+        // so the turret resumes predictive targeting as soon as AutoShoot is triggered.
+        getPredictiveTargetingCommand(),
+        // Override hood idle default: command targeting angle from firing solution
+        m_hood.setAngle(
+            () -> {
+              if (m_lastFiringSolution != null) {
+                double trimmedDeg = MathUtil.clamp(
+                    Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees)
+                        + m_hoodTrimOffsetDeg,
+                    HoodConstants.HOOD_DEGREES_MIN,
+                    HoodConstants.HOOD_DEGREES_MAX);
+                return Degrees.of(trimmedDeg);
+              }
+              return Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
+            }),
+        // Override flywheel idle default: command targeting RPM from firing solution
+        m_bottomFlyWheel.setVelocity(
+            () -> m_lastFiringSolution != null
+                ? RPM.of(m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm)
+                : RPM.of(IDLE_FLYWHEEL_RPM + m_rpmTrimOffsetRpm)),
+        // Kicker + spindexer (+ sim fuel launch): wait until ready, feed until turret
+        // infeasible, then loop back to wait for ready again.
+        Commands.sequence(
+            Commands.waitUntil(() -> m_isShooterReady),
+            feedCmd.until(
+                () -> m_lastFiringSolution == null
+                    || !m_lastFiringSolution.isTurretFeasible()))
+            .repeatedly())
         .beforeStarting(
             () -> {
               m_isShooting = true;
@@ -1441,63 +1476,66 @@ public class Shooter extends TimedSubsystem {
   /**
    * TURRET-SERVO FALLBACK mode — activated by holding the A button.
    *
-   * <p>Locks the turret to 0° robot-relative and relies on the drive chassis rotating to aim. Hood
-   * and flywheel continue to use the firing-solution LUT for distance-based setpoints. {@link
-   * #m_isTurretServoMode} is set so that {@link #updateReadiness()} checks drive heading alignment
-   * (within 2°) instead of turret angle error. Once aligned, kicker and spindexer fire.
+   * <p>
+   * Locks the turret to 0° robot-relative and relies on the drive chassis
+   * rotating to aim. Hood
+   * and flywheel continue to use the firing-solution LUT for distance-based
+   * setpoints. {@link
+   * #m_isTurretServoMode} is set so that {@link #updateReadiness()} checks drive
+   * heading alignment
+   * (within 2°) instead of turret angle error. Once aligned, kicker and spindexer
+   * fire.
    *
-   * <p>Use when the turret is mechanically or electrically inoperable. Pair with {@link
-   * DriveCommands#joystickDriveAtAngle} passing {@link #getRobotHeadingForTurretServo()} as the
+   * <p>
+   * Use when the turret is mechanically or electrically inoperable. Pair with
+   * {@link
+   * DriveCommands#joystickDriveAtAngle} passing
+   * {@link #getRobotHeadingForTurretServo()} as the
    * heading supplier so the drive actively steers to the required heading.
    */
   public Command getTurretServoShootCmd() {
-    final double[] lastLaunchTimeSec = {0.0};
-    Command feedCmd =
-        m_kicker.setVelocity(RPM.of(KICKER_SHOOT_RPM)).alongWith(m_spindexer.getRunCmd());
+    final double[] lastLaunchTimeSec = { 0.0 };
+    Command feedCmd = m_kicker.setVelocity(RPM.of(KICKER_SHOOT_RPM)).alongWith(m_spindexer.getRunCmd());
     if (Constants.currentMode == Constants.Mode.SIM) {
-      feedCmd =
-          feedCmd.alongWith(
-              Commands.run(
-                  () -> {
-                    double nowSec = Timer.getFPGATimestamp();
-                    if (nowSec - lastLaunchTimeSec[0] >= AUTO_SHOOT_INTERVAL_SEC) {
-                      launchFuelSim();
-                      lastLaunchTimeSec[0] = nowSec;
-                    }
-                  }));
+      feedCmd = feedCmd.alongWith(
+          Commands.run(
+              () -> {
+                double nowSec = Timer.getFPGATimestamp();
+                if (nowSec - lastLaunchTimeSec[0] >= AUTO_SHOOT_INTERVAL_SEC) {
+                  launchFuelSim();
+                  lastLaunchTimeSec[0] = nowSec;
+                }
+              }));
     }
 
     return Commands.parallel(
-            // Turret locked to 0° — robot rotation provides the aim
-            m_turret.setAngle(Degrees.of(0)),
-            // Hood from firing solution (same as AutoShoot)
-            m_hood.setAngle(
-                () -> {
-                  if (m_lastFiringSolution != null) {
-                    double trimmedDeg =
-                        MathUtil.clamp(
-                            Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees)
-                                + m_hoodTrimOffsetDeg,
-                            HoodConstants.HOOD_DEGREES_MIN,
-                            HoodConstants.HOOD_DEGREES_MAX);
-                    return Degrees.of(trimmedDeg);
-                  }
-                  return Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
-                }),
-            // Flywheel from firing solution (same as AutoShoot)
-            m_bottomFlyWheel.setVelocity(
-                () ->
-                    m_lastFiringSolution != null
-                        ? RPM.of(m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm)
-                        : RPM.of(IDLE_FLYWHEEL_RPM + m_rpmTrimOffsetRpm)),
-            // Feed when heading-aligned; stop if firing solution becomes infeasible
-            Commands.sequence(
-                    Commands.waitUntil(() -> m_isShooterReady),
-                    feedCmd.until(
-                        () ->
-                            m_lastFiringSolution == null
-                                || !m_lastFiringSolution.isTurretFeasible()))
-                .repeatedly())
+        // Turret locked to 0° — robot rotation provides the aim
+        m_turret.setAngle(Degrees.of(0)),
+        // Hood from firing solution (same as AutoShoot)
+        m_hood.setAngle(
+            () -> {
+              if (m_lastFiringSolution != null) {
+                double trimmedDeg = MathUtil.clamp(
+                    Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees)
+                        + m_hoodTrimOffsetDeg,
+                    HoodConstants.HOOD_DEGREES_MIN,
+                    HoodConstants.HOOD_DEGREES_MAX);
+                return Degrees.of(trimmedDeg);
+              }
+              return Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
+            }),
+        // Flywheel from firing solution (same as AutoShoot)
+        m_bottomFlyWheel.setVelocity(
+            () -> m_lastFiringSolution != null
+                ? RPM.of(m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm)
+                : RPM.of(IDLE_FLYWHEEL_RPM + m_rpmTrimOffsetRpm)),
+        // Feed when heading-aligned; stop if firing solution becomes infeasible
+        Commands.sequence(
+            Commands.waitUntil(() -> m_isShooterReady),
+            feedCmd.until(
+                () -> m_lastFiringSolution == null
+                    || !m_lastFiringSolution.isTurretFeasible()))
+            .repeatedly())
         .beforeStarting(
             () -> {
               m_isTurretServoMode = true;
@@ -1528,7 +1566,8 @@ public class Shooter extends TimedSubsystem {
   }
 
   /**
-   * Returns true if the shooter is fully ready to fire (turret, hood, flywheel, and speed are all
+   * Returns true if the shooter is fully ready to fire (turret, hood, flywheel,
+   * and speed are all
    * within tolerance and debounced).
    */
   public boolean isReady() {
@@ -1538,10 +1577,15 @@ public class Shooter extends TimedSubsystem {
   /**
    * MANUAL mode — triggered by right bumper.
    *
-   * <p>Runs the kicker and spindexer at shooting speed. Assumes the turret, hood, and flywheel are
-   * already at the correct setpoints (positioned by the operator or a prior auto-aim sequence).
-   * Does not require Hood or BottomFlyWheel — whatever command is running them continues
-   * uninterrupted. When the bumper is released, the kicker and spindexer default commands (stop)
+   * <p>
+   * Runs the kicker and spindexer at shooting speed. Assumes the turret, hood,
+   * and flywheel are
+   * already at the correct setpoints (positioned by the operator or a prior
+   * auto-aim sequence).
+   * Does not require Hood or BottomFlyWheel — whatever command is running them
+   * continues
+   * uninterrupted. When the bumper is released, the kicker and spindexer default
+   * commands (stop)
    * resume.
    */
   public Command getManualShootCmd() {
@@ -1552,27 +1596,32 @@ public class Shooter extends TimedSubsystem {
   }
 
   /**
-   * OFF mode — stops all shooter mechanisms. Not driver-bound; triggered from Elastic/Shuffleboard.
-   * Uses {@code setDutyCycle(0.0)} for positional mechanisms (Hood, Turret) since they have no raw
+   * OFF mode — stops all shooter mechanisms. Not driver-bound; triggered from
+   * Elastic/Shuffleboard.
+   * Uses {@code setDutyCycle(0.0)} for positional mechanisms (Hood, Turret) since
+   * they have no raw
    * {@code set()} equivalent.
    */
   public Command getOffCmd() {
     return Commands.parallel(
-            m_turret.setDutyCycle(0.0),
-            m_hood.setDutyCycle(0.0),
-            m_bottomFlyWheel.set(0),
-            m_kicker.stop(),
-            m_spindexer.stop())
+        m_turret.setDutyCycle(0.0),
+        m_hood.setDutyCycle(0.0),
+        m_bottomFlyWheel.set(0),
+        m_kicker.stop(),
+        m_spindexer.stop())
         .withName("Shooter/Off");
   }
 
   /**
-   * Returns a command that retracts the hood to its minimum angle. While this command is running,
-   * the hood's default (auto-aiming) command is paused. When this command ends, the default command
+   * Returns a command that retracts the hood to its minimum angle. While this
+   * command is running,
+   * the hood's default (auto-aiming) command is paused. When this command ends,
+   * the default command
    * resumes automatically.
    *
-   * @param reason Human-readable description of why the hood is being retracted (logged to
-   *     "Shooter/Hood/RetractReason").
+   * @param reason Human-readable description of why the hood is being retracted
+   *               (logged to
+   *               "Shooter/Hood/RetractReason").
    */
   public Command getRetractHoodCmd(String reason) {
     return m_hood
@@ -1595,65 +1644,93 @@ public class Shooter extends TimedSubsystem {
   // ── Fixed-distance shots ──────────────────────────────────────────────────
 
   /**
-   * Locks the turret to 0° robot-relative, commands the hood to a fixed angle, and spins the
-   * flywheel to a fixed RPM. Holds indefinitely — cancel via Elastic to return to normal auto mode.
+   * Locks the turret to 0° robot-relative, commands the hood to a fixed angle,
+   * and spins the
+   * flywheel to a fixed RPM. Holds indefinitely — cancel via Elastic to return to
+   * normal auto mode.
    *
-   * <p>Use when pose estimation is unavailable. Pair with {@link #getAutoShootCmd()} to fire.
+   * <p>
+   * Use when pose estimation is unavailable. Pair with {@link #getAutoShootCmd()}
+   * to fire.
    *
    * @param hoodAngle fixed hood angle
-   * @param rpm fixed flywheel speed
+   * @param rpm       fixed flywheel speed
    */
   public Command getFixedShotCmd(Angle hoodAngle, double rpm) {
     return Commands.parallel(
-            m_turret.setAngle(Degrees.of(0)),
-            m_hood.setAngle(hoodAngle),
-            m_bottomFlyWheel.setVelocity(() -> RPM.of(rpm + m_rpmTrimOffsetRpm)))
+        m_turret.setAngle(Degrees.of(0)),
+        m_hood.setAngle(hoodAngle),
+        m_bottomFlyWheel.setVelocity(() -> RPM.of(rpm + m_rpmTrimOffsetRpm)))
         .withName("FixedShot");
   }
 
-  /** Fixed shot from 1 m. Tune {@code FIXED_SHOT_1M_HOOD_DEG} and {@code FIXED_SHOT_1M_RPM}. */
+  /**
+   * Fixed shot from 1 m. Tune {@code FIXED_SHOT_1M_HOOD_DEG} and
+   * {@code FIXED_SHOT_1M_RPM}.
+   */
   public Command getFixedShot1mCmd() {
     return getFixedShotCmd(Degrees.of(FIXED_SHOT_1M_HOOD_DEG), FIXED_SHOT_1M_RPM)
         .withName("FixedShot/1m");
   }
 
-  /** Fixed shot from 2 m. Tune {@code FIXED_SHOT_2M_HOOD_DEG} and {@code FIXED_SHOT_2M_RPM}. */
+  /**
+   * Fixed shot from 2 m. Tune {@code FIXED_SHOT_2M_HOOD_DEG} and
+   * {@code FIXED_SHOT_2M_RPM}.
+   */
   public Command getFixedShot2mCmd() {
     return getFixedShotCmd(Degrees.of(FIXED_SHOT_2M_HOOD_DEG), FIXED_SHOT_2M_RPM)
         .withName("FixedShot/2m");
   }
 
-  /** Fixed shot from 3 m. Tune {@code FIXED_SHOT_3M_HOOD_DEG} and {@code FIXED_SHOT_3M_RPM}. */
+  /**
+   * Fixed shot from 3 m. Tune {@code FIXED_SHOT_3M_HOOD_DEG} and
+   * {@code FIXED_SHOT_3M_RPM}.
+   */
   public Command getFixedShot3mCmd() {
     return getFixedShotCmd(Degrees.of(FIXED_SHOT_3M_HOOD_DEG), FIXED_SHOT_3M_RPM)
         .withName("FixedShot/3m");
   }
 
-  /** Fixed shot from 4 m. Tune {@code FIXED_SHOT_4M_HOOD_DEG} and {@code FIXED_SHOT_4M_RPM}. */
+  /**
+   * Fixed shot from 4 m. Tune {@code FIXED_SHOT_4M_HOOD_DEG} and
+   * {@code FIXED_SHOT_4M_RPM}.
+   */
   public Command getFixedShot4mCmd() {
     return getFixedShotCmd(Degrees.of(FIXED_SHOT_4M_HOOD_DEG), FIXED_SHOT_4M_RPM)
         .withName("FixedShot/4m");
   }
 
-  /** Fixed shot from 5 m. Tune {@code FIXED_SHOT_5M_HOOD_DEG} and {@code FIXED_SHOT_5M_RPM}. */
+  /**
+   * Fixed shot from 5 m. Tune {@code FIXED_SHOT_5M_HOOD_DEG} and
+   * {@code FIXED_SHOT_5M_RPM}.
+   */
   public Command getFixedShot5mCmd() {
     return getFixedShotCmd(Degrees.of(FIXED_SHOT_5M_HOOD_DEG), FIXED_SHOT_5M_RPM)
         .withName("FixedShot/5m");
   }
 
-  /** Fixed shot from 6 m. Tune {@code FIXED_SHOT_6M_HOOD_DEG} and {@code FIXED_SHOT_6M_RPM}. */
+  /**
+   * Fixed shot from 6 m. Tune {@code FIXED_SHOT_6M_HOOD_DEG} and
+   * {@code FIXED_SHOT_6M_RPM}.
+   */
   public Command getFixedShot6mCmd() {
     return getFixedShotCmd(Degrees.of(FIXED_SHOT_6M_HOOD_DEG), FIXED_SHOT_6M_RPM)
         .withName("FixedShot/6m");
   }
 
-  /** Fixed shot from 7 m. Tune {@code FIXED_SHOT_7M_HOOD_DEG} and {@code FIXED_SHOT_7M_RPM}. */
+  /**
+   * Fixed shot from 7 m. Tune {@code FIXED_SHOT_7M_HOOD_DEG} and
+   * {@code FIXED_SHOT_7M_RPM}.
+   */
   public Command getFixedShot7mCmd() {
     return getFixedShotCmd(Degrees.of(FIXED_SHOT_7M_HOOD_DEG), FIXED_SHOT_7M_RPM)
         .withName("FixedShot/7m");
   }
 
-  /** Fixed shot from 8 m. Tune {@code FIXED_SHOT_8M_HOOD_DEG} and {@code FIXED_SHOT_8M_RPM}. */
+  /**
+   * Fixed shot from 8 m. Tune {@code FIXED_SHOT_8M_HOOD_DEG} and
+   * {@code FIXED_SHOT_8M_RPM}.
+   */
   public Command getFixedShot8mCmd() {
     return getFixedShotCmd(Degrees.of(FIXED_SHOT_8M_HOOD_DEG), FIXED_SHOT_8M_RPM)
         .withName("FixedShot/8m");
@@ -1662,8 +1739,10 @@ public class Shooter extends TimedSubsystem {
   // ── In-match RPM trim ────────────────────────────────────────────────────
 
   /**
-   * Adds {@code deltaRpm} to the persistent RPM trim offset. Applied to every flywheel velocity
-   * calculation (auto and fixed). Runs as a one-shot — each Elastic click accumulates.
+   * Adds {@code deltaRpm} to the persistent RPM trim offset. Applied to every
+   * flywheel velocity
+   * calculation (auto and fixed). Runs as a one-shot — each Elastic click
+   * accumulates.
    *
    * @param deltaRpm RPM to add (positive or negative)
    */
@@ -1681,17 +1760,19 @@ public class Shooter extends TimedSubsystem {
   }
 
   /**
-   * Adds {@code deltaDeg} to the persistent hood trim offset. Applied to every dynamic hood
-   * setpoint (auto and auto-shoot). Clamped so the commanded angle stays within the hood's valid
+   * Adds {@code deltaDeg} to the persistent hood trim offset. Applied to every
+   * dynamic hood
+   * setpoint (auto and auto-shoot). Clamped so the commanded angle stays within
+   * the hood's valid
    * range regardless of how many times it is pressed.
    *
-   * @param deltaDeg degrees to add (positive = more open, negative = more retracted)
+   * @param deltaDeg degrees to add (positive = more open, negative = more
+   *                 retracted)
    */
   public Command getHoodTrimCmd(double deltaDeg) {
     double range = HoodConstants.HOOD_DEGREES_MAX - HoodConstants.HOOD_DEGREES_MIN;
     return Commands.runOnce(
-            () ->
-                m_hoodTrimOffsetDeg = MathUtil.clamp(m_hoodTrimOffsetDeg + deltaDeg, -range, range))
+        () -> m_hoodTrimOffsetDeg = MathUtil.clamp(m_hoodTrimOffsetDeg + deltaDeg, -range, range))
         .withName("HoodTrim/" + (deltaDeg > 0 ? "+" : "") + (int) deltaDeg);
   }
 
@@ -1703,17 +1784,16 @@ public class Shooter extends TimedSubsystem {
   // ── In-match turret trim ──────────────────────────────────────────────────
 
   /**
-   * Adds {@code deltaDeg} to the persistent turret trim offset. Applied to every dynamic turret
+   * Adds {@code deltaDeg} to the persistent turret trim offset. Applied to every
+   * dynamic turret
    * targeting calculation. Clamped to ±TURRET_TRIM_MAX_DEG.
    */
   public Command getTurretTrimCmd(double deltaDeg) {
     return Commands.runOnce(
-            () ->
-                m_turretTrimOffsetDeg =
-                    MathUtil.clamp(
-                        m_turretTrimOffsetDeg + deltaDeg,
-                        -TURRET_TRIM_MAX_DEG,
-                        TURRET_TRIM_MAX_DEG))
+        () -> m_turretTrimOffsetDeg = MathUtil.clamp(
+            m_turretTrimOffsetDeg + deltaDeg,
+            -TURRET_TRIM_MAX_DEG,
+            TURRET_TRIM_MAX_DEG))
         .withName("TurretTrim/" + (deltaDeg > 0 ? "+" : "") + (int) deltaDeg);
   }
 
@@ -1725,31 +1805,34 @@ public class Shooter extends TimedSubsystem {
   // ── Turret manual controls ────────────────────────────────────────────────
 
   /**
-   * Captures the current turret angle, adds {@code offset}, clamps to soft limits, then holds there
+   * Captures the current turret angle, adds {@code offset}, clamps to soft
+   * limits, then holds there
    * indefinitely. Cancel via Elastic to return to auto-targeting.
    *
-   * <p>Pressing again while active captures the new physical angle, so presses accumulate naturally
+   * <p>
+   * Pressing again while active captures the new physical angle, so presses
+   * accumulate naturally
    * (e.g. two +5° presses hold at +10°).
    *
-   * @param offset angle to add to the current turret position (positive = clockwise)
+   * @param offset angle to add to the current turret position (positive =
+   *               clockwise)
    */
   public Command getTurretNudgeCmd(Angle offset) {
-    Angle[] targetAngle = {Degrees.of(0)};
+    Angle[] targetAngle = { Degrees.of(0) };
     return Commands.sequence(
-            Commands.runOnce(
-                () ->
-                    targetAngle[0] =
-                        Degrees.of(
-                            MathUtil.clamp(
-                                m_turret.getAngle().in(Degrees) + offset.in(Degrees),
-                                Turret.TURRET_DEGREES_MIN,
-                                Turret.TURRET_DEGREES_MAX))),
-            m_turret.setAngle(() -> targetAngle[0]))
+        Commands.runOnce(
+            () -> targetAngle[0] = Degrees.of(
+                MathUtil.clamp(
+                    m_turret.getAngle().in(Degrees) + offset.in(Degrees),
+                    Turret.TURRET_DEGREES_MIN,
+                    Turret.TURRET_DEGREES_MAX))),
+        m_turret.setAngle(() -> targetAngle[0]))
         .withName("Turret/Nudge");
   }
 
   /**
-   * Snaps the turret to 0° robot-relative and holds. Cancel via Elastic to return to *
+   * Snaps the turret to 0° robot-relative and holds. Cancel via Elastic to return
+   * to *
    * auto-targeting.
    */
   public Command getTurretCenterCmd() {
