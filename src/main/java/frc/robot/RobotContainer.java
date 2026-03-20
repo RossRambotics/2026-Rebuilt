@@ -235,7 +235,7 @@ public class RobotContainer {
     // "SuperFastClimb/Right",
     // ClimbCommands.superFastClimb(drive, m_climbElevator, FieldSpot.CLIMB_RIGHT));
 
-    NamedCommands.registerCommand("Intake.Deploy", m_intake.getDeployArmOnceCmd());
+    NamedCommands.registerCommand("Intake.Deploy", m_intake.getDeployInstantCmd());
     // Shoot.Start / Shoot.Stop: instant commands for use in PathPlanner auto
     // routines.
     // They schedule/cancel the same shared AutoShoot command instance used by the
