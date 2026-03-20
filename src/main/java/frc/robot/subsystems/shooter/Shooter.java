@@ -1596,6 +1596,44 @@ public class Shooter extends TimedSubsystem {
   }
 
   /**
+   * FIRE-NOW mode — fires the kicker and spindexer immediately without waiting for
+   * {@link #isReady()}, while holding the hood and flywheel at their current firing-solution
+   * setpoints.
+   *
+   * <p>Use this instead of {@link #getManualShootCmd()} when {@link #getAutoShootCmd()} is active,
+   * so that triggering the kicker does not cancel the auto-shoot parallel group and drop the hood
+   * and flywheel back to their idle defaults.
+   *
+   * <p>When this command ends, all four subsystems release and their default commands resume.
+   */
+  public Command getAutoFireNowCmd() {
+    return Commands.parallel(
+            // Hold hood at firing-solution angle (same logic as AutoShoot)
+            m_hood.setAngle(
+                () -> {
+                  if (m_lastFiringSolution != null) {
+                    double trimmedDeg =
+                        MathUtil.clamp(
+                            Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees)
+                                + m_hoodTrimOffsetDeg,
+                            HoodConstants.HOOD_DEGREES_MIN,
+                            HoodConstants.HOOD_DEGREES_MAX);
+                    return Degrees.of(trimmedDeg);
+                  }
+                  return Degrees.of(HoodConstants.HOOD_DEGREES_MIN);
+                }),
+            // Hold flywheel at firing-solution RPM (same logic as AutoShoot)
+            m_bottomFlyWheel.setVelocity(
+                () ->
+                    m_lastFiringSolution != null
+                        ? RPM.of(m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm)
+                        : RPM.of(IDLE_FLYWHEEL_RPM + m_rpmTrimOffsetRpm)),
+            m_kicker.setVelocity(RPM.of(KICKER_SHOOT_RPM)),
+            m_spindexer.getRunCmd())
+        .withName("AutoFireNow");
+  }
+
+  /**
    * OFF mode — stops all shooter mechanisms. Not driver-bound; triggered from
    * Elastic/Shuffleboard.
    * Uses {@code setDutyCycle(0.0)} for positional mechanisms (Hood, Turret) since
