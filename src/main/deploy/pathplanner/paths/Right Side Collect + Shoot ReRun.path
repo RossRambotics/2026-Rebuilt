@@ -68,8 +68,24 @@
         "y": 0.658
       },
       "prevControl": {
-        "x": 3.701553353054708,
-        "y": 0.6907649166485944
+        "x": 3.331964770398627,
+        "y": 0.45352675885128013
+      },
+      "nextControl": {
+        "x": 1.6680352296013723,
+        "y": 0.8624732411487198
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.9209999999999998,
+        "y": 1.3467831325301212
+      },
+      "prevControl": {
+        "x": 1.9100722891566262,
+        "y": 0.7348313253012042
       },
       "nextControl": null,
       "isLocked": false,
@@ -94,8 +110,12 @@
       "rotationDegrees": -90.0
     },
     {
-      "waypointRelativePos": 3.010788381742713,
+      "waypointRelativePos": 3.0,
       "rotationDegrees": 90.0
+    },
+    {
+      "waypointRelativePos": 3.365145228215775,
+      "rotationDegrees": 0.0
     }
   ],
   "constraintZones": [],
