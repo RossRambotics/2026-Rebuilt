@@ -57,7 +57,7 @@ public class Robot extends LoggedRobot {
     switch (Constants.currentMode) {
       case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
-        Logger.addDataReceiver(new WPILOGWriter());
+        Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
@@ -102,7 +102,8 @@ public class Robot extends LoggedRobot {
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
 
-    // Log GC deltas — non-zero values indicate GC ran during this loop cycle (verbose only).
+    // Log GC deltas — non-zero values indicate GC ran during this loop cycle
+    // (verbose only).
     if (Constants.VERBOSE_TELEMETRY) {
       long totalGcCount =
           gcBeans.stream().mapToLong(GarbageCollectorMXBean::getCollectionCount).sum();

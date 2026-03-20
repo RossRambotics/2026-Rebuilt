@@ -217,6 +217,9 @@ public class OperatorControls {
     SmartDashboard.putData("Intake/Run Spindexer", shooter.getSpindexerRunCmd());
     SmartDashboard.putData("Intake/Stop Spindexer", shooter.getSpindexerStopCmd());
     SmartDashboard.putData("Intake/Reverse Spindexer", shooter.getSpindexerReverseCmd());
+    // SmartDashboard.putData("Shooter/Reverse Kicker",
+    // m_kicker.setDutyCycle(-12).withName("Intake/Reverse")
+    // );
 
     // ── Calibration ──────────────────────────────────────────────────────────
     // TODO: Add prematch alignment readouts to the Calibration page on the button

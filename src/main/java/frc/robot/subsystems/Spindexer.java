@@ -48,7 +48,7 @@ public class Spindexer extends TimedSubsystem {
           new SmartMotorControllerConfig(this)
               .withControlMode(ControlMode.CLOSED_LOOP)
               .withClosedLoopController(
-                  0, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
+                  1, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
               .withSimClosedLoopController(
                   50, 0, 0, RotationsPerSecond.of(100), RotationsPerSecondPerSecond.of(1000))
               .withFeedforward(new SimpleMotorFeedforward(0, .12, 0))

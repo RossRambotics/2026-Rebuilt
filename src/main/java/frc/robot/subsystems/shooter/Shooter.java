@@ -82,7 +82,7 @@ public class Shooter extends TimedSubsystem {
 
   // Persistent in-match RPM offset accumulated by the trim buttons.
   // Added inside every flywheel velocity calculation (auto and fixed).
-  private double m_rpmTrimOffsetRpm = 0.0;
+  private double m_rpmTrimOffsetRpm = 100.0;
 
   // Persistent in-match hood angle offset (degrees) accumulated by the trim
   // buttons.
@@ -124,13 +124,13 @@ public class Shooter extends TimedSubsystem {
   private static final double HOPPER_EMPTY_TIMEOUT_SEC = 1.0;
 
   // Readiness thresholds (allowable error)
-  private static final double TURRET_ANGLE_TOLERANCE_DEG = 2.0; // degrees
+  private static final double TURRET_ANGLE_TOLERANCE_DEG = 3.0; // degrees
   private static final double HOOD_ANGLE_TOLERANCE_DEG = 2.0; // degrees
-  private static final double BOTTOM_FLYWHEEL_RPM_TOLERANCE = 150.0; // RPM
+  private static final double BOTTOM_FLYWHEEL_RPM_TOLERANCE = 200.0; // RPM
   // Debounce durations for readiness signals (seconds)
-  private static final double TURRET_READY_DEBOUNCE_SEC = 0.10; // 100 ms
-  private static final double HOOD_READY_DEBOUNCE_SEC = 0.10; // 100 ms
-  private static final double BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC = 0.10; // 100 ms
+  private static final double TURRET_READY_DEBOUNCE_SEC = 0.05; // 100 ms
+  private static final double HOOD_READY_DEBOUNCE_SEC = 0.05; // 100 ms
+  private static final double BOTTOM_FLYWHEEL_READY_DEBOUNCE_SEC = 0.05; // 100 ms
   private static final double AUTO_SHOOT_INTERVAL_SEC = 0.5; // 2 balls per second
   // Extra time added to TOF when predicting future pose, to compensate for system
   // latency
@@ -776,8 +776,10 @@ public class Shooter extends TimedSubsystem {
       // commanded speed includes the trim offset, so the target must too).
       double currentBottomRpm = m_bottomFlyWheel.getVelocity().in(RPM);
       double targetBottomRpm = m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm;
-      boolean rawBottomReady =
-          Math.abs(currentBottomRpm - targetBottomRpm) < BOTTOM_FLYWHEEL_RPM_TOLERANCE;
+      double errorBottomRpm = Math.abs(currentBottomRpm - targetBottomRpm);
+      Logger.recordOutput("Shooter/ErrorBottomRPM", errorBottomRpm);
+
+      boolean rawBottomReady = errorBottomRpm < BOTTOM_FLYWHEEL_RPM_TOLERANCE;
       m_isBottomFlyWheelReady = m_bottomFlywheelReadyDebouncer.calculate(rawBottomReady);
 
       // Hood readiness: compare current hood angle to trimmed target (degrees,
@@ -1747,7 +1749,7 @@ public class Shooter extends TimedSubsystem {
   }
 
   /**
-   * Snaps the turret to 0° robot-relative and holds. Cancel via Elastic to return to
+   * Snaps the turret to 0° robot-relative and holds. Cancel via Elastic to return to *
    * auto-targeting.
    */
   public Command getTurretCenterCmd() {
