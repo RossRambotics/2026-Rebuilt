@@ -841,6 +841,7 @@ public class Shooter extends TimedSubsystem {
     Logger.recordOutput("Shooter/IsTurretReady", m_isTurretReady);
     Logger.recordOutput("Shooter/IsBottomFlyWheelReady", m_isBottomFlyWheelReady);
     Logger.recordOutput("Shooter/IsShooterReady", m_isShooterReady);
+    Logger.recordOutput("Shooter/IsShooting", m_isShooting);
     Logger.recordOutput("Shooter/IsHoodReady", m_isHoodReady);
     Logger.recordOutput("Shooter/IsSpeedReady", m_isSpeedReady);
     Logger.recordOutput("Shooter/RPMTrimOffsetRpm", m_rpmTrimOffsetRpm);
@@ -1620,16 +1621,12 @@ public class Shooter extends TimedSubsystem {
         .setAngle(Degrees.of(HoodConstants.HOOD_DEGREES_MIN))
         .beforeStarting(
             () -> {
-              if (Constants.VERBOSE_TELEMETRY) {
-                Logger.recordOutput("Shooter/Hood/IsRetracted", true);
-                Logger.recordOutput("Shooter/Hood/RetractReason", reason);
-              }
+              Logger.recordOutput("Shooter/Hood/IsRetracted", true);
+              Logger.recordOutput("Shooter/Hood/RetractReason", reason);
             })
         .finallyDo(
             interrupted -> {
-              if (Constants.VERBOSE_TELEMETRY) {
-                Logger.recordOutput("Shooter/Hood/IsRetracted", false);
-              }
+              Logger.recordOutput("Shooter/Hood/IsRetracted", false);
             });
   }
 
