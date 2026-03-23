@@ -18,6 +18,10 @@ public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
+  // Set to true during development to enable all verbose telemetry.
+  // Set to false for competition to eliminate NT4 publish overhead.
+  public static final boolean VERBOSE_TELEMETRY = false;
+
   public static enum Mode {
     /** Running on a real robot. */
     REAL,

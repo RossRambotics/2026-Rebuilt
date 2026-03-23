@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "dashboardId": "teleop",
+  "dashboards": {
+    "auto": {
+      "id": "auto",
+      "widgets": []
+    },
+    "teleop": {
+      "id": "teleop",
+      "viewport": {
+        "scale": 0.9579352182226982,
+        "x": 22.99044523734476,
+        "y": 22.99044523734476
+      },
+      "widgets": [
+        {
+          "id": "354f0752-e547-4a3f-97a3-efc0523f562d",
+          "type": "field2d",
+          "layout": {
+            "height": 20,
+            "left": 26,
+            "top": 1,
+            "width": 15
+          },
+          "constraints": {
+            "height": {
+              "min": 11
+            },
+            "width": {
+              "min": 6
+            }
+          },
+          "slot": "nt:/AdvantageKit/RealOutputs/Odometry/Robot",
+          "lookback": 5,
+          "props": {
+            "style": "2026-empty",
+            "orientation": "90",
+            "bumperSizeInch": 30
+          }
+        },
+        {
+          "id": "37ad947f-91d8-491f-90b7-101be8110929",
+          "type": "value",
+          "layout": {
+            "height": 6,
+            "left": 0,
+            "top": 8,
+            "width": 6
+          },
+          "constraints": {
+            "height": {
+              "min": 4
+            },
+            "width": {
+              "min": 4
+            }
+          },
+          "slot": "nt:/AdvantageKit/RealOutputs/Shooter/DistanceToTarget",
+          "props": {
+            "valueFormat": {
+              "maximumFractionDigits": 2
+            },
+            "alignment": "center",
+            "size": "lg",
+            "mono": false,
+            "title": "Target Distance"
+          }
+        },
+        {
+          "id": "2e67d09f-4999-4bf5-ad7b-be3d3219eb0c",
+          "type": "value",
+          "layout": {
+            "height": 6,
+            "left": 0,
+            "top": 1,
+            "width": 6
+          },
+          "constraints": {
+            "height": {
+              "min": 4
+            },
+            "width": {
+              "min": 4
+            }
+          },
+          "slot": "nt:/AdvantageKit/RealOutputs/Shooter/TargetName",
+          "props": {
+            "valueFormat": {
+              "maximumFractionDigits": 2
+            },
+            "alignment": "center",
+            "size": "lg",
+            "mono": false,
+            "title": "Target Name"
+          }
+        },
+        {
+          "id": "2e707211-4ddb-4bf8-b62d-c5bd8d94dc18",
+          "type": "color",
+          "layout": {
+            "left": 9,
+            "top": 1,
+            "width": 6,
+            "height": 6
+          },
+          "constraints": {
+            "width": {
+              "min": 4
+            },
+            "height": {
+              "min": 4
+            }
+          },
+          "slot": "nt:/AdvantageKit/RealOutputs/Shooter/TurretOnTarget",
+          "props": {
+            "boolean": {
+              "true": "#00c951",
+              "false": "#fb2c36"
+            },
+            "title": "On Target?"
+          }
+        }
+      ]
+    },
+    "custom": []
+  }
+}

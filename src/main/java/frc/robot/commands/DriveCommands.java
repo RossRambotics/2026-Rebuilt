@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -40,21 +41,106 @@ public class DriveCommands {
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
+  private static double m_prevTimestamp = Timer.getFPGATimestamp();
+  private static Translation2d m_prevLinearVel = new Translation2d(0.0, 0.0);
+  private static double m_prevAngularTimestamp = Timer.getFPGATimestamp();
+  private static double m_prevAngularVel = 0.0;
 
   private DriveCommands() {}
 
   private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
-    // Apply deadband
+
+    // --- Time delta ---
+    double now = Timer.getFPGATimestamp();
+    double dt = now - m_prevTimestamp;
+    m_prevTimestamp = now;
+
+    // --- Joystick shaping (unchanged) ---
     double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND);
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
-    // Square magnitude for more precise control
-    linearMagnitude = linearMagnitude * linearMagnitude;
+    linearMagnitude *= linearMagnitude; // square for precision
 
-    // Return new linear velocity
-    return new Pose2d(Translation2d.kZero, linearDirection)
-        .transformBy(new Transform2d(linearMagnitude, 0.0, Rotation2d.kZero))
-        .getTranslation();
+    // Scale magnitude into meters/sec using SpeedNanny's runtime speed limit
+    double speedLimit = RobotContainer.getInstance().m_speedNanny.getSpeedLimit();
+    double linearMagnitudeMps = linearMagnitude * speedLimit;
+
+    Translation2d desiredVel =
+        new Pose2d(Translation2d.kZero, linearDirection)
+            .transformBy(new Transform2d(linearMagnitudeMps, 0.0, Rotation2d.kZero))
+            .getTranslation();
+
+    // --- Dynamic slew limiting ---
+    Translation2d delta = desiredVel.minus(m_prevLinearVel);
+    double deltaMag = delta.getNorm();
+
+    // Acceleration limit is in meters/sec^2, so multiplying by dt yields meters/sec
+    double maxDelta = RobotContainer.getInstance().m_speedNanny.getAccelerationLimit() * dt;
+
+    if (deltaMag > maxDelta) {
+      delta = delta.times(maxDelta / deltaMag);
+    }
+
+    Translation2d limitedVel = m_prevLinearVel.plus(delta);
+
+    // Clamp to speed limit in case limit was reduced while moving
+    double limitedVelMag = limitedVel.getNorm();
+    if (limitedVelMag > speedLimit) {
+      limitedVel = limitedVel.times(speedLimit / limitedVelMag);
+    }
+
+    m_prevLinearVel = limitedVel;
+
+    return limitedVel;
+  }
+
+  /**
+   * Convert a joystick rotational axis into a limited rotational velocity (rad/s).
+   *
+   * <p>Processing steps:
+   *
+   * <ol>
+   *   <li>Apply a deadband to the raw input using {@code DEADBAND}.
+   *   <li>Square the input for finer low-speed control while preserving sign.
+   *   <li>Scale the shaped input by the runtime angular rate limit from {@code
+   *       RobotContainer.getInstance().m_speedNanny.getAngularRateLimit()} to obtain a commanded
+   *       angular velocity in rad/s.
+   *   <li>Apply dynamic slew limiting using the angular acceleration limit from {@code
+   *       RobotContainer.getInstance().m_speedNanny.getAngularAccelerationLimit()}.
+   * </ol>
+   *
+   * @param omegaInput raw rotational joystick axis in [-1, 1]
+   * @return commanded angular velocity in rad/s
+   */
+  private static double getRotationalVelocityFromJoysticks(double omegaInput) {
+    // --- Time delta (separate timestamp from linear) ---
+    double now = Timer.getFPGATimestamp();
+    double dt = now - m_prevAngularTimestamp;
+    m_prevAngularTimestamp = now;
+
+    // Deadband + shaping (square for precision)
+    double omega = MathUtil.applyDeadband(omegaInput, DEADBAND);
+    omega = Math.copySign(omega * omega, omega);
+
+    // Scale to rad/s using SpeedNanny's runtime angular rate limit (assumed rad/s)
+    double angularRateLimit = RobotContainer.getInstance().m_speedNanny.getAngularRateLimit();
+    double desiredOmega = omega * angularRateLimit;
+
+    // Slew limiting (angular acceleration limit is in rad/s^2)
+    double maxDelta = RobotContainer.getInstance().m_speedNanny.getAngularAccelerationLimit() * dt;
+    double delta = desiredOmega - m_prevAngularVel;
+    if (Math.abs(delta) > maxDelta) {
+      delta = Math.copySign(maxDelta, delta);
+    }
+
+    double limitedOmega = m_prevAngularVel + delta;
+
+    // Clamp to angular rate limit in case limit was reduced while rotating
+    limitedOmega = MathUtil.clamp(limitedOmega, -angularRateLimit, angularRateLimit);
+
+    m_prevAngularVel = limitedOmega;
+
+    return limitedOmega;
   }
 
   /**
@@ -71,18 +157,14 @@ public class DriveCommands {
           Translation2d linearVelocity =
               getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
-          // Apply rotation deadband
-          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+          // Compute rotational velocity (rad/s) using SpeedNanny limits
+          double omega = getRotationalVelocityFromJoysticks(omegaSupplier.getAsDouble());
 
-          // Square rotation value for more precise control
-          omega = Math.copySign(omega * omega, omega);
-
-          // Convert to field relative speeds & send command
+          // Convert to field relative speeds & send command.
+          // getLinearVelocityFromJoysticks
+          // now returns meters/sec directly, so use values as-is.
           ChassisSpeeds speeds =
-              new ChassisSpeeds(
-                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-                  omega * drive.getMaxAngularSpeedRadPerSec());
+              new ChassisSpeeds(linearVelocity.getX(), linearVelocity.getY(), omega);
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
                   && DriverStation.getAlliance().get() == Alliance.Red;
@@ -128,12 +210,11 @@ public class DriveCommands {
                   angleController.calculate(
                       drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
 
-              // Convert to field relative speeds & send command
+              // Convert to field relative speeds & send command.
+              // getLinearVelocityFromJoysticks
+              // returns meters/sec directly, so use values as-is.
               ChassisSpeeds speeds =
-                  new ChassisSpeeds(
-                      linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                      linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-                      omega);
+                  new ChassisSpeeds(linearVelocity.getX(), linearVelocity.getY(), omega);
               boolean isFlipped =
                   DriverStation.getAlliance().isPresent()
                       && DriverStation.getAlliance().get() == Alliance.Red;
@@ -286,5 +367,58 @@ public class DriveCommands {
     double[] positions = new double[4];
     Rotation2d lastAngle = Rotation2d.kZero;
     double gyroDelta = 0.0;
+  }
+
+  /**
+   * Spins the robot in place to the target heading, then finishes. Uses the same angle PID
+   * constants as {@link #joystickDriveAtAngle}. Ends when within 2 degrees of the target.
+   *
+   * @param drive the drive subsystem
+   * @param targetHeading supplier for the desired heading
+   */
+  public static Command spinToHeading(Drive drive, Supplier<Rotation2d> targetHeading) {
+    ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+    angleController.setTolerance(Units.degreesToRadians(2.0));
+
+    return Commands.run(
+            () -> {
+              double omega =
+                  angleController.calculate(
+                      drive.getRotation().getRadians(), targetHeading.get().getRadians());
+              drive.runVelocity(new ChassisSpeeds(0.0, 0.0, omega));
+            },
+            drive)
+        .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()))
+        .until(angleController::atGoal);
+  }
+
+  public static Command joystickDriveRobotCentric(
+      Drive drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      DoubleSupplier omegaSupplier) {
+    return Commands.run(
+        () -> {
+          // Get linear velocity
+          Translation2d linearVelocity =
+              getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+          // Compute rotational velocity (rad/s) using SpeedNanny limits
+          double omega = getRotationalVelocityFromJoysticks(omegaSupplier.getAsDouble());
+
+          // Convert to robot-centric speeds & send command.
+          // getLinearVelocityFromJoysticks
+          // returns meters/sec directly, so use values as-is.
+          ChassisSpeeds speeds =
+              new ChassisSpeeds(linearVelocity.getX(), linearVelocity.getY(), omega);
+          drive.runVelocity(speeds);
+        },
+        drive);
   }
 }

@@ -1,0 +1,317 @@
+{
+  "NetworkTables": {
+    "transitory": {
+      "AdvantageKit": {
+        "RealOutputs": {
+          "Shooter": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "Mechanisms": {
+        "BottomFlyWheel": {
+          "BottomFlyWheelMotor": {
+            "closedloop": {
+              "setpoint": {
+                "open": true
+              }
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "BottomShooterMech": {
+          "ShooterMotor": {
+            "closedloop": {
+              "open": true,
+              "setpoint": {
+                "open": true
+              }
+            },
+            "open": true
+          },
+          "open": true
+        }
+      },
+      "Shuffleboard": {
+        "Hood": {
+          "open": true
+        }
+      },
+      "Tuning": {
+        "BottomFlyWheel": {
+          "BottomFlyWheelMotor": {
+            "closedloop": {
+              "feedback": {
+                "open": true
+              },
+              "feedforward": {
+                "open": true
+              },
+              "motionprofile": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "HoodMech": {
+          "HoodMotor": {
+            "closedloop": {
+              "feedback": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "TurretMech": {
+          "TurretMotor": {
+            "closedloop": {
+              "feedback": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "photonvision": {
+        "intake-cam": {
+          "open": true
+        },
+        "open": true
+      }
+    },
+    "types": {
+      "/AdvantageKit/RealOutputs/Alerts": "Alerts",
+      "/AdvantageKit/RealOutputs/PathPlanner": "Alerts",
+      "/AdvantageKit/RealOutputs/PhotonAlerts": "Alerts",
+      "/FMSInfo": "FMSInfo",
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 0 RPM": "Command",
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 10 RPM": "Command",
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 100 RPM": "Command",
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 1000 RPM": "Command",
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 2000 RPM": "Command",
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Bottom Flywheel 3000 RPM": "Command",
+      "/Shuffleboard/BottomFlyWheel/BottomFlyWheel/Dynamic": "Command",
+      "/Shuffleboard/Hood/Hood.ZeroAngle": "Command",
+      "/Shuffleboard/Hood/Hood/Hood Angle 0": "Command",
+      "/Shuffleboard/Hood/Hood/Hood Angle 20": "Command",
+      "/Shuffleboard/Hood/Hood/Hood Angle 25": "Command",
+      "/Shuffleboard/Hood/Hood/Hood Angle 30": "Command",
+      "/Shuffleboard/Hood/Hood/Hood Angle 35": "Command",
+      "/Shuffleboard/Hood/Hood/Hood Angle 40": "Command",
+      "/Shuffleboard/Hood/Hood/Hood Angle 45": "Command",
+      "/Shuffleboard/Hood/Hood/ResetZero": "Command",
+      "/Shuffleboard/Kicker/Kicker/Kicker Dynamic": "Command",
+      "/Shuffleboard/Shooter/NormalTargeting": "Command",
+      "/Shuffleboard/Shooter/PredictiveTargeting": "Command",
+      "/Shuffleboard/Shooter/Shooter/Off": "Command",
+      "/Shuffleboard/Shooter/Target/Blue Hub": "Command",
+      "/Shuffleboard/Shooter/Target/Blue Neutral Target Left": "Command",
+      "/Shuffleboard/Shooter/Target/Blue Neutral Target Right": "Command",
+      "/Shuffleboard/Shooter/Target/Blue Opposition Target Left": "Command",
+      "/Shuffleboard/Shooter/Target/Blue Opposition Target Right": "Command",
+      "/Shuffleboard/Shooter/Target/Red Hub": "Command",
+      "/Shuffleboard/Spindexer/Spindexer/Spindexer Dynamic": "Command",
+      "/Shuffleboard/SpotSelector/Alliance Trench Left": "Command",
+      "/Shuffleboard/SpotSelector/Alliance Trench Right": "Command",
+      "/Shuffleboard/SpotSelector/Blue Trench Bottom": "Command",
+      "/Shuffleboard/SpotSelector/Blue Trench Top": "Command",
+      "/Shuffleboard/SpotSelector/Clear Selection": "Command",
+      "/Shuffleboard/SpotSelector/Climb Center": "Command",
+      "/Shuffleboard/SpotSelector/Climb Left": "Command",
+      "/Shuffleboard/SpotSelector/Climb Right": "Command",
+      "/Shuffleboard/SpotSelector/Hub Alliance": "Command",
+      "/Shuffleboard/SpotSelector/Hub Neutral": "Command",
+      "/Shuffleboard/SpotSelector/Opponent Trench Left": "Command",
+      "/Shuffleboard/SpotSelector/Opponent Trench Right": "Command",
+      "/Shuffleboard/SpotSelector/Red Trench Bottom": "Command",
+      "/Shuffleboard/SpotSelector/Red Trench Top": "Command",
+      "/Shuffleboard/YAMS_SysID/Hood SysId": "Command",
+      "/Shuffleboard/YAMS_SysID/InstantCommand": "Command",
+      "/SmartDashboard/Alerts": "Alerts",
+      "/SmartDashboard/Auto Choices": "String Chooser",
+      "/SmartDashboard/Calibration/Climb Calibrate In Place": "Command",
+      "/SmartDashboard/Calibration/Climb Home & Calibrate": "Command",
+      "/SmartDashboard/Calibration/Enable Normal Gyro": "Command",
+      "/SmartDashboard/Calibration/Enable Vision Gyro": "Command",
+      "/SmartDashboard/Calibration/Hood Calibrate In Place": "Command",
+      "/SmartDashboard/Calibration/Hood Home & Calibrate": "Command",
+      "/SmartDashboard/Calibration/Hood Zero": "Command",
+      "/SmartDashboard/Calibration/Intake Arm Calibrate In Place": "Command",
+      "/SmartDashboard/Calibration/Intake Arm Home & Calibrate": "Command",
+      "/SmartDashboard/Calibration/Reseed from Vision": "Command",
+      "/SmartDashboard/Calibration/Reset Gyro": "Command",
+      "/SmartDashboard/Calibration/Reset Pose Hub Wall": "Command",
+      "/SmartDashboard/Calibration/Turret Calibrate In Place": "Command",
+      "/SmartDashboard/Calibration/Turret Home & Calibrate": "Command",
+      "/SmartDashboard/Climb/Center": "Command",
+      "/SmartDashboard/Climb/Extend Arm": "Command",
+      "/SmartDashboard/Climb/Left": "Command",
+      "/SmartDashboard/Climb/Retract Arm": "Command",
+      "/SmartDashboard/Climb/Right": "Command",
+      "/SmartDashboard/Climb/Robot Climb": "Command",
+      "/SmartDashboard/Enable Normal Gyro": "Command",
+      "/SmartDashboard/Enable Vision Gyro": "Command",
+      "/SmartDashboard/Intake/Auto Drive To Fuel": "Command",
+      "/SmartDashboard/Intake/Deploy": "Command",
+      "/SmartDashboard/Intake/Eject": "Command",
+      "/SmartDashboard/Intake/Retract": "Command",
+      "/SmartDashboard/Intake/Reverse Spindexer": "Command",
+      "/SmartDashboard/Intake/Roller Off": "Command",
+      "/SmartDashboard/Intake/Roller On": "Command",
+      "/SmartDashboard/Intake/Run Spindexer": "Command",
+      "/SmartDashboard/Intake/Stop Spindexer": "Command",
+      "/SmartDashboard/Mechanisms/Commands/BottomFlyWheel/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/BottomFlyWheelMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ClimbElevator/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ClimbElevatorMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ClimbElevatorMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ClimbElevatorMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Hood/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/HoodMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/HoodMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/HoodMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeDeployArm/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeDeployArmMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeDeployArmMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeDeployArmMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeRoller/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeRoller/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeRoller/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/IntakeRoller/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Kicker/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Kicker/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Kicker/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Kicker/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ShooterMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ShooterMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/ShooterMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Spindexer/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Spindexer/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Spindexer/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Spindexer/ZeroEncoder": "Command",
+      "/SmartDashboard/Mechanisms/Commands/Turret/Live Tuning": "Command",
+      "/SmartDashboard/Mechanisms/Commands/TurretMotor/Down": "Command",
+      "/SmartDashboard/Mechanisms/Commands/TurretMotor/Up": "Command",
+      "/SmartDashboard/Mechanisms/Commands/TurretMotor/ZeroEncoder": "Command",
+      "/SmartDashboard/PathPlanner": "Alerts",
+      "/SmartDashboard/PhotonAlerts": "Alerts",
+      "/SmartDashboard/Reseed Gyro From Vision": "Command",
+      "/SmartDashboard/Shooter/Auto Shoot": "Command",
+      "/SmartDashboard/Shooter/Hood +1deg": "Command",
+      "/SmartDashboard/Shooter/Hood -1deg": "Command",
+      "/SmartDashboard/Shooter/Hood Trim Reset": "Command",
+      "/SmartDashboard/Shooter/Normal Targeting": "Command",
+      "/SmartDashboard/Shooter/Off": "Command",
+      "/SmartDashboard/Shooter/Predictive Targeting": "Command",
+      "/SmartDashboard/Shooter/RPM +100": "Command",
+      "/SmartDashboard/Shooter/RPM +50": "Command",
+      "/SmartDashboard/Shooter/RPM -100": "Command",
+      "/SmartDashboard/Shooter/RPM -50": "Command",
+      "/SmartDashboard/Shooter/RPM Reset": "Command",
+      "/SmartDashboard/Shooter/Retract Hood": "Command",
+      "/SmartDashboard/Shooter/Shot 1m": "Command",
+      "/SmartDashboard/Shooter/Shot 2m": "Command",
+      "/SmartDashboard/Shooter/Shot 3m": "Command",
+      "/SmartDashboard/Shooter/Shot 4m": "Command",
+      "/SmartDashboard/Shooter/Shot 5m": "Command",
+      "/SmartDashboard/Shooter/Shot 6m": "Command",
+      "/SmartDashboard/Shooter/Shot 7m": "Command",
+      "/SmartDashboard/Shooter/Shot 8m": "Command",
+      "/SmartDashboard/Shooter/TOF Confirm": "Command",
+      "/SmartDashboard/Shooter/Target Enable Auto": "Command",
+      "/SmartDashboard/Shooter/Target Hub": "Command",
+      "/SmartDashboard/Shooter/Target Neutral Left": "Command",
+      "/SmartDashboard/Shooter/Target Neutral Right": "Command",
+      "/SmartDashboard/Shooter/Target Opposition Left": "Command",
+      "/SmartDashboard/Shooter/Target Opposition Right": "Command",
+      "/SmartDashboard/Shooter/Turret Center": "Command",
+      "/SmartDashboard/Shooter/Turret Left 5deg": "Command",
+      "/SmartDashboard/Shooter/Turret Right 5deg": "Command",
+      "/SmartDashboard/Shooter/Turret Trim +1deg": "Command",
+      "/SmartDashboard/Shooter/Turret Trim -1deg": "Command",
+      "/SmartDashboard/Shooter/Turret Trim Reset": "Command",
+      "/SmartDashboard/Spots/Alliance Trench Left": "Command",
+      "/SmartDashboard/Spots/Alliance Trench Right": "Command",
+      "/SmartDashboard/Spots/Clear Selection": "Command",
+      "/SmartDashboard/Spots/Climb Center": "Command",
+      "/SmartDashboard/Spots/Climb Left": "Command",
+      "/SmartDashboard/Spots/Climb Right": "Command",
+      "/SmartDashboard/Spots/Hub Alliance": "Command",
+      "/SmartDashboard/Spots/Hub Neutral": "Command",
+      "/SmartDashboard/Spots/Opponent Trench Left": "Command",
+      "/SmartDashboard/Spots/Opponent Trench Right": "Command",
+      "/SmartDashboard/Spots/Red Trench Bottom": "Command",
+      "/SmartDashboard/Spots/Shooting Bottom": "Command",
+      "/SmartDashboard/Spots/Shooting Top": "Command"
+    },
+    "windows": {
+      "/SmartDashboard/Auto Choices": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Calibration/Intake Arm Home & Calibrate": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Calibration/Turret Calibrate In Place": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Info": {
+    "visible": true
+  },
+  "NetworkTables Settings": {
+    "mode": "Client (NT4)",
+    "serverTeam": "3201",
+    "visible": false
+  },
+  "Plots": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 457,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/AdvantageKit/RealOutputs/Shooter/FlyWheelRPM"
+            }
+          ]
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    }
+  }
+}

@@ -37,20 +37,22 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.TimedSubsystem;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Drive extends SubsystemBase {
+public class Drive extends TimedSubsystem {
   // TunerConstants doesn't include these constants, so they are declared locally
-  static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;
+  // performance tuning trying to reduce loops reduced 250 to 100 for FD networks
+  static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 100.0 : 100.0;
   public static final double DRIVE_BASE_RADIUS =
       Math.max(
           Math.max(
@@ -121,7 +123,7 @@ public class Drive extends SubsystemBase {
         this::getPose,
         this::setPose,
         this::getChassisSpeeds,
-        this::runVelocity,
+        (speeds, feedforwards) -> runVelocity(speeds),
         new PPHolonomicDriveController(
             new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
         PP_CONFIG,
@@ -130,11 +132,15 @@ public class Drive extends SubsystemBase {
     Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
         (activePath) -> {
-          Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]));
+          if (Constants.VERBOSE_TELEMETRY) {
+            Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]));
+          }
         });
     PathPlannerLogging.setLogTargetPoseCallback(
         (targetPose) -> {
-          Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+          if (Constants.VERBOSE_TELEMETRY) {
+            Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
+          }
         });
 
     // Configure SysId
@@ -144,13 +150,17 @@ public class Drive extends SubsystemBase {
                 null,
                 null,
                 null,
-                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+                (state) -> {
+                  if (Constants.VERBOSE_TELEMETRY) {
+                    Logger.recordOutput("Drive/SysIdState", state.toString());
+                  }
+                }),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
   }
 
   @Override
-  public void periodic() {
+  protected void periodicImpl() {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
     Logger.processInputs("Drive/Gyro", gyroInputs);
@@ -166,8 +176,8 @@ public class Drive extends SubsystemBase {
       }
     }
 
-    // Log empty setpoint states when disabled
-    if (DriverStation.isDisabled()) {
+    // Log empty setpoint states when disabled (verbose only)
+    if (DriverStation.isDisabled() && Constants.VERBOSE_TELEMETRY) {
       Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
       Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
     }
@@ -204,6 +214,11 @@ public class Drive extends SubsystemBase {
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
     }
 
+    // Log measured swerve states (verbose only)
+    if (Constants.VERBOSE_TELEMETRY) {
+      Logger.recordOutput("SwerveStates/Measured", getModuleStates());
+    }
+
     // Update gyro alert
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
   }
@@ -219,17 +234,21 @@ public class Drive extends SubsystemBase {
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
 
-    // Log unoptimized setpoints and setpoint speeds
-    Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-    Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+    if (Constants.VERBOSE_TELEMETRY) {
+      // Log unoptimized setpoints and setpoint speeds
+      Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
+      Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+    }
 
     // Send setpoints to modules
     for (int i = 0; i < 4; i++) {
       modules[i].runSetpoint(setpointStates[i]);
     }
 
-    // Log optimized setpoints (runSetpoint mutates each state)
-    Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    if (Constants.VERBOSE_TELEMETRY) {
+      // Log optimized setpoints (runSetpoint mutates each state)
+      Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+    }
   }
 
   /** Runs the drive in a straight line with the specified drive output. */
@@ -270,7 +289,6 @@ public class Drive extends SubsystemBase {
   }
 
   /** Returns the module states (turn angles and drive velocities) for all of the modules. */
-  @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
     for (int i = 0; i < 4; i++) {
@@ -290,8 +308,28 @@ public class Drive extends SubsystemBase {
 
   /** Returns the measured chassis speeds of the robot. */
   @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
-  private ChassisSpeeds getChassisSpeeds() {
+  public ChassisSpeeds getChassisSpeeds() {
     return kinematics.toChassisSpeeds(getModuleStates());
+  }
+
+  /**
+   * Returns the measured chassis speeds expressed in the field frame.
+   *
+   * <p>Robot-frame speeds (vx forward, vy left) are rotated by the robot's current heading to
+   * produce field-frame velocities.
+   *
+   * @return field-relative chassis speeds
+   */
+  public ChassisSpeeds getFieldSpeeds() {
+    ChassisSpeeds robotSpeeds = getChassisSpeeds();
+    Rotation2d r = getRotation();
+
+    double fieldVx =
+        robotSpeeds.vxMetersPerSecond * r.getCos() - robotSpeeds.vyMetersPerSecond * r.getSin();
+    double fieldVy =
+        robotSpeeds.vxMetersPerSecond * r.getSin() + robotSpeeds.vyMetersPerSecond * r.getCos();
+
+    return new ChassisSpeeds(fieldVx, fieldVy, robotSpeeds.omegaRadiansPerSecond);
   }
 
   /** Returns the position of each module in radians. */
@@ -312,6 +350,12 @@ public class Drive extends SubsystemBase {
     return output;
   }
 
+  /** Returns the combined roll+pitch tilt magnitude in radians. Zero when gyro disconnected. */
+  @AutoLogOutput(key = "Drive/TiltMagnitudeRad")
+  public double getTiltMagnitudeRad() {
+    return Math.hypot(gyroInputs.rollRobotRad, gyroInputs.pitchRobotRad);
+  }
+
   /** Returns the current odometry pose. */
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
@@ -326,6 +370,31 @@ public class Drive extends SubsystemBase {
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+  }
+
+  // X/Y position of the front face of the hub (Blue alliance coordinates).
+  private static final double HUB_WALL_X_M = 3.6;
+  private static final double HUB_WALL_Y_M = 4.0;
+
+  /**
+   * Returns a command that resets the robot pose to the front face of the hub and resets the gyro
+   * heading. Blue alliance faces 180°; Red alliance faces 0°. Safe to run while disabled.
+   */
+  public Command getResetPoseHubWallCmd() {
+    return Commands.runOnce(
+            () -> {
+              boolean isRed =
+                  DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red;
+              setPose(
+                  new Pose2d(
+                      HUB_WALL_X_M,
+                      HUB_WALL_Y_M,
+                      !isRed ? Rotation2d.kZero : Rotation2d.fromDegrees(180)));
+            },
+            this)
+        .withName("Drive/ResetPoseHubWall")
+        .ignoringDisable(true);
   }
 
   /** Adds a new timestamped vision measurement. */

@@ -7,8 +7,15 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.util.FuelSim;
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
+import java.util.List;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -25,6 +32,11 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
+
+  private final List<GarbageCollectorMXBean> gcBeans =
+      ManagementFactory.getGarbageCollectorMXBeans();
+  private long lastGcCount = 0;
+  private long lastGcTimeMs = 0;
 
   public Robot() {
     // Record metadata
@@ -45,13 +57,15 @@ public class Robot extends LoggedRobot {
     switch (Constants.currentMode) {
       case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
-        Logger.addDataReceiver(new WPILOGWriter());
+        Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
       case SIM:
         // Running a physics simulator, log to NT
         Logger.addDataReceiver(new NT4Publisher());
+        Logger.addDataReceiver(new WPILOGWriter());
+
         break;
 
       case REPLAY:
@@ -87,23 +101,51 @@ public class Robot extends LoggedRobot {
 
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
+
+    // Log GC deltas — non-zero values indicate GC ran during this loop cycle
+    // (verbose only).
+    if (Constants.VERBOSE_TELEMETRY) {
+      long totalGcCount =
+          gcBeans.stream().mapToLong(GarbageCollectorMXBean::getCollectionCount).sum();
+      long totalGcTimeMs =
+          gcBeans.stream().mapToLong(GarbageCollectorMXBean::getCollectionTime).sum();
+      Logger.recordOutput("Timing/GC/CollectionsDelta", totalGcCount - lastGcCount);
+      Logger.recordOutput("Timing/GC/TimeDeltaMs", totalGcTimeMs - lastGcTimeMs);
+      lastGcCount = totalGcCount;
+      lastGcTimeMs = totalGcTimeMs;
+    }
   }
 
   /** This function is called once when the robot is disabled. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    setLimelightThrottle(200);
+  }
 
   /** This function is called periodically when disabled. */
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    // Publish the selected auto's starting pose directly to telemetry so the Field
+    // widget shows a
+    // marker at the expected start location — drivers can visually verify robot
+    // alignment before
+    // enable. Uses AutoStart/Pose (Pose2d array) rather than SpotSelector to avoid
+    // clobbering
+    // any teleop spot the driver pre-selected while disabled.
+    robotContainer.publishAutoStartPose();
+  }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    setLimelightThrottle(1);
     autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
+      autonomousCommand =
+          autonomousCommand.finallyDo(
+              interrupted -> Logger.recordOutput("Auto/Ended_Interrupted", interrupted));
       CommandScheduler.getInstance().schedule(autonomousCommand);
     }
   }
@@ -115,6 +157,7 @@ public class Robot extends LoggedRobot {
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
+    setLimelightThrottle(1);
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
@@ -122,6 +165,9 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    // Suppress the prematch auto-start-pose marker on the dashboard now that we are
+    // in teleop.
+    Logger.recordOutput("AutoStart/Pose", new Pose2d());
   }
 
   /** This function is called periodically during operator control. */
@@ -145,5 +191,14 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    FuelSim.getInstance().updateSim();
+  }
+
+  /** Sets the throttle_set value on both Limelights. */
+  private void setLimelightThrottle(int throttle) {
+    var nt = NetworkTableInstance.getDefault();
+    nt.getTable(VisionConstants.camera0Name).getEntry("throttle_set").setInteger(throttle);
+    nt.getTable(VisionConstants.camera1Name).getEntry("throttle_set").setInteger(throttle);
+  }
 }
