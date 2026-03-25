@@ -80,6 +80,14 @@ public class Shooter extends TimedSubsystem {
   private boolean m_isShooting = false;
   private boolean m_isTurretServoMode = false;
 
+  // ── Turret jam detection ───────────────────────────────────────────────────
+  // Reuses TURRET_ANGLE_TOLERANCE_DEG as the error threshold.
+  // Velocity threshold matches Turret homing stall detection.
+  private static final double TURRET_STUCK_VELOCITY_RPS = 0.5;
+  private static final double TURRET_STUCK_DURATION_SEC = 0.25;
+  private boolean m_isTurretJammed = false;
+  private final Timer m_turretStuckTimer = new Timer();
+
   // Persistent in-match RPM offset accumulated by the trim buttons.
   // Added inside every flywheel velocity calculation (auto and fixed).
   private double m_rpmTrimOffsetRpm = 100.0;
@@ -327,11 +335,13 @@ public class Shooter extends TimedSubsystem {
   }
 
   /**
-   * Computes the robot heading that places the turret (at 0° robot-relative) on target.
+   * Computes the robot heading required to aim at the target given the turret's current angle.
    *
-   * <p>In servo mode the turret is locked to 0°, so the robot itself must rotate to aim. The
-   * required heading is: fieldAngleToTarget + turretTrimOffset. Returns {@link Rotation2d#kZero} if
-   * turret pose is not yet available.
+   * <p>Because {@code robotHeading + turretAngle = fieldAngleToTarget}, the required robot heading
+   * is {@code fieldAngleToTarget − turretCurrentAngle + turretTrimOffset}. This correctly accounts
+   * for wherever the turret is physically stuck: if it is jammed at 35° the robot only needs to
+   * rotate by the remaining error, not the full field angle. Returns {@link Rotation2d#kZero} if
+   * the turret pose is not yet available.
    */
   public Rotation2d getRobotHeadingForTurretServo() {
     if (m_turretPoseField3d == null) {
@@ -341,7 +351,10 @@ public class Shooter extends TimedSubsystem {
     Translation2d delta =
         m_targetPoseField3d.toPose2d().getTranslation().minus(turretPos.getTranslation());
     Rotation2d fieldAngleToTarget = new Rotation2d(Math.atan2(delta.getY(), delta.getX()));
-    return fieldAngleToTarget.plus(Rotation2d.fromDegrees(m_turretTrimOffsetDeg));
+    Rotation2d turretCurrentAngle = Rotation2d.fromDegrees(m_turret.getAngle().in(Degrees));
+    return fieldAngleToTarget
+        .minus(turretCurrentAngle)
+        .plus(Rotation2d.fromDegrees(m_turretTrimOffsetDeg));
   }
 
   private Command getDynamicHoodCommand() {
@@ -423,6 +436,8 @@ public class Shooter extends TimedSubsystem {
     // Update firing solution and telemetry (compute early so commands/targeting can
     // use it)
     updateFiringSolution();
+    // Detect turret jams; must run after updateFiringSolution() and before updateReadiness()
+    updateJamDetection();
     // Updates target data (kept lightweight) and then publish telemetry last
     updateTargetData();
     // Update readiness flags (moved to its own method for clarity)
@@ -450,6 +465,56 @@ public class Shooter extends TimedSubsystem {
     // store computed solution for consumers; telemetry will be published in
     // updateTelemetry()
     m_lastFiringSolution = solution;
+  }
+
+  /**
+   * Detects a turret that cannot reach its target during an active shooting sequence and latches
+   * {@link #m_isTurretJammed}. Two conditions trigger the latch:
+   *
+   * <ul>
+   *   <li><b>Mechanical jam:</b> position error exceeds {@link #TURRET_ANGLE_TOLERANCE_DEG} while
+   *       turret velocity stays below {@link #TURRET_STUCK_VELOCITY_RPS}.
+   *   <li><b>Geometric infeasibility:</b> the required turret angle is outside ±90° ({@code
+   *       !isTurretFeasible()}). The turret reaches its clamped limit with near-zero error, so the
+   *       velocity check alone would not catch this case.
+   * </ul>
+   *
+   * <p>Either condition must persist for {@link #TURRET_STUCK_DURATION_SEC} before the flag is
+   * latched. Once latched, {@link #m_isTurretJammed} stays {@code true} until the next shooting
+   * sequence resets it.
+   *
+   * <p>Must be called after {@link #updateFiringSolution()} so {@link #m_lastFiringSolution} is
+   * current.
+   */
+  private void updateJamDetection() {
+    // Only detect while actively shooting; skip if already latched or in manual servo mode.
+    if (!m_isShooting || m_isTurretJammed || m_isTurretServoMode) return;
+    if (m_lastFiringSolution == null) return;
+
+    double commandedDeg = Math.toDegrees(m_lastFiringSolution.turretAngleRad);
+    double actualDeg = m_turret.getAngle().in(Degrees);
+    double errorDeg = Math.abs(commandedDeg - actualDeg);
+    double velocityRps =
+        Math.abs(m_turret.getVelocity().in(edu.wpi.first.units.Units.RotationsPerSecond));
+
+    boolean isStuck =
+        !m_lastFiringSolution.isTurretFeasible()
+            || (errorDeg > TURRET_ANGLE_TOLERANCE_DEG && velocityRps < TURRET_STUCK_VELOCITY_RPS);
+
+    if (isStuck) {
+      m_turretStuckTimer.start();
+    } else {
+      m_turretStuckTimer.reset();
+    }
+
+    if (m_turretStuckTimer.hasElapsed(TURRET_STUCK_DURATION_SEC)) {
+      m_isTurretJammed = true;
+    }
+  }
+
+  /** Returns {@code true} if the turret has been detected as jammed this shooting sequence. */
+  public boolean isTurretJammed() {
+    return m_isTurretJammed;
   }
 
   public FiringSolution calculateFiringSolutionLUT(
@@ -760,8 +825,9 @@ public class Shooter extends TimedSubsystem {
    */
   private void updateReadiness() {
     if (m_lastFiringSolution != null) {
-      if (m_isTurretServoMode) {
-        // Servo mode: turret is at 0°; check drive heading alignment instead
+      if (m_isTurretServoMode || m_isTurretJammed) {
+        // Servo mode (manual or auto jam fallback): check drive heading alignment.
+        // getRobotHeadingForTurretServo() accounts for the turret's actual current angle.
         Rotation2d requiredHeading = getRobotHeadingForTurretServo();
         Rotation2d currentHeading = RobotContainer.getInstance().getRobotPose2d().getRotation();
         double headingErrorDeg = Math.abs(requiredHeading.minus(currentHeading).getDegrees());
@@ -850,6 +916,8 @@ public class Shooter extends TimedSubsystem {
     Logger.recordOutput("Shooter/IsHopperEmpty", m_isHopperEmpty);
     Logger.recordOutput("Shooter/KickerHasFuel", m_kicker.hasFuel());
     Logger.recordOutput("Shooter/IsTurretServoMode", m_isTurretServoMode);
+    Logger.recordOutput("Shooter/IsTurretJammed", m_isTurretJammed);
+    Logger.recordOutput("Shooter/TurretStuckTimerSec", m_turretStuckTimer.get());
     Logger.recordOutput("Shooter/TurretActualDegRobot", m_turret.getAngle().in(Degrees));
     Logger.recordOutput("Shooter/TurretErrorDeg", m_lastTurretErrorRobotAngle.in(Degrees));
     Logger.recordOutput("Shooter/TargetPose2d", m_targetPoseField3d.toPose2d());
@@ -1421,6 +1489,9 @@ public class Shooter extends TimedSubsystem {
         .beforeStarting(
             () -> {
               m_isShooting = true;
+              // Reset jam detection state for new shooting session
+              m_isTurretJammed = false;
+              m_turretStuckTimer.reset();
               // Reset TOF state for new shooting session
               m_tofLaunchCount = 0;
               m_tofConfirmCount = 0;
@@ -1507,6 +1578,9 @@ public class Shooter extends TimedSubsystem {
             () -> {
               m_isTurretServoMode = true;
               m_isShooting = true;
+              // Reset jam detection state for new shooting session
+              m_isTurretJammed = false;
+              m_turretStuckTimer.reset();
               m_tofLaunchCount = 0;
               m_tofConfirmCount = 0;
               m_kickerHadFuelLastLoop = false;

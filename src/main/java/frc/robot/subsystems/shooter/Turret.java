@@ -158,6 +158,12 @@ public class Turret extends TimedSubsystem {
     return m_stubbedAngle;
   }
 
+  /** Returns the turret motor's reported velocity. Returns zero when stubbed. */
+  public AngularVelocity getVelocity() {
+    if (turretMotorVelocity != null) return turretMotorVelocity.refresh().getValue();
+    return DegreesPerSecond.of(0);
+  }
+
   public Command sysId() {
     if (turret != null) {
       return turret.sysId(Volts.of(4.0), Volts.per(Second).of(0.5), Seconds.of(8.0));
