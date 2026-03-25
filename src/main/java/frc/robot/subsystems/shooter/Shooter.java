@@ -543,10 +543,7 @@ public class Shooter extends TimedSubsystem {
 
     // --- Iterate once or twice ---
     for (int i = 0; i < 2; i++) {
-      // futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
-      futurePose = currentPose;
-      // Changed futurePose to equal currentPose to prevent hood from dropping during
-      // manual shoot
+      futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
       shooterFieldPos =
           futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
 
@@ -557,10 +554,7 @@ public class Shooter extends TimedSubsystem {
     }
 
     // --- Final future pose ---
-    // futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
-    futurePose = currentPose;
-    // Changed futurePose to equal currentPose to prevent hood from dropping during
-    // manual shoot
+    futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
     shooterFieldPos =
         futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
 
@@ -577,7 +571,7 @@ public class Shooter extends TimedSubsystem {
     // ±180°
     double rawTurretAngleRad =
         MathUtil.angleModulus(
-            Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians());
+            Math.atan2(delta.getY(), delta.getX()) - futurePose.getRotation().getRadians());
 
     double rawTurretAngleDeg = Math.toDegrees(rawTurretAngleRad);
 
