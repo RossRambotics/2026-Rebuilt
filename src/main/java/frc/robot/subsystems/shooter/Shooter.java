@@ -654,7 +654,7 @@ public class Shooter extends TimedSubsystem {
     // ±180°
     double rawTurretAngleRad =
         MathUtil.angleModulus(
-            Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians());
+            Math.atan2(delta.getY(), delta.getX()) - futurePose.getRotation().getRadians());
 
     double rawTurretAngleDeg = Math.toDegrees(rawTurretAngleRad);
 
