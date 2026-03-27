@@ -21,6 +21,7 @@ public class Intake extends TimedSubsystem {
   private final boolean m_isReal;
   private final IntakeRoller m_roller;
   private final IntakeDeployArm m_deployArm;
+  private boolean m_isDeployed = false;
 
   /** Creates a new Intake coordinator. */
   public Intake(boolean isReal) {
@@ -36,83 +37,48 @@ public class Intake extends TimedSubsystem {
   // ---------------------------------------------------------------------------
 
   /**
-   * Deploy the intake arm and run the roller.
+   * Deploy the intake arm and run the roller. Runs indefinitely until cancelled (e.g. by
+   * getRetractCmd()).
    *
-   * <p>Phase 1: burst duty cycle toward the deploy angle while starting the roller, for
-   * DEPLOY_BURST_SEC.
+   * <p>If the arm has not been deployed yet this match: burst toward the deploy angle, then seat
+   * firmly against the deployed hard stop (stall detection), then periodically re-nudge every
+   * ARM_DEPLOY_NUDGE_INTERVAL_SEC.
    *
-   * <p>Phase 2: release arm to coast (duty-cycle 0) while the roller continues running. This allows
-   * the arm to fold back freely if struck by another robot.
+   * <p>If the arm is already deployed (m_isDeployed): skip the burst and go straight to re-seating,
+   * then periodic nudge. This prevents jarring the mechanism when the driver toggles intake off and
+   * back on.
    */
   public Command getDeployCmd() {
-    return Commands.sequence(
-            // Phase 1 — burst arm toward deploy while starting roller
-            Commands.parallel(
-                    m_deployArm.setDutyCycle(IntakeConstants.DEPLOY_BURST_DUTY_CYCLE),
-                    m_roller.setVelocity(RPM.of(IntakeConstants.ROLLER_INTAKE_RPM)))
-                .withTimeout(IntakeConstants.DEPLOY_BURST_SEC),
-            // Phase 2 — coast arm, keep roller running
-            Commands.parallel(
-                m_deployArm.setDutyCycle(0.0),
-                m_roller.setVelocity(RPM.of(IntakeConstants.ROLLER_INTAKE_RPM))))
+    Command armSequence =
+        Commands.either(
+                // Already deployed — skip burst, just re-seat
+                m_deployArm.driveToDeployedHardStop(),
+                // First deploy — burst first, then seat, then mark deployed
+                Commands.sequence(
+                    m_deployArm
+                        .setDutyCycle(IntakeConstants.DEPLOY_BURST_DUTY_CYCLE)
+                        .withTimeout(IntakeConstants.DEPLOY_BURST_SEC),
+                    m_deployArm.driveToDeployedHardStop(),
+                    Commands.runOnce(() -> m_isDeployed = true)),
+                () -> m_isDeployed)
+            .andThen(
+                Commands.sequence(
+                        Commands.waitSeconds(IntakeConstants.ARM_DEPLOY_NUDGE_INTERVAL_SEC),
+                        m_deployArm.driveToDeployedHardStop())
+                    .repeatedly());
+
+    return Commands.parallel(
+            armSequence, m_roller.setVelocity(RPM.of(IntakeConstants.ROLLER_INTAKE_RPM)))
         .withName("Intake/Deploy");
   }
 
   /**
-   * Kick off arm deploy and roller spin-up, then finish immediately.
+   * Kick off full deploy (arm + roller) as a background command, then finish immediately.
    *
-   * <p>Schedules the arm burst sequence and roller as independent background commands so the caller
-   * (e.g. a PathPlanner NamedCommand) finishes in one cycle without holding subsystem requirements.
-   * Safe to trigger multiple times across auto runs.
+   * <p>Allows PathPlanner NamedCommands to trigger intake deployment without blocking the path.
    */
   public Command getDeployInstantCmd() {
-    return Commands.runOnce(
-            () -> {
-              Commands.sequence(
-                      m_deployArm
-                          .setDutyCycle(IntakeConstants.DEPLOY_BURST_DUTY_CYCLE)
-                          .withTimeout(IntakeConstants.DEPLOY_BURST_SEC),
-                      m_deployArm.setDutyCycle(0.0).withTimeout(0.1),
-                      m_deployArm.setDutyCycle(-3.0).withTimeout(0.5),
-                      m_deployArm.setDutyCycle(0.0))
-                  .schedule();
-              m_roller.setVelocity(RPM.of(IntakeConstants.ROLLER_INTAKE_RPM)).schedule();
-            })
-        .withName("Intake/RollerOn");
-  }
-
-  /**
-   * Deploy the intake arm only (no roller).
-   *
-   * <p>Phase 1: burst duty cycle toward the deploy angle for DEPLOY_BURST_SEC.
-   *
-   * <p>Phase 2: release arm to coast (duty-cycle 0). This allows the arm to fold back freely if
-   * struck by another robot.
-   */
-  public Command getDeployArmCmd() {
-    return Commands.sequence(
-            m_deployArm
-                .setDutyCycle(IntakeConstants.DEPLOY_BURST_DUTY_CYCLE)
-                .withTimeout(IntakeConstants.DEPLOY_BURST_SEC),
-            m_deployArm.setDutyCycle(0.0).withTimeout(0.1),
-            m_deployArm.setDutyCycle(-1.0))
-        .withName("Intake/DeployArm");
-  }
-
-  private boolean m_deployed = false;
-
-  public Command getDeployArmOnceCmd() {
-    if (m_deployed == true) {
-      return m_deployArm.setDutyCycle(-1);
-    }
-    m_deployed = true;
-    return Commands.sequence(
-            m_deployArm
-                .setDutyCycle(IntakeConstants.DEPLOY_BURST_DUTY_CYCLE)
-                .withTimeout(IntakeConstants.DEPLOY_BURST_SEC),
-            m_deployArm.setDutyCycle(0.0).withTimeout(0.1),
-            m_deployArm.setDutyCycle(-1.0).withTimeout(0.5))
-        .withName("Intake/DeployArm");
+    return Commands.runOnce(() -> getDeployCmd().schedule()).withName("Intake/DeployInstant");
   }
 
   /**
@@ -123,6 +89,7 @@ public class Intake extends TimedSubsystem {
    */
   public Command getRetractCmd() {
     return Commands.sequence(
+            Commands.runOnce(() -> m_isDeployed = false),
             Commands.runOnce(() -> {}, m_roller), // interrupt any running roller command
             m_roller
                 .stop()

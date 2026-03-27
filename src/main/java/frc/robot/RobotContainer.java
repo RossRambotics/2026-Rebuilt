@@ -326,12 +326,9 @@ public class RobotContainer {
     // () -> -controller.getLeftX(),
     // () -> Rotation2d.kZero));
 
-    // Left trigger (toggle): deploy arm on every press; toggle roller
-    // independently.
-    // Press 1 — arm deploys, roller starts. Press 2 — roller stops, arm stays
-    // deployed.
-    controller.leftTrigger().onTrue(m_intake.getDeployArmOnceCmd());
-    controller.leftTrigger().toggleOnTrue(m_intake.getRollerOnCmd());
+    // Left trigger (toggle): deploy arm and start roller; press again to cancel.
+    // Skips the initial burst if the arm is already deployed.
+    controller.leftTrigger().toggleOnTrue(m_intake.getDeployCmd());
     // Left bumper: retract intake arm
     controller.leftBumper().onTrue(m_intake.getRetractCmd());
 

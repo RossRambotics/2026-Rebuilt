@@ -57,6 +57,13 @@ public class IntakeDeployArm extends TimedSubsystem {
           .withIgnoreHardwareLimits(true)
           .withIgnoreSoftwareLimits(true);
 
+  // Deploy hard-stop request: gentle negative duty cycle toward DEPLOY_ANGLE_DEG.
+  // Bypasses limits so the arm can press firmly into the deployed hard stop.
+  private final DutyCycleOut armDeployHardStopRequest =
+      new DutyCycleOut(IntakeConstants.ARM_DEPLOY_HARDSTOP_DUTY_CYCLE)
+          .withIgnoreHardwareLimits(true)
+          .withIgnoreSoftwareLimits(true);
+
   // StatusSignals used for hard-stop detection. Initialized to null and
   // assigned in the real-hardware block of the constructor.
   private StatusSignal<AngularVelocity> armMotorVelocity = null;
@@ -77,6 +84,22 @@ public class IntakeDeployArm extends TimedSubsystem {
                         > IntakeConstants.ARM_HOME_STALL_CURRENT_AMPS;
               })
           .debounce(IntakeConstants.ARM_HOME_STALL_DEBOUNCE_SEC);
+
+  /**
+   * Fires when the intake arm has stalled against its deployed hard stop: velocity drops below
+   * ARM_DEPLOY_STALL_VELOCITY_RPS and stator current exceeds ARM_DEPLOY_STALL_CURRENT_AMPS for
+   * ARM_DEPLOY_STALL_DEBOUNCE_SEC.
+   */
+  public final Trigger isDeployHardStop =
+      new Trigger(
+              () -> {
+                if (armMotorVelocity == null) return false;
+                return Math.abs(armMotorVelocity.refresh().getValue().in(RotationsPerSecond))
+                        < IntakeConstants.ARM_DEPLOY_STALL_VELOCITY_RPS
+                    && Math.abs(armMotorTorqueCurrent.refresh().getValue().in(Amps))
+                        > IntakeConstants.ARM_DEPLOY_STALL_CURRENT_AMPS;
+              })
+          .debounce(IntakeConstants.ARM_DEPLOY_STALL_DEBOUNCE_SEC);
 
   /** Creates a new IntakeDeployArm. */
   public IntakeDeployArm(boolean isReal) {
@@ -215,6 +238,30 @@ public class IntakeDeployArm extends TimedSubsystem {
                       m_isCalibrated = true;
                     }))
         .withName("IntakeDeployArm/HomeAndCalibrate");
+  }
+
+  /**
+   * Gently drives the arm toward its deployed hard stop (DEPLOY_ANGLE_DEG) using a low duty cycle
+   * that bypasses hardware/software limits. Ends when a velocity drop and current spike are
+   * detected (isDeployHardStop), then coasts for ARM_DEPLOY_SETTLE_SEC. Does not re-zero the
+   * encoder.
+   *
+   * <p>Use this command when you need to ensure the arm is fully seated against the deployed
+   * mechanical stop before beginning an intake sequence.
+   *
+   * <p>Returns immediately as a no-op when the subsystem is stubbed.
+   *
+   * @return Command to run
+   */
+  public Command driveToDeployedHardStop() {
+    if (!m_isReal) {
+      return this.runOnce(() -> m_stubbedAngle = Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG))
+          .withName("IntakeDeployArm/DriveToDeployedHardStop");
+    }
+    return run(() -> armMotor.setControl(armDeployHardStopRequest))
+        .until(isDeployHardStop)
+        .andThen(setDutyCycle(0.0).withTimeout(IntakeConstants.ARM_DEPLOY_SETTLE_SEC))
+        .withName("IntakeDeployArm/DriveToDeployedHardStop");
   }
 
   /**
