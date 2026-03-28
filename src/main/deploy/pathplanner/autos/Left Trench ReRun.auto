@@ -35,6 +35,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Shoot.Stop"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Left Side Collect + Shoot ReRun"

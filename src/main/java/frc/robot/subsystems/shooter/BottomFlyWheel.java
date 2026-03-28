@@ -173,12 +173,13 @@ public class BottomFlyWheel extends TimedSubsystem {
     m_rpmTable.put(4.2 + dist_tune, 2500.0);
     m_rpmTable.put(5.2 + dist_tune, 2700.0);
     m_rpmTable.put(6.0 + dist_tune, 3000.0);
+
     m_rpmTable.put(7.0 + dist_tune, 3200.0);
     m_rpmTable.put(8.0 + dist_tune, 3450.0);
     // --- Interpolation Code END ---
     // Populate ToF Table (Distance -> Time-of-Flight in seconds)
     // These are sample values; tune with real ballistics data.
-    double tune = 0.0;
+    double tune = -0.1;
     m_tofTable.put(1.0 + dist_tune, 1.6 + tune);
     m_tofTable.put(2.0 + dist_tune, 1.5 + tune);
     m_tofTable.put(3.0 + dist_tune, 1.7 + tune);

@@ -27,7 +27,7 @@ public class SpeedNanny extends TimedSubsystem {
   // Previously: 1.0 rps (≈6.28 rad/s) and 1.5 rps/s (≈9.42 rad/s^2).
   // New defaults provide more responsive rotation on the field.
   private double m_kMaxAngularRate =
-      RotationsPerSecond.of(1.5).in(RadiansPerSecond); // 2.0 rotations per second
+      RotationsPerSecond.of(1.0).in(RadiansPerSecond); // 2.0 rotations per second
   // (~12.57 rad/s)
   // max angular velocity
 
@@ -55,10 +55,10 @@ public class SpeedNanny extends TimedSubsystem {
     m_accelerationLimit = m_kMaxAcceleration;
 
     if (RobotContainer.getInstance().m_shooter.isShooting()) {
-      m_speedLimit = m_kMaxSpeed * 0.5; // Reduce max speed to make it easier to aim while shooting
+      m_speedLimit = m_kMaxSpeed * 0.3; // Reduce max speed to make it easier to aim while shooting
       m_angularRateLimit =
           m_kMaxAngularRate
-              * 0.75; // Reduce max angular rate to make it easier to aim while shooting
+              * 0.25; // Reduce max angular rate to make it easier to aim while shooting
       // m_accelerationLimit = 1.5; // Reduce acceleration to make it easier to aim
       // while shooting
       // m_angularAccelLimit =

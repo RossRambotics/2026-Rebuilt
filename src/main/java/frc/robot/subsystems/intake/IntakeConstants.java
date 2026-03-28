@@ -80,7 +80,7 @@ public final class IntakeConstants {
   // Intake roller — PID / motion
   // ---------------------------------------------------------------------------
   // TODO: Tune PID gains on hardware
-  public static final double ROLLER_KP = 0.5;
+  public static final double ROLLER_KP = 10.5;
   public static final double ROLLER_KI = 0.0;
   public static final double ROLLER_KD = 0.0;
   public static final double ROLLER_MAX_VEL_RPS = 100.0;
@@ -128,7 +128,7 @@ public final class IntakeConstants {
   // Negative duty cycle drives toward DEPLOY_ANGLE_DEG (the deployed hard stop)
   public static final double ARM_DEPLOY_HARDSTOP_DUTY_CYCLE = -0.5;
   public static final double ARM_DEPLOY_STALL_VELOCITY_RPS = 0.5;
-  public static final double ARM_DEPLOY_STALL_CURRENT_AMPS = 10.0;
+  public static final double ARM_DEPLOY_STALL_CURRENT_AMPS = 5.0;
   public static final double ARM_DEPLOY_STALL_DEBOUNCE_SEC = 0.1;
   public static final double ARM_DEPLOY_SETTLE_SEC = 0.1;
 

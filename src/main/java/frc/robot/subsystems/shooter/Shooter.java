@@ -143,7 +143,7 @@ public class Shooter extends TimedSubsystem {
   // Extra time added to TOF when predicting future pose, to compensate for system
   // latency
   // (sensor delay, loop delay, actuator delay). Tune on hardware.
-  private static final double POSE_PREDICT_TIMESHIFT_SEC = 0.030;
+  private static final double POSE_PREDICT_TIMESHIFT_SEC = 0.00;
 
   // ── TOF empirical measurement ──────────────────────────────────────────────
   private static final int TOF_MAX_SHOTS = 5;
@@ -436,8 +436,9 @@ public class Shooter extends TimedSubsystem {
     // Update firing solution and telemetry (compute early so commands/targeting can
     // use it)
     updateFiringSolution();
-    // Detect turret jams; must run after updateFiringSolution() and before updateReadiness()
-    updateJamDetection();
+    // Detect turret jams; must run after updateFiringSolution() and before
+    // updateReadiness()
+    // updateJamDetection();
     // Updates target data (kept lightweight) and then publish telemetry last
     updateTargetData();
     // Update readiness flags (moved to its own method for clarity)
@@ -487,7 +488,8 @@ public class Shooter extends TimedSubsystem {
    * current.
    */
   private void updateJamDetection() {
-    // Only detect while actively shooting; skip if already latched or in manual servo mode.
+    // Only detect while actively shooting; skip if already latched or in manual
+    // servo mode.
     if (!m_isShooting || m_isTurretJammed || m_isTurretServoMode) return;
     if (m_lastFiringSolution == null) return;
 
@@ -542,7 +544,7 @@ public class Shooter extends TimedSubsystem {
     double distanceMeters;
 
     // --- Iterate once or twice ---
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 10; i++) {
       futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
       shooterFieldPos =
           futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
@@ -821,7 +823,8 @@ public class Shooter extends TimedSubsystem {
     if (m_lastFiringSolution != null) {
       if (m_isTurretServoMode || m_isTurretJammed) {
         // Servo mode (manual or auto jam fallback): check drive heading alignment.
-        // getRobotHeadingForTurretServo() accounts for the turret's actual current angle.
+        // getRobotHeadingForTurretServo() accounts for the turret's actual current
+        // angle.
         Rotation2d requiredHeading = getRobotHeadingForTurretServo();
         Rotation2d currentHeading = RobotContainer.getInstance().getRobotPose2d().getRotation();
         double headingErrorDeg = Math.abs(requiredHeading.minus(currentHeading).getDegrees());
