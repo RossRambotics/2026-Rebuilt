@@ -101,7 +101,7 @@ public final class IntakeConstants {
   // ---------------------------------------------------------------------------
   // Intake roller — hardware
   // ---------------------------------------------------------------------------
-  public static final double ROLLER_STATOR_CURRENT_LIMIT_AMPS = 40.0;
+  public static final double ROLLER_STATOR_CURRENT_LIMIT_AMPS = 20.0;
   // TODO: Update roller diameter and mass once measured
   public static final double ROLLER_DIAMETER_IN = 2.0;
   public static final double ROLLER_MASS_LBS = 0.5;

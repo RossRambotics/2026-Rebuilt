@@ -78,7 +78,7 @@ public class LEDSubsystem extends TimedSubsystem {
       m_candle = new CANdle(CANDLE_CAN_ID);
       var config = new CANdleConfiguration();
       config.LED.StripType = StripTypeValue.GRB;
-      config.LED.BrightnessScalar = 1.0;
+      config.LED.BrightnessScalar = 0.75;
       m_candle.getConfigurator().apply(config);
 
       // Onboard LEDs and spacers never change — set them once here instead of every

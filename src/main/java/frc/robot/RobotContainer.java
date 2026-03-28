@@ -447,7 +447,8 @@ public class RobotContainer {
 
     // Coast drive motors while disabled so the robot can be pushed freely;
     // restore brake mode when re-enabled.
-    new Trigger(DriverStation::isDisabled).whileTrue(drive.coastOnDisableCommand());
+    // new
+    // Trigger(DriverStation::isDisabled).whileTrue(drive.coastOnDisableCommand());
   }
 
   /**

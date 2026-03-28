@@ -1,0 +1,97 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.3520722891566255,
+        "y": 7.39
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.598533850926552,
+        "y": 7.348087011918396
+      },
+      "isLocked": true,
+      "linkedName": "Left-End Neutral Zone"
+    },
+    {
+      "anchor": {
+        "x": 7.363,
+        "y": 4.614168674698795
+      },
+      "prevControl": {
+        "x": 8.401171919907862,
+        "y": 4.5145995594465065
+      },
+      "nextControl": {
+        "x": 6.260409290215855,
+        "y": 4.719916074867683
+      },
+      "isLocked": true,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.281156626506024,
+        "y": 7.39
+      },
+      "prevControl": {
+        "x": 7.217686650481979,
+        "y": 6.6754131137065436
+      },
+      "nextControl": {
+        "x": 5.766697674364538,
+        "y": 7.782540133604961
+      },
+      "isLocked": true,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.9644819277108434,
+        "y": 7.39
+      },
+      "prevControl": {
+        "x": 5.331038710122457,
+        "y": 7.4362084315188826
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Left Trench ReRun Trench"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [
+    {
+      "fieldPosition": {
+        "x": 7.5,
+        "y": 7.5
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 0.15,
+      "maxWaypointRelativePos": 0.75,
+      "name": "Point Towards Zone"
+    }
+  ],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 2.5,
+    "maxAcceleration": 2.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "useDefaultConstraints": true
+}

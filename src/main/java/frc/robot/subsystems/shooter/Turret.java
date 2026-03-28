@@ -38,8 +38,8 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class Turret extends TimedSubsystem {
-  public static final int TURRET_DEGREES_MIN = -90;
-  public static final int TURRET_DEGREES_MAX = 90;
+  public static final int TURRET_DEGREES_MIN = -125;
+  public static final int TURRET_DEGREES_MAX = 125;
 
   // TODO: Tune homing speed and hard-stop detection thresholds on hardware.
   // Negative duty cycle drives the turret toward TURRET_DEGREES_MIN (left hard
