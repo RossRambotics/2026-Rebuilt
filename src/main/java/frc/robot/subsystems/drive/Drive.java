@@ -276,6 +276,24 @@ public class Drive extends TimedSubsystem {
     stop();
   }
 
+  /** Sets brake/coast mode on all drive modules. */
+  public void setBrakeMode(boolean brake) {
+    for (var module : modules) {
+      module.setBrakeMode(brake);
+    }
+  }
+
+  /**
+   * Returns a command that puts all drive motors into coast mode while active and restores brake
+   * mode when cancelled. Intended for use with a disabled trigger so motors can be pushed freely
+   * when the robot is disabled.
+   */
+  public Command coastOnDisableCommand() {
+    return Commands.startEnd(() -> setBrakeMode(false), () -> setBrakeMode(true))
+        .withName("Drive/CoastOnDisable")
+        .ignoringDisable(true);
+  }
+
   /** Returns a command to run a quasistatic test in the specified direction. */
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     return run(() -> runCharacterization(0.0))

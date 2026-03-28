@@ -12,6 +12,7 @@ import static frc.robot.util.PhoenixUtil.*;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -260,5 +261,19 @@ public class ModuleIOTalonFX implements ModuleIO {
           case TorqueCurrentFOC -> positionTorqueCurrentRequest.withPosition(
               rotation.getRotations());
         });
+  }
+
+  @Override
+  public void setBrakeMode(boolean brake) {
+    var neutralMode = brake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+    var driveOutputConfig = new MotorOutputConfigs();
+    driveTalon.getConfigurator().refresh(driveOutputConfig);
+    driveOutputConfig.NeutralMode = neutralMode;
+    driveTalon.getConfigurator().apply(driveOutputConfig);
+
+    var turnOutputConfig = new MotorOutputConfigs();
+    turnTalon.getConfigurator().refresh(turnOutputConfig);
+    turnOutputConfig.NeutralMode = neutralMode;
+    turnTalon.getConfigurator().apply(turnOutputConfig);
   }
 }

@@ -444,6 +444,10 @@ public class RobotContainer {
     controller.povRight().onTrue(m_shooter.getTurretTrimCmd(+1)); // trim right
     controller.povLeft().onTrue(m_shooter.getTurretTrimCmd(-1)); // trim left
     controller.povDown().onTrue(m_shooter.getTurretTrimResetCmd()); // reset trim to 0
+
+    // Coast drive motors while disabled so the robot can be pushed freely;
+    // restore brake mode when re-enabled.
+    new Trigger(DriverStation::isDisabled).whileTrue(drive.coastOnDisableCommand());
   }
 
   /**

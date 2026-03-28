@@ -94,6 +94,11 @@ public class Module {
     io.setTurnOpenLoop(0.0);
   }
 
+  /** Sets brake/coast mode on drive and turn motors. */
+  public void setBrakeMode(boolean brake) {
+    io.setBrakeMode(brake);
+  }
+
   /** Returns the current turn angle of the module. */
   public Rotation2d getAngle() {
     return inputs.turnPosition;

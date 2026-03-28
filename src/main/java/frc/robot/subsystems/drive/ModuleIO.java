@@ -46,4 +46,7 @@ public interface ModuleIO {
 
   /** Run the turn motor to the specified rotation. */
   public default void setTurnPosition(Rotation2d rotation) {}
+
+  /** Sets the brake/coast mode on the drive and turn motors. */
+  public default void setBrakeMode(boolean brake) {}
 }
