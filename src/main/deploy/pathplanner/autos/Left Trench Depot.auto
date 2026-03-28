@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "Left Tench - Neutral Zone"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "Intake.Deploy"
@@ -44,6 +50,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "HP & Depot",
   "choreoAuto": false
 }

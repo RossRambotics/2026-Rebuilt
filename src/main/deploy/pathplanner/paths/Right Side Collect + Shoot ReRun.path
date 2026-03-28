@@ -3,111 +3,124 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.5,
-        "y": 0.658
+        "x": 3.1449036144578315,
+        "y": 2.4176987951807236
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.2984466469452924,
-        "y": 0.6907649166485944
+        "x": 2.8455882879040817,
+        "y": 2.4460240087332217
       },
-      "isLocked": false,
-      "linkedName": null
+      "isLocked": true,
+      "linkedName": "Right Bump Rerun"
     },
     {
       "anchor": {
-        "x": 6.1500240963855415,
-        "y": 0.658
+        "x": 3.7459277108433735,
+        "y": 0.5599879518072293
       },
       "prevControl": {
-        "x": 6.1500240963855415,
-        "y": 0.27553012048192793
+        "x": 3.4249086708552374,
+        "y": 0.613214357991861
       },
       "nextControl": {
-        "x": 6.1500240963855415,
-        "y": 1.5106415974573482
+        "x": 3.99256058636337,
+        "y": 0.5190951075342036
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.997036144578313,
-        "y": 3.56510843373494
+        "x": 5.953325301204819,
+        "y": 0.5599879518072293
       },
       "prevControl": {
-        "x": 5.785777460770328,
-        "y": 3.937960057061342
+        "x": 5.489893194534313,
+        "y": 0.4811967549126309
       },
       "nextControl": {
-        "x": 6.213122834765673,
-        "y": 3.1837358351589904
+        "x": 6.543908919209552,
+        "y": 0.6603970289064544
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 8.03710413694722,
-        "y": 0.658
+        "x": 5.953325301204819,
+        "y": 3.6962409638554217
       },
       "prevControl": {
-        "x": 8.03710413694722,
-        "y": 1.2224614651874144
+        "x": 5.932378205525881,
+        "y": 4.062439015494595
       },
       "nextControl": {
-        "x": 8.03710413694722,
-        "y": 0.40800000000000003
+        "x": 5.980701214828311,
+        "y": 3.2176540330263985
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.5,
-        "y": 0.658
+        "x": 6.641771084337348,
+        "y": 2.5488313253012054
       },
       "prevControl": {
-        "x": 3.331964770398627,
-        "y": 0.45352675885128013
+        "x": 6.9222464691858985,
+        "y": 2.495050889872924
       },
       "nextControl": {
-        "x": 1.6680352296013723,
-        "y": 0.8624732411487199
+        "x": 6.233985911854235,
+        "y": 2.6270230858693595
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.9209999999999998,
-        "y": 1.3467831325301212
+        "x": 3.1449036144578315,
+        "y": 2.4176987951807236
       },
       "prevControl": {
-        "x": 1.9100722891566262,
-        "y": 0.7348313253012042
+        "x": 3.1532873541134414,
+        "y": 2.1433065286107356
       },
       "nextControl": null,
-      "isLocked": false,
-      "linkedName": null
+      "isLocked": true,
+      "linkedName": "Right Bump Rerun"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.6823027718550083,
-      "rotationDegrees": 0.0
-    },
-    {
-      "waypointRelativePos": 1.0127931769722827,
-      "rotationDegrees": -90.0
-    },
-    {
-      "waypointRelativePos": 3.6034115138592773,
-      "rotationDegrees": 0.0
+      "waypointRelativePos": 3.356846473029007,
+      "rotationDegrees": 45.0
     }
   ],
   "constraintZones": [],
-  "pointTowardsZones": [],
+  "pointTowardsZones": [
+    {
+      "fieldPosition": {
+        "x": 0.4,
+        "y": 0.5
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 0.25,
+      "maxWaypointRelativePos": 1.5632754342431332,
+      "name": "Point Towards Zone"
+    },
+    {
+      "fieldPosition": {
+        "x": 6.0,
+        "y": 0.5
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 2.2382133995037288,
+      "maxWaypointRelativePos": 3.101736972704705,
+      "name": "Point Towards Zone"
+    }
+  ],
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.0,
@@ -119,13 +132,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 61.0
+    "rotation": 45.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 61.0
+    "rotation": 45.0
   },
   "useDefaultConstraints": true
 }

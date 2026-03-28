@@ -3,7 +3,12 @@
   "robotLength": 0.7,
   "holonomicMode": true,
   "pathFolders": [],
-  "autoFolders": [],
+  "autoFolders": [
+    "Bump",
+    "HP & Depot",
+    "Pass",
+    "ReRun"
+  ],
   "defaultMaxVel": 4.0,
   "defaultMaxAccel": 2.5,
   "defaultMaxAngVel": 540.0,
