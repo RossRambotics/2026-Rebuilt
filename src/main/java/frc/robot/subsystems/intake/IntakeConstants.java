@@ -121,4 +121,17 @@ public final class IntakeConstants {
   // ---------------------------------------------------------------------------
   // Brief pause to let the roller settle before retracting the arm
   public static final double RETRACT_ROLLER_STOP_TIMEOUT_SEC = 0.1;
+
+  // ---------------------------------------------------------------------------
+  // Deploy arm — deploy hard-stop detection
+  // ---------------------------------------------------------------------------
+  // Negative duty cycle drives toward DEPLOY_ANGLE_DEG (the deployed hard stop)
+  public static final double ARM_DEPLOY_HARDSTOP_DUTY_CYCLE = -0.5;
+  public static final double ARM_DEPLOY_STALL_VELOCITY_RPS = 0.5;
+  public static final double ARM_DEPLOY_STALL_CURRENT_AMPS = 10.0;
+  public static final double ARM_DEPLOY_STALL_DEBOUNCE_SEC = 0.1;
+  public static final double ARM_DEPLOY_SETTLE_SEC = 0.1;
+
+  // How often to re-nudge the arm against the deployed hard stop while deployed
+  public static final double ARM_DEPLOY_NUDGE_INTERVAL_SEC = 2.0;
 }

@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AutoDriveToFuel;
 import frc.robot.commands.AutoTargetSelector;
@@ -325,12 +326,9 @@ public class RobotContainer {
     // () -> -controller.getLeftX(),
     // () -> Rotation2d.kZero));
 
-    // Left trigger (toggle): deploy arm on every press; toggle roller
-    // independently.
-    // Press 1 — arm deploys, roller starts. Press 2 — roller stops, arm stays
-    // deployed.
-    controller.leftTrigger().onTrue(m_intake.getDeployArmOnceCmd());
-    controller.leftTrigger().toggleOnTrue(m_intake.getRollerOnCmd());
+    // Left trigger (toggle): deploy arm and start roller; press again to cancel.
+    // Skips the initial burst if the arm is already deployed.
+    controller.leftTrigger().toggleOnTrue(m_intake.getDeployCmd());
     // Left bumper: retract intake arm
     controller.leftBumper().onTrue(m_intake.getRetractCmd());
 
@@ -381,6 +379,21 @@ public class RobotContainer {
                     () -> -controller.getLeftX(),
                     () -> m_shooter.getRobotHeadingForTurretServo())
                 .alongWith(m_shooter.getTurretServoShootCmd()));
+
+    // Auto jam fallback: when m_autoShootCmd is running and the turret jams, servo
+    // the robot heading to compensate. Guarded by isEffectivelyStopped() so this
+    // never fires while PathPlanner is actively driving (which would cancel the path).
+    new Trigger(
+            () ->
+                m_autoShootCmd.isScheduled()
+                    && m_shooter.isTurretJammed()
+                    && isEffectivelyStopped(drive))
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> m_shooter.getRobotHeadingForTurretServo()));
 
     // B button (hold): auto-drive toward detected game pieces and deploy intake.
     // Release to cancel. Intake stays deployed after release — retract manually if
@@ -569,5 +582,17 @@ public class RobotContainer {
                 })
             .withName("Clear Fuel")
             .ignoringDisable(true));
+  }
+
+  /**
+   * Returns {@code true} when the robot's actual chassis speed is low enough that no PathPlanner
+   * path is actively driving it. Used to guard the turret-jam drive-servo fallback so it does not
+   * conflict with an in-progress autonomous path.
+   */
+  private static boolean isEffectivelyStopped(Drive drive) {
+    ChassisSpeeds s = drive.getChassisSpeeds();
+    double linearSpeedMps = Math.hypot(s.vxMetersPerSecond, s.vyMetersPerSecond);
+    double angularSpeedRadPerSec = Math.abs(s.omegaRadiansPerSecond);
+    return linearSpeedMps < 0.2 && angularSpeedRadPerSec < Math.toRadians(10.0);
   }
 }
