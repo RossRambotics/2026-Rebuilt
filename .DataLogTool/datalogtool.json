@@ -1,9 +1,5 @@
 {
   "download": {
-    "localDir": "D:\\",
     "serverTeam": "3201"
-  },
-  "output": {
-    "outputFolder": "D:\\"
   }
 }

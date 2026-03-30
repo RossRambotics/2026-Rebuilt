@@ -31,13 +31,31 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.0
+            "waitTime": 1.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake.Retract"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.5
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Shoot.Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake.Deploy"
           }
         },
         {

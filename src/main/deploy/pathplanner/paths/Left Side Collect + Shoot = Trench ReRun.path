@@ -3,45 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.9644819277108434,
+        "x": 3.0902650602409643,
         "y": 7.39
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.379068417280292,
-        "y": 7.302895888947027
+        "x": 3.6592184576194184,
+        "y": 7.36717233411261
       },
       "isLocked": false,
       "linkedName": "Left Trench ReRun Trench"
     },
     {
       "anchor": {
-        "x": 6.248373493975904,
+        "x": 6.248,
         "y": 7.39
       },
       "prevControl": {
-        "x": 6.609654617137253,
-        "y": 7.437320403641155
+        "x": 5.684563544764179,
+        "y": 7.7460614749417775
       },
       "nextControl": {
-        "x": 5.405652035674546,
-        "y": 7.279620804942875
+        "x": 6.873523591878753,
+        "y": 6.994702800705346
       },
-      "isLocked": true,
+      "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.876831325301204,
-        "y": 2.843879518072289
+        "x": 5.822192771084336,
+        "y": 4.428397590361445
       },
       "prevControl": {
-        "x": 5.949568632498696,
-        "y": 3.0830641416199946
+        "x": 6.012950765875752,
+        "y": 4.802526679058774
       },
       "nextControl": {
-        "x": 5.80357378717644,
-        "y": 2.60298420102641
+        "x": 5.70863385202423,
+        "y": 4.205677200855006
       },
       "isLocked": false,
       "linkedName": null
@@ -52,41 +52,50 @@
         "y": 7.39
       },
       "prevControl": {
-        "x": 6.498277995865799,
-        "y": 7.2101009692671925
+        "x": 7.098527219287706,
+        "y": 6.96563061589267
       },
       "nextControl": {
-        "x": 6.045477508682192,
-        "y": 7.5360589577934
+        "x": 5.7934496106394375,
+        "y": 7.617083364383783
       },
       "isLocked": true,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.9644819277108434,
+        "x": 3.0902650602409643,
         "y": 7.39
       },
       "prevControl": {
-        "x": 3.721065071164669,
-        "y": 7.333006720140185
+        "x": 2.7968606096531827,
+        "y": 7.320339723680745
       },
       "nextControl": null,
       "isLocked": true,
       "linkedName": "Left Trench ReRun Trench"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.50788381742739,
+      "rotationDegrees": 179.8323056639151
+    },
+    {
+      "waypointRelativePos": 1.3377593360995539,
+      "rotationDegrees": 88.30524848734066
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [
     {
       "fieldPosition": {
-        "x": 5.7,
-        "y": 7.5
+        "x": 0.4,
+        "y": 7.3
       },
       "rotationOffset": 0.0,
-      "minWaypointRelativePos": 0.8615384615384497,
-      "maxWaypointRelativePos": 2.100248138957801,
+      "minWaypointRelativePos": 2.9657568238213394,
+      "maxWaypointRelativePos": 4.0,
       "name": "Point Towards Zone"
     }
   ],

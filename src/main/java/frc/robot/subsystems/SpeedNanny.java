@@ -27,12 +27,12 @@ public class SpeedNanny extends TimedSubsystem {
   // Previously: 1.0 rps (≈6.28 rad/s) and 1.5 rps/s (≈9.42 rad/s^2).
   // New defaults provide more responsive rotation on the field.
   private double m_kMaxAngularRate =
-      RotationsPerSecond.of(1.0).in(RadiansPerSecond); // 2.0 rotations per second
+      RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 2.0 rotations per second
   // (~12.57 rad/s)
   // max angular velocity
 
   private double m_kMaxAngularAcceleration =
-      RotationsPerSecondPerSecond.of(2.0).in(RadiansPerSecondPerSecond); // 3.0
+      RotationsPerSecondPerSecond.of(0.75).in(RadiansPerSecondPerSecond); // 3.0
   // rps/s
   // (~18.85
   // rad/s^2)

@@ -259,6 +259,9 @@ public class RobotContainer {
         "Intake.Start",
         Commands.runOnce(() -> CommandScheduler.getInstance().schedule(m_rollerOnCmd)));
     NamedCommands.registerCommand(
+        "Intake.Retract",
+        Commands.runOnce(() -> CommandScheduler.getInstance().schedule(m_intake.getRetractCmd())));
+    NamedCommands.registerCommand(
         "Auto.Shoot",
         Commands.runOnce(() -> CommandScheduler.getInstance().schedule(m_autoShootCmd)));
 

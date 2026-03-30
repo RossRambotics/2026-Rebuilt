@@ -90,7 +90,7 @@ public class Shooter extends TimedSubsystem {
 
   // Persistent in-match RPM offset accumulated by the trim buttons.
   // Added inside every flywheel velocity calculation (auto and fixed).
-  private double m_rpmTrimOffsetRpm = 100.0;
+  private double m_rpmTrimOffsetRpm = -50.0;
 
   // Persistent in-match hood angle offset (degrees) accumulated by the trim
   // buttons.
@@ -562,6 +562,8 @@ public class Shooter extends TimedSubsystem {
 
     // --- LUT lookup ---
     distanceMeters = shooterFieldPos.getDistance(targetFieldPos);
+    Logger.recordOutput("Shooter/DistanceMeters", distanceMeters);
+
     double hoodMechAngleRad =
         Degrees.of(m_bottomFlyWheel.calculateAngle(distanceMeters)).in(Radians);
     double flywheelRPM = m_bottomFlyWheel.calculateRPM(distanceMeters);
@@ -845,6 +847,10 @@ public class Shooter extends TimedSubsystem {
       double targetBottomRpm = m_lastFiringSolution.flywheelRPM + m_rpmTrimOffsetRpm;
       double errorBottomRpm = Math.abs(currentBottomRpm - targetBottomRpm);
       Logger.recordOutput("Shooter/ErrorBottomRPM", errorBottomRpm);
+      Logger.recordOutput("Shooter/targetBottomRPM", targetBottomRpm);
+      Logger.recordOutput(
+          "Shooter/TargetHoodAngleDegrees",
+          Radians.of(m_lastFiringSolution.hoodMechAngleRad).in(Degrees));
 
       boolean rawBottomReady = errorBottomRpm < BOTTOM_FLYWHEEL_RPM_TOLERANCE;
       m_isBottomFlyWheelReady = m_bottomFlywheelReadyDebouncer.calculate(rawBottomReady);

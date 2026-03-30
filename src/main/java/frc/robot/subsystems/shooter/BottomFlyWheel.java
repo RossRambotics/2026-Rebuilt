@@ -158,36 +158,38 @@ public class BottomFlyWheel extends TimedSubsystem {
 
     // Populate Angle Table (Distance -> Degrees)
     m_angleTable.put(1.0 + dist_tune, 15.0);
-    m_angleTable.put(2.0 + dist_tune, 30.0);
+    m_angleTable.put(1.5 + dist_tune, 22.6);
+    m_angleTable.put(2.0 + dist_tune, 28.0);
     m_angleTable.put(3.0 + dist_tune, 35.0);
-    m_angleTable.put(4.2 + dist_tune, 35.0);
-    m_angleTable.put(5.2 + dist_tune, 35.0);
-    m_angleTable.put(6.0 + dist_tune, 35.0);
-    m_angleTable.put(7.0 + dist_tune, 35.0);
-    m_angleTable.put(8.0 + dist_tune, 40.0);
+    m_angleTable.put(4.0 + dist_tune, 35.0);
+    m_angleTable.put(5.0 + dist_tune, 38.0);
+    m_angleTable.put(6.0 + dist_tune, 38.0);
+    m_angleTable.put(7.0 + dist_tune, 38.0);
+    m_angleTable.put(8.0 + dist_tune, 38.0);
 
     // Populate RPM Table (Distance -> RPM)
-    m_rpmTable.put(1.0 + dist_tune, 2150.0);
-    m_rpmTable.put(2.0 + dist_tune, 2000.0);
-    m_rpmTable.put(3.0 + dist_tune, 2200.0);
-    m_rpmTable.put(4.2 + dist_tune, 2500.0);
-    m_rpmTable.put(5.2 + dist_tune, 2700.0);
-    m_rpmTable.put(6.0 + dist_tune, 3000.0);
+    m_rpmTable.put(1.0 + dist_tune, 2000.0);
+    m_rpmTable.put(1.5 + dist_tune, 2075.0);
+    m_rpmTable.put(2.0 + dist_tune, 2100.0);
+    m_rpmTable.put(3.0 + dist_tune, 2450.0);
+    m_rpmTable.put(4.0 + dist_tune, 2670.0);
+    m_rpmTable.put(5.0 + dist_tune, 2950.0);
+    m_rpmTable.put(6.0 + dist_tune, 3200.0);
 
-    m_rpmTable.put(7.0 + dist_tune, 3200.0);
-    m_rpmTable.put(8.0 + dist_tune, 3450.0);
+    m_rpmTable.put(7.0 + dist_tune, 3450.0);
+    m_rpmTable.put(8.0 + dist_tune, 3700.0);
     // --- Interpolation Code END ---
     // Populate ToF Table (Distance -> Time-of-Flight in seconds)
     // These are sample values; tune with real ballistics data.
-    double tune = -0.1;
-    m_tofTable.put(1.0 + dist_tune, 1.6 + tune);
-    m_tofTable.put(2.0 + dist_tune, 1.5 + tune);
-    m_tofTable.put(3.0 + dist_tune, 1.7 + tune);
-    m_tofTable.put(4.2 + dist_tune, 1.75 + tune);
-    m_tofTable.put(5.2 + dist_tune, 1.8 + tune);
-    m_tofTable.put(6.0 + dist_tune, 1.85 + tune);
-    m_tofTable.put(7.0 + dist_tune, 1.95 + tune);
-    m_tofTable.put(8.0 + dist_tune, 2.0 + tune);
+    double tune = 0.6;
+    m_tofTable.put(1.0 + dist_tune, 1.6 * tune);
+    m_tofTable.put(2.0 + dist_tune, 1.5 * tune);
+    m_tofTable.put(3.0 + dist_tune, 1.7 * tune);
+    m_tofTable.put(4.2 + dist_tune, 1.75 * tune);
+    m_tofTable.put(5.2 + dist_tune, 1.8 * tune);
+    m_tofTable.put(6.0 + dist_tune, 1.85 * tune);
+    m_tofTable.put(7.0 + dist_tune, 1.95 * tune);
+    m_tofTable.put(8.0 + dist_tune, 2.0 * tune);
   }
 
   /**
