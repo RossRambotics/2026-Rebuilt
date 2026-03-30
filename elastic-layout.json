@@ -3,14 +3,323 @@
   "grid_size": 64,
   "tabs": [
     {
-      "name": "Spots",
+      "name": "Home               ",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "HasTarget",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 192.0,
+            "height": 704.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/SpotSelector/HasTarget",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "IsAutoDriving",
+            "x": 1344.0,
+            "y": 0.0,
+            "width": 192.0,
+            "height": 704.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/SpotSelector/IsAutoDriving",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "RPM +50",
+            "x": 1088.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Shooter/RPM +50",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "RPM Reset",
+            "x": 1088.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Shooter/RPM Reset",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "RPM -50",
+            "x": 1088.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Shooter/RPM -50",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "RPMTrimOffsetRpm",
+            "x": 1088.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Shooter/RPMTrimOffsetRpm",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Reverse Spindexer",
+            "x": 512.0,
+            "y": 192.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/Reverse Spindexer",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Stop Spindexer",
+            "x": 768.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/Stop Spindexer",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Run Spindexer",
+            "x": 768.0,
+            "y": 192.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/Run Spindexer",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Eject",
+            "x": 256.0,
+            "y": 192.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/Eject",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Retract",
+            "x": 512.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/Retract",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Roller Off",
+            "x": 256.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/Roller Off",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Deploy",
+            "x": 256.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/Deploy",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Roller On",
+            "x": 640.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/Roller On",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "IsHoodReady",
+            "x": 256.0,
+            "y": 576.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Shooter/IsHoodReady",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "IsShooterReady",
+            "x": 384.0,
+            "y": 576.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Shooter/IsShooterReady",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "IsSpeedReady",
+            "x": 576.0,
+            "y": 576.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Shooter/IsSpeedReady",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "IsTurretReady",
+            "x": 768.0,
+            "y": 576.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Shooter/IsTurretReady",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "IsBottomFlyWheelReady",
+            "x": 896.0,
+            "y": 576.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Shooter/IsBottomFlyWheelReady",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "Shot 1m",
+            "x": 1088.0,
+            "y": 576.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Shooter/Shot 1m",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Spots              ",
       "grid_layout": {
         "layouts": [],
         "containers": [
           {
             "title": "Hub Alliance",
             "x": 576.0,
-            "y": 320.0,
+            "y": 384.0,
             "width": 384.0,
             "height": 192.0,
             "type": "Command",
@@ -22,65 +331,9 @@
             }
           },
           {
-            "title": "Alliance Trench Left",
-            "x": 128.0,
-            "y": 320.0,
-            "width": 320.0,
-            "height": 192.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/Spots/Alliance Trench Left",
-              "period": 0.06,
-              "show_type": false,
-              "maximize_button_space": true
-            }
-          },
-          {
-            "title": "Alliance Trench Right",
-            "x": 1088.0,
-            "y": 320.0,
-            "width": 320.0,
-            "height": 192.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/Spots/Alliance Trench Right",
-              "period": 0.06,
-              "show_type": false,
-              "maximize_button_space": true
-            }
-          },
-          {
-            "title": "Opponent Trench Right",
-            "x": 1088.0,
-            "y": 128.0,
-            "width": 320.0,
-            "height": 192.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/Shuffleboard/SpotSelector/Opponent Trench Right",
-              "period": 0.06,
-              "show_type": false,
-              "maximize_button_space": true
-            }
-          },
-          {
-            "title": "Opponent Trench Left",
-            "x": 128.0,
-            "y": 128.0,
-            "width": 320.0,
-            "height": 192.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/Spots/Opponent Trench Left",
-              "period": 0.06,
-              "show_type": false,
-              "maximize_button_space": true
-            }
-          },
-          {
             "title": "Hub Neutral",
             "x": 576.0,
-            "y": 128.0,
+            "y": 192.0,
             "width": 384.0,
             "height": 192.0,
             "type": "Command",
@@ -92,52 +345,10 @@
             }
           },
           {
-            "title": "Climb Left",
-            "x": 128.0,
-            "y": 512.0,
-            "width": 320.0,
-            "height": 192.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/Shuffleboard/SpotSelector/Climb Left",
-              "period": 0.06,
-              "show_type": false,
-              "maximize_button_space": true
-            }
-          },
-          {
-            "title": "Climb Right",
-            "x": 1088.0,
-            "y": 512.0,
-            "width": 320.0,
-            "height": 192.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/Shuffleboard/SpotSelector/Climb Right",
-              "period": 0.06,
-              "show_type": false,
-              "maximize_button_space": true
-            }
-          },
-          {
-            "title": "Climb Center",
-            "x": 576.0,
-            "y": 512.0,
-            "width": 384.0,
-            "height": 192.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/Spots/Climb Center",
-              "period": 0.06,
-              "show_type": false,
-              "maximize_button_space": true
-            }
-          },
-          {
             "title": "Clear Selection",
-            "x": 192.0,
+            "x": 256.0,
             "y": 0.0,
-            "width": 1152.0,
+            "width": 1024.0,
             "height": 128.0,
             "type": "Command",
             "properties": {
@@ -146,12 +357,102 @@
               "show_type": false,
               "maximize_button_space": true
             }
+          },
+          {
+            "title": "Blue Trench Top",
+            "x": 192.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/Shuffleboard/SpotSelector/Blue Trench Top",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Blue Trench Bottom",
+            "x": 192.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/Shuffleboard/SpotSelector/Blue Trench Bottom",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Red Trench Bottom",
+            "x": 1088.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/Shuffleboard/SpotSelector/Red Trench Bottom",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Red Trench Top",
+            "x": 1088.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/Shuffleboard/SpotSelector/Red Trench Top",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "HasTarget",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 192.0,
+            "height": 704.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/SpotSelector/HasTarget",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
+          },
+          {
+            "title": "IsAutoDriving",
+            "x": 1344.0,
+            "y": 0.0,
+            "width": 192.0,
+            "height": 704.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/SpotSelector/IsAutoDriving",
+              "period": 0.06,
+              "data_type": "boolean",
+              "true_color": 4283215696,
+              "false_color": 4294198070,
+              "true_icon": "None",
+              "false_icon": "None"
+            }
           }
         ]
       }
     },
     {
-      "name": "Climb",
+      "name": "Climb           ",
       "grid_layout": {
         "layouts": [],
         "containers": [
@@ -229,7 +530,7 @@
       }
     },
     {
-      "name": "Shooter",
+      "name": "Shooter          ",
       "grid_layout": {
         "layouts": [],
         "containers": [
@@ -264,7 +565,7 @@
           {
             "title": "Target Neutral Left",
             "x": 320.0,
-            "y": 384.0,
+            "y": 320.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Command",
@@ -278,7 +579,7 @@
           {
             "title": "Target Neutral Right",
             "x": 960.0,
-            "y": 384.0,
+            "y": 320.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Command",
@@ -294,7 +595,7 @@
             "x": 320.0,
             "y": 192.0,
             "width": 256.0,
-            "height": 192.0,
+            "height": 128.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Shooter/Target Opposition Left",
@@ -308,7 +609,7 @@
             "x": 960.0,
             "y": 192.0,
             "width": 256.0,
-            "height": 192.0,
+            "height": 128.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Shooter/Target Opposition Right",
@@ -336,7 +637,7 @@
             "x": 576.0,
             "y": 192.0,
             "width": 384.0,
-            "height": 192.0,
+            "height": 128.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Shooter/Auto Shoot",
@@ -348,7 +649,7 @@
           {
             "title": "Retract Hood",
             "x": 576.0,
-            "y": 384.0,
+            "y": 320.0,
             "width": 384.0,
             "height": 128.0,
             "type": "Command",
@@ -444,28 +745,28 @@
             }
           },
           {
-            "title": "RPM +100",
+            "title": "RPM +50",
             "x": 0.0,
-            "y": 64.0,
+            "y": 0.0,
             "width": 256.0,
-            "height": 192.0,
+            "height": 128.0,
             "type": "Command",
             "properties": {
-              "topic": "/SmartDashboard/Shooter/RPM +100",
+              "topic": "/SmartDashboard/Shooter/RPM +50",
               "period": 0.06,
               "show_type": false,
               "maximize_button_space": true
             }
           },
           {
-            "title": "RPM -100",
+            "title": "RPM -50",
             "x": 0.0,
-            "y": 448.0,
+            "y": 256.0,
             "width": 256.0,
-            "height": 192.0,
+            "height": 128.0,
             "type": "Command",
             "properties": {
-              "topic": "/SmartDashboard/Shooter/RPM -100",
+              "topic": "/SmartDashboard/Shooter/RPM -50",
               "period": 0.06,
               "show_type": false,
               "maximize_button_space": true
@@ -474,9 +775,9 @@
           {
             "title": "RPM Reset",
             "x": 0.0,
-            "y": 256.0,
+            "y": 128.0,
             "width": 256.0,
-            "height": 192.0,
+            "height": 128.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Shooter/RPM Reset",
@@ -484,12 +785,68 @@
               "show_type": false,
               "maximize_button_space": true
             }
+          },
+          {
+            "title": "RPMTrimOffsetRpm",
+            "x": 0.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Shooter/RPMTrimOffsetRpm",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "DistanceMeters",
+            "x": 320.0,
+            "y": 448.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Shooter/DistanceMeters",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "targetBottomRPM",
+            "x": 640.0,
+            "y": 448.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Shooter/targetBottomRPM",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "TargetHoodAngleDegrees",
+            "x": 768.0,
+            "y": 448.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/AdvantageKit/RealOutputs/Shooter/TargetHoodAngleDegrees",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
           }
         ]
       }
     },
     {
-      "name": "Intake",
+      "name": "Intake            ",
       "grid_layout": {
         "layouts": [],
         "containers": [
@@ -609,14 +966,14 @@
       }
     },
     {
-      "name": "Calibration",
+      "name": "Calibration          ",
       "grid_layout": {
         "layouts": [],
         "containers": [
           {
             "title": "Hood Home & Calibrate",
-            "x": 1152.0,
-            "y": 128.0,
+            "x": 960.0,
+            "y": 64.0,
             "width": 256.0,
             "height": 192.0,
             "type": "Command",
@@ -629,7 +986,7 @@
           },
           {
             "title": "Turret Calibrate In Place",
-            "x": 128.0,
+            "x": 320.0,
             "y": 64.0,
             "width": 256.0,
             "height": 192.0,
@@ -643,8 +1000,8 @@
           },
           {
             "title": "Hood Calibrate In Place",
-            "x": 1152.0,
-            "y": 320.0,
+            "x": 960.0,
+            "y": 256.0,
             "width": 256.0,
             "height": 192.0,
             "type": "Command",
@@ -657,10 +1014,10 @@
           },
           {
             "title": "IsCalibrated",
-            "x": 192.0,
-            "y": 512.0,
-            "width": 128.0,
-            "height": 128.0,
+            "x": 128.0,
+            "y": 64.0,
+            "width": 192.0,
+            "height": 576.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/AdvantageKit/RealOutputs/Turret/IsCalibrated",
@@ -675,9 +1032,9 @@
           {
             "title": "IsCalibrated",
             "x": 1216.0,
-            "y": 512.0,
-            "width": 128.0,
-            "height": 128.0,
+            "y": 64.0,
+            "width": 192.0,
+            "height": 576.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/AdvantageKit/RealOutputs/Hood/IsCalibrated",
@@ -691,10 +1048,10 @@
           },
           {
             "title": "TurretActualDegRobot",
-            "x": 128.0,
+            "x": 320.0,
             "y": 256.0,
             "width": 256.0,
-            "height": 128.0,
+            "height": 192.0,
             "type": "Text Display",
             "properties": {
               "topic": "/AdvantageKit/RealOutputs/Shooter/TurretActualDegRobot",
@@ -705,16 +1062,43 @@
           },
           {
             "title": "TurretErrorDeg",
-            "x": 128.0,
-            "y": 384.0,
+            "x": 320.0,
+            "y": 448.0,
             "width": 256.0,
-            "height": 128.0,
+            "height": 192.0,
             "type": "Text Display",
             "properties": {
               "topic": "/AdvantageKit/RealOutputs/Shooter/TurretErrorDeg",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
+            }
+          },
+          {
+            "title": "selected",
+            "x": 640.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Auto Choices/selected",
+              "period": 0.06,
+              "data_type": "string",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Auto Choices",
+            "x": 640.0,
+            "y": 64.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto Choices",
+              "period": 0.06,
+              "sort_options": false
             }
           }
         ]

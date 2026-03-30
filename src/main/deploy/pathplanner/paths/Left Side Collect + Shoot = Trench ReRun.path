@@ -16,50 +16,82 @@
     },
     {
       "anchor": {
-        "x": 6.248,
+        "x": 7.592481927710843,
         "y": 7.39
       },
       "prevControl": {
-        "x": 5.684563544764179,
-        "y": 7.7460614749417775
+        "x": 6.9664198887172155,
+        "y": 7.6186629317523025
       },
       "nextControl": {
-        "x": 6.873523591878753,
-        "y": 6.994702800705346
+        "x": 7.827309099656976,
+        "y": 7.3042317114792334
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.822192771084336,
-        "y": 4.428397590361445
+        "x": 7.7345421686746985,
+        "y": 5.313542168674698
       },
       "prevControl": {
-        "x": 6.012950765875752,
-        "y": 4.802526679058774
+        "x": 7.778253012048193,
+        "y": 5.728795180722891
       },
       "nextControl": {
-        "x": 5.70863385202423,
-        "y": 4.205677200855006
+        "x": 7.708370972545188,
+        "y": 5.06491580544435
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.248373493975904,
+        "x": 5.8440481927710834,
+        "y": 5.018493975903613
+      },
+      "prevControl": {
+        "x": 6.086583817807418,
+        "y": 4.957860069644533
+      },
+      "nextControl": {
+        "x": 5.6015125677347495,
+        "y": 5.079127882162693
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.8440481927710834,
+        "y": 6.417240963855421
+      },
+      "prevControl": {
+        "x": 5.8440481927710834,
+        "y": 6.167240963855419
+      },
+      "nextControl": {
+        "x": 5.8440481927710834,
+        "y": 6.6904337349397585
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.592481927710843,
         "y": 7.39
       },
       "prevControl": {
-        "x": 7.098527219287706,
-        "y": 6.96563061589267
+        "x": 7.753346490797906,
+        "y": 7.198629698378232
       },
       "nextControl": {
-        "x": 5.7934496106394375,
-        "y": 7.617083364383783
+        "x": 7.363,
+        "y": 7.663
       },
-      "isLocked": true,
+      "isLocked": false,
       "linkedName": null
     },
     {
@@ -78,24 +110,58 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.50788381742739,
-      "rotationDegrees": 179.8323056639151
+      "waypointRelativePos": 0.4531120331950219,
+      "rotationDegrees": 180.0
     },
     {
-      "waypointRelativePos": 1.3377593360995539,
-      "rotationDegrees": 88.30524848734066
+      "waypointRelativePos": 4.894605809128609,
+      "rotationDegrees": 180.0
     }
   ],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 3.9602977667493797,
+      "maxWaypointRelativePos": 6.0,
+      "constraints": {
+        "maxVelocity": 1.0,
+        "maxAcceleration": 2.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [
     {
       "fieldPosition": {
-        "x": 0.4,
+        "x": 7.7,
         "y": 7.3
       },
       "rotationOffset": 0.0,
-      "minWaypointRelativePos": 2.9657568238213394,
-      "maxWaypointRelativePos": 4.0,
+      "minWaypointRelativePos": 1.2089330024814007,
+      "maxWaypointRelativePos": 2.0903225806451626,
+      "name": "Point Towards Zone"
+    },
+    {
+      "fieldPosition": {
+        "x": 9.0,
+        "y": 5.25
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 2.1975186104218283,
+      "maxWaypointRelativePos": 3.0193548387096767,
+      "name": "Point Towards Zone"
+    },
+    {
+      "fieldPosition": {
+        "x": 5.75,
+        "y": 3.0
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 3.209925558312654,
+      "maxWaypointRelativePos": 3.9602977667493797,
       "name": "Point Towards Zone"
     }
   ],
