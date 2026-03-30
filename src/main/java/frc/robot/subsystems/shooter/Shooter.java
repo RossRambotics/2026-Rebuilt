@@ -144,6 +144,9 @@ public class Shooter extends TimedSubsystem {
   // latency
   // (sensor delay, loop delay, actuator delay). Tune on hardware.
   private static final double POSE_PREDICT_TIMESHIFT_SEC = 0.00;
+  // Cap the velocity magnitude used for pose prediction to prevent over-leading
+  // at high robot speeds where the constant-velocity assumption breaks down.
+  private static final double MAX_PREDICTION_SPEED_MPS = 1.5;
 
   // ── TOF empirical measurement ──────────────────────────────────────────────
   private static final int TOF_MAX_SHOTS = 5;
@@ -525,6 +528,20 @@ public class Shooter extends TimedSubsystem {
       Translation2d targetFieldPos,
       Translation2d shooterOffsetRobot) {
 
+    // --- Cap prediction velocity ---
+    // At high speeds the constant-velocity model over-predicts where the robot
+    // will be, causing the turret to over-lead. Clamp the speed magnitude so the
+    // prediction stays trustworthy.
+    double speedMag = Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+    if (speedMag > MAX_PREDICTION_SPEED_MPS && speedMag > 0) {
+      double scale = MAX_PREDICTION_SPEED_MPS / speedMag;
+      chassisSpeeds =
+          new ChassisSpeeds(
+              chassisSpeeds.vxMetersPerSecond * scale,
+              chassisSpeeds.vyMetersPerSecond * scale,
+              chassisSpeeds.omegaRadiansPerSecond * scale);
+    }
+
     // --- Initial guess for TOF ---
     // Warm-start from last solution when available (already near-converged);
     // otherwise seed from
@@ -543,8 +560,8 @@ public class Shooter extends TimedSubsystem {
     Translation2d shooterFieldPos;
     double distanceMeters;
 
-    // --- Iterate once or twice ---
-    for (int i = 0; i < 10; i++) {
+    // --- Iterate to converge TOF estimate ---
+    for (int i = 0; i < 3; i++) {
       futurePose = predictPoseLinear(currentPose, chassisSpeeds, tofSec);
       shooterFieldPos =
           futurePose.getTranslation().plus(shooterOffsetRobot.rotateBy(futurePose.getRotation()));
