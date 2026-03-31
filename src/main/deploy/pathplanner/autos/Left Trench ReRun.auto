@@ -5,12 +5,6 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "Left Tench - Neutral Zone"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "Intake.Deploy"
@@ -19,7 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Left Side Collect + Shoot"
+            "pathName": "Left Side Collect + Shoot = Trench"
           }
         },
         {
@@ -31,7 +25,61 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.0
+            "waitTime": 1.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake.Retract"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake.Deploy"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake.Retract"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake.Deploy"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake.Deploy"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake.Retract"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
           }
         },
         {
@@ -41,9 +89,15 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Intake.Deploy"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "Left Side Collect + Shoot ReRun"
+            "pathName": "Left Side Collect + Shoot = Trench ReRun"
           }
         },
         {

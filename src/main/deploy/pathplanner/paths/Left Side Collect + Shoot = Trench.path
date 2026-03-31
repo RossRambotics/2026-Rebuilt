@@ -3,16 +3,32 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.3520722891566255,
+        "x": 4.292313253012049,
         "y": 7.39
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.598533850926552,
-        "y": 7.348087011918396
+        "x": 4.541265969970553,
+        "y": 7.3671407629397
       },
       "isLocked": true,
-      "linkedName": "Left-End Neutral Zone"
+      "linkedName": "Left Trench Start"
+    },
+    {
+      "anchor": {
+        "x": 7.242795180722891,
+        "y": 7.597433734939759
+      },
+      "prevControl": {
+        "x": 6.991289045813839,
+        "y": 7.617464963304175
+      },
+      "nextControl": {
+        "x": 7.931240963855423,
+        "y": 7.5426024096385555
+      },
+      "isLocked": false,
+      "linkedName": null
     },
     {
       "anchor": {
@@ -20,49 +36,49 @@
         "y": 4.373759036144579
       },
       "prevControl": {
-        "x": 7.874778204861685,
-        "y": 4.389353607683374
+        "x": 7.625265060240963,
+        "y": 4.623759036144579
       },
       "nextControl": {
-        "x": 7.375751915620245,
-        "y": 4.358164464605784
+        "x": 7.625265060240963,
+        "y": 4.1237590361445795
       },
-      "isLocked": false,
+      "isLocked": true,
       "linkedName": null
     },
     {
       "anchor": {
         "x": 7.242795180722891,
-        "y": 7.39
+        "y": 7.597433734939759
       },
       "prevControl": {
-        "x": 8.179325204698848,
-        "y": 6.6754131137065436
+        "x": 7.918378182362611,
+        "y": 7.536558810766751
       },
       "nextControl": {
-        "x": 6.728336228581405,
-        "y": 7.782540133604961
+        "x": 6.99380395642377,
+        "y": 7.619869648605682
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.0902650602409643,
+        "x": 3.133975903614458,
         "y": 7.39
       },
       "prevControl": {
-        "x": 4.4568218426525785,
-        "y": 7.4362084315188826
+        "x": 3.383471842883527,
+        "y": 7.374132539956092
       },
       "nextControl": null,
-      "isLocked": false,
+      "isLocked": true,
       "linkedName": "Left Trench ReRun Trench"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 1.720331950207472,
+      "waypointRelativePos": 0.42821576763485764,
       "rotationDegrees": 180.0
     }
   ],
@@ -70,19 +86,29 @@
   "pointTowardsZones": [
     {
       "fieldPosition": {
-        "x": 8.0,
+        "x": 7.7,
         "y": 8.5
       },
       "rotationOffset": 0.0,
-      "minWaypointRelativePos": 0.15,
-      "maxWaypointRelativePos": 0.75,
+      "minWaypointRelativePos": 1.1235732009925448,
+      "maxWaypointRelativePos": 2.4813895781637596,
+      "name": "Point Towards Zone"
+    },
+    {
+      "fieldPosition": {
+        "x": 0.4,
+        "y": 7.5
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 2.711662531017363,
+      "maxWaypointRelativePos": 4.0,
       "name": "Point Towards Zone"
     }
   ],
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 2.5,
-    "maxAcceleration": 2.0,
+    "maxAcceleration": 1.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -96,7 +122,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }
