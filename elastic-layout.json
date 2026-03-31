@@ -1075,20 +1075,6 @@
             }
           },
           {
-            "title": "selected",
-            "x": 640.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Auto Choices/selected",
-              "period": 0.06,
-              "data_type": "string",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "Auto Choices",
             "x": 640.0,
             "y": 64.0,
@@ -1099,6 +1085,20 @@
               "topic": "/SmartDashboard/Auto Choices",
               "period": 0.06,
               "sort_options": false
+            }
+          },
+          {
+            "title": "Instant Win",
+            "x": 640.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/Shuffleboard/SpotSelector/Instant Win",
+              "period": 0.06,
+              "show_type": false,
+              "maximize_button_space": true
             }
           }
         ]
