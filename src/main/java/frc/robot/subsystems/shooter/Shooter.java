@@ -147,6 +147,9 @@ public class Shooter extends TimedSubsystem {
   // Cap the velocity magnitude used for pose prediction to prevent over-leading
   // at high robot speeds where the constant-velocity assumption breaks down.
   private static final double MAX_PREDICTION_SPEED_MPS = 1.5;
+  // Cap angular velocity used for heading prediction. Uncapped omega causes the
+  // predicted heading to diverge, swinging the turret past perpendicular.
+  private static final double MAX_PREDICTION_OMEGA_RAD_PER_SEC = 1.0;
 
   // ── TOF empirical measurement ──────────────────────────────────────────────
   private static final int TOF_MAX_SHOTS = 5;
@@ -533,14 +536,19 @@ public class Shooter extends TimedSubsystem {
     // will be, causing the turret to over-lead. Clamp the speed magnitude so the
     // prediction stays trustworthy.
     double speedMag = Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+    double clampedVx = chassisSpeeds.vxMetersPerSecond;
+    double clampedVy = chassisSpeeds.vyMetersPerSecond;
     if (speedMag > MAX_PREDICTION_SPEED_MPS && speedMag > 0) {
       double scale = MAX_PREDICTION_SPEED_MPS / speedMag;
-      chassisSpeeds =
-          new ChassisSpeeds(
-              chassisSpeeds.vxMetersPerSecond * scale,
-              chassisSpeeds.vyMetersPerSecond * scale,
-              chassisSpeeds.omegaRadiansPerSecond * scale);
+      clampedVx *= scale;
+      clampedVy *= scale;
     }
+    double clampedOmega =
+        MathUtil.clamp(
+            chassisSpeeds.omegaRadiansPerSecond,
+            -MAX_PREDICTION_OMEGA_RAD_PER_SEC,
+            MAX_PREDICTION_OMEGA_RAD_PER_SEC);
+    chassisSpeeds = new ChassisSpeeds(clampedVx, clampedVy, clampedOmega);
 
     // --- Initial guess for TOF ---
     // Warm-start from last solution when available (already near-converged);
@@ -586,13 +594,16 @@ public class Shooter extends TimedSubsystem {
     double flywheelRPM = m_bottomFlyWheel.calculateRPM(distanceMeters);
 
     // --- Turret angle (robot-relative) ---
+    // Use currentPose heading (not futurePose) because the turret rotates faster
+    // than the robot and tracks reactively at 50 Hz. Predicting the heading adds
+    // noise and the exact firing moment is unpredictable.
     Translation2d delta = targetFieldPos.minus(shooterFieldPos);
 
     // MathUtil.angleModulus normalizes to (-π, π], preventing wrap errors near
     // ±180°
     double rawTurretAngleRad =
         MathUtil.angleModulus(
-            Math.atan2(delta.getY(), delta.getX()) - futurePose.getRotation().getRadians());
+            Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians());
 
     double rawTurretAngleDeg = Math.toDegrees(rawTurretAngleRad);
 
