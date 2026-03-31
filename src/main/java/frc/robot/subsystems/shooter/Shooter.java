@@ -594,13 +594,16 @@ public class Shooter extends TimedSubsystem {
     double flywheelRPM = m_bottomFlyWheel.calculateRPM(distanceMeters);
 
     // --- Turret angle (robot-relative) ---
+    // Use currentPose heading (not futurePose) because the turret rotates faster
+    // than the robot and tracks reactively at 50 Hz. Predicting the heading adds
+    // noise and the exact firing moment is unpredictable.
     Translation2d delta = targetFieldPos.minus(shooterFieldPos);
 
     // MathUtil.angleModulus normalizes to (-π, π], preventing wrap errors near
     // ±180°
     double rawTurretAngleRad =
         MathUtil.angleModulus(
-            Math.atan2(delta.getY(), delta.getX()) - futurePose.getRotation().getRadians());
+            Math.atan2(delta.getY(), delta.getX()) - currentPose.getRotation().getRadians());
 
     double rawTurretAngleDeg = Math.toDegrees(rawTurretAngleRad);
 
