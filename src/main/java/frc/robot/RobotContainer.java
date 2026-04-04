@@ -337,7 +337,7 @@ public class RobotContainer {
     // Skips the initial burst if the arm is already deployed.
     controller.leftTrigger().toggleOnTrue(m_intake.getDeployCmd());
     // Left bumper: retract intake arm
-    controller.leftBumper().onTrue(m_intake.getRetractCmd());
+    controller.leftBumper().whileTrue(m_intake.getRetractCmd());
 
     // Right trigger (toggle): auto shoot — predictive targeting mode
     // Hood and flywheel override their idle defaults; kicker and spindexer engage

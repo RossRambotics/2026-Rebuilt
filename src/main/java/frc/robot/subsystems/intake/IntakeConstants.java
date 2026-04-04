@@ -46,7 +46,7 @@ public final class IntakeConstants {
   // Deploy arm — PID / motion magic
   // ---------------------------------------------------------------------------
   // TODO: Tune PID gains on hardware
-  public static final double ARM_KP = 150.0;
+  public static final double ARM_KP = 5.0;
   public static final double ARM_KI = 0.0;
   public static final double ARM_KD = 0.0;
   public static final double ARM_MAX_VEL_DEG_PER_SEC = 180.0;
@@ -65,7 +65,7 @@ public final class IntakeConstants {
   // ---------------------------------------------------------------------------
   // Deploy arm — hardware limits
   // ---------------------------------------------------------------------------
-  public static final double ARM_STATOR_CURRENT_LIMIT_AMPS = 20.0;
+  public static final double ARM_STATOR_CURRENT_LIMIT_AMPS = 7.0;
   // TODO: Update arm length and mass once measured
   public static final double ARM_LENGTH_M = 0.4;
   public static final double ARM_MASS_LBS = 5.0;
@@ -112,9 +112,9 @@ public final class IntakeConstants {
   // ---------------------------------------------------------------------------
   // TODO: Tune burst duty cycles and durations on hardware
   // Negative drives toward DEPLOY_ANGLE_DEG, positive toward RETRACT_ANGLE_DEG
-  public static final double DEPLOY_BURST_DUTY_CYCLE = -2.0;
-  public static final double RETRACT_BURST_DUTY_CYCLE = 2;
-  public static final double DEPLOY_BURST_SEC = 0.75;
+  public static final double DEPLOY_BURST_DUTY_CYCLE = -1.0;
+  public static final double RETRACT_BURST_DUTY_CYCLE = 4.0;
+  public static final double DEPLOY_BURST_SEC = 0.3;
   public static final double RETRACT_BURST_SEC = 0.3;
 
   // ---------------------------------------------------------------------------
@@ -127,7 +127,7 @@ public final class IntakeConstants {
   // Deploy arm — deploy hard-stop detection
   // ---------------------------------------------------------------------------
   // Negative duty cycle drives toward DEPLOY_ANGLE_DEG (the deployed hard stop)
-  public static final double ARM_DEPLOY_HARDSTOP_DUTY_CYCLE = -0.5;
+  public static final double ARM_DEPLOY_HARDSTOP_DUTY_CYCLE = -0.25;
   public static final double ARM_DEPLOY_STALL_VELOCITY_RPS = 0.5;
   public static final double ARM_DEPLOY_STALL_CURRENT_AMPS = 5.0;
   public static final double ARM_DEPLOY_STALL_DEBOUNCE_SEC = 0.1;

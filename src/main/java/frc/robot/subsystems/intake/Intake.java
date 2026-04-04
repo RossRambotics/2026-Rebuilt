@@ -100,6 +100,9 @@ public class Intake extends TimedSubsystem {
                 .withTimeout(IntakeConstants.RETRACT_BURST_SEC),
             m_deployArm.setDutyCycle(0.0))
         .withName("Intake/Retract");
+    // .withTimeout(
+    // IntakeConstants.RETRACT_BURST_DUTY_CYCLE + IntakeConstants.RETRACT_BURST_SEC
+    // + 0.1);
   }
 
   // ---------------------------------------------------------------------------
