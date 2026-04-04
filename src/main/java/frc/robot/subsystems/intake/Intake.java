@@ -90,15 +90,12 @@ public class Intake extends TimedSubsystem {
   public Command getRetractCmd() {
     return Commands.sequence(
             Commands.runOnce(() -> m_isDeployed = false),
-            Commands.runOnce(() -> {}, m_roller), // interrupt any running roller command
-            m_roller
-                .stop()
-                .withTimeout(
-                    IntakeConstants.RETRACT_ROLLER_STOP_TIMEOUT_SEC), // brief stop to settle roller
+            m_roller.setVelocity(RPM.of(IntakeConstants.ROLLER_INTAKE_RPM)).withTimeout(0.1),
             m_deployArm
                 .setDutyCycle(IntakeConstants.RETRACT_BURST_DUTY_CYCLE)
                 .withTimeout(IntakeConstants.RETRACT_BURST_SEC),
-            m_deployArm.setDutyCycle(0.0))
+            m_deployArm.setDutyCycle(0.0),
+            m_roller.stop())
         .withName("Intake/Retract");
     // .withTimeout(
     // IntakeConstants.RETRACT_BURST_DUTY_CYCLE + IntakeConstants.RETRACT_BURST_SEC

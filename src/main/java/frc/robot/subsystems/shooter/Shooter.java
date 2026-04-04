@@ -90,7 +90,7 @@ public class Shooter extends TimedSubsystem {
 
   // Persistent in-match RPM offset accumulated by the trim buttons.
   // Added inside every flywheel velocity calculation (auto and fixed).
-  private double m_rpmTrimOffsetRpm = -50.0;
+  private double m_rpmTrimOffsetRpm = -0.0;
 
   // Persistent in-match hood angle offset (degrees) accumulated by the trim
   // buttons.
@@ -143,7 +143,7 @@ public class Shooter extends TimedSubsystem {
   // Extra time added to TOF when predicting future pose, to compensate for system
   // latency
   // (sensor delay, loop delay, actuator delay). Tune on hardware.
-  private static final double POSE_PREDICT_TIMESHIFT_SEC = 0.00;
+  private static final double POSE_PREDICT_TIMESHIFT_SEC = 0.10;
   // Cap the velocity magnitude used for pose prediction to prevent over-leading
   // at high robot speeds where the constant-velocity assumption breaks down.
   private static final double MAX_PREDICTION_SPEED_MPS = 1.5;

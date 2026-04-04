@@ -93,7 +93,7 @@ public class Turret extends TimedSubsystem {
           new SmartMotorControllerConfig(this)
               .withControlMode(ControlMode.CLOSED_LOOP)
               .withClosedLoopController(
-                  100, 0, 0.15, DegreesPerSecond.of(360), DegreesPerSecondPerSecond.of(720))
+                  120, 0, 0.15, DegreesPerSecond.of(360), DegreesPerSecondPerSecond.of(720))
               .withSimClosedLoopController(
                   25, 0, 0, DegreesPerSecond.of(360), DegreesPerSecondPerSecond.of(900))
               .withGearing(new MechanismGearing(GearBox.fromReductionStages(16.0)))

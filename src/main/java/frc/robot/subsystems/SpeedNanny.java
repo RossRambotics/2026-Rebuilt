@@ -55,7 +55,7 @@ public class SpeedNanny extends TimedSubsystem {
     m_accelerationLimit = m_kMaxAcceleration;
 
     if (RobotContainer.getInstance().m_shooter.isShooting()) {
-      m_speedLimit = m_kMaxSpeed * 0.3; // Reduce max speed to make it easier to aim while shooting
+      m_speedLimit = m_kMaxSpeed * 0.15; // Reduce max speed to make it easier to aim while shooting
       m_angularRateLimit =
           m_kMaxAngularRate
               * 0.25; // Reduce max angular rate to make it easier to aim while shooting

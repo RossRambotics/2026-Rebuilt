@@ -5,9 +5,15 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "Intake.Deploy"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "2m test"
+            "pathName": "Left Trench ReRun - 1st Run"
           }
         },
         {

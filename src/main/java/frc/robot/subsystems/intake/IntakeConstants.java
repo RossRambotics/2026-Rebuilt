@@ -65,7 +65,7 @@ public final class IntakeConstants {
   // ---------------------------------------------------------------------------
   // Deploy arm — hardware limits
   // ---------------------------------------------------------------------------
-  public static final double ARM_STATOR_CURRENT_LIMIT_AMPS = 7.0;
+  public static final double ARM_STATOR_CURRENT_LIMIT_AMPS = 15.0;
   // TODO: Update arm length and mass once measured
   public static final double ARM_LENGTH_M = 0.4;
   public static final double ARM_MASS_LBS = 5.0;
@@ -113,9 +113,9 @@ public final class IntakeConstants {
   // TODO: Tune burst duty cycles and durations on hardware
   // Negative drives toward DEPLOY_ANGLE_DEG, positive toward RETRACT_ANGLE_DEG
   public static final double DEPLOY_BURST_DUTY_CYCLE = -1.0;
-  public static final double RETRACT_BURST_DUTY_CYCLE = 5.0;
+  public static final double RETRACT_BURST_DUTY_CYCLE = 12.0;
   public static final double DEPLOY_BURST_SEC = 0.3;
-  public static final double RETRACT_BURST_SEC = 0.3;
+  public static final double RETRACT_BURST_SEC = 0.5;
 
   // ---------------------------------------------------------------------------
   // Timing
