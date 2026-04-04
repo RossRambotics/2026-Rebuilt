@@ -113,7 +113,7 @@ public final class IntakeConstants {
   // TODO: Tune burst duty cycles and durations on hardware
   // Negative drives toward DEPLOY_ANGLE_DEG, positive toward RETRACT_ANGLE_DEG
   public static final double DEPLOY_BURST_DUTY_CYCLE = -1.0;
-  public static final double RETRACT_BURST_DUTY_CYCLE = 4.0;
+  public static final double RETRACT_BURST_DUTY_CYCLE = 5.0;
   public static final double DEPLOY_BURST_SEC = 0.3;
   public static final double RETRACT_BURST_SEC = 0.3;
 
