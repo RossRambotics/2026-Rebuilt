@@ -11,7 +11,10 @@ import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -41,6 +44,8 @@ public class IntakeRoller extends TimedSubsystem {
     m_isReal = isReal;
 
     if (m_isReal) {
+      TalonFX followerMotor = new TalonFX(IntakeConstants.ROLLER_FOLLOWER_CAN_ID);
+
       SmartMotorControllerConfig smcConfig =
           new SmartMotorControllerConfig(this)
               .withControlMode(ControlMode.CLOSED_LOOP)
@@ -70,10 +75,11 @@ public class IntakeRoller extends TimedSubsystem {
               .withGearing(new MechanismGearing(GearBox.fromReductionStages(3)))
               .withMotorInverted(true)
               .withIdleMode(MotorMode.COAST)
-              .withStatorCurrentLimit(Amps.of(IntakeConstants.ROLLER_STATOR_CURRENT_LIMIT_AMPS));
+              .withStatorCurrentLimit(Amps.of(IntakeConstants.ROLLER_STATOR_CURRENT_LIMIT_AMPS))
+              .withFollowers(new Pair<Object, Boolean>(followerMotor, true));
 
       TalonFX rollerMotor = new TalonFX(IntakeConstants.ROLLER_CAN_ID);
-      var rollerController = new TalonFXWrapper(rollerMotor, DCMotor.getKrakenX60(1), smcConfig);
+      var rollerController = new TalonFXWrapper(rollerMotor, DCMotor.getKrakenX60(2), smcConfig);
 
       FlyWheelConfig rollerConfig =
           new FlyWheelConfig(rollerController)
@@ -82,6 +88,9 @@ public class IntakeRoller extends TimedSubsystem {
               .withTelemetry("IntakeRollerMech", TelemetryVerbosity.LOW);
 
       roller = new FlyWheel(rollerConfig);
+
+      followerMotor.setControl(
+          new Follower(rollerMotor.getDeviceID(), MotorAlignmentValue.Opposed));
     }
   }
 

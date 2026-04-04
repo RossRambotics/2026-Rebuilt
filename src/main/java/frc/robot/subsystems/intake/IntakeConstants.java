@@ -12,6 +12,7 @@ public final class IntakeConstants {
   // ---------------------------------------------------------------------------
   public static final int ARM_CAN_ID = 41;
   public static final int ROLLER_CAN_ID = 42;
+  public static final int ROLLER_FOLLOWER_CAN_ID = 43;
 
   // ---------------------------------------------------------------------------
   // Deploy arm — target angles
