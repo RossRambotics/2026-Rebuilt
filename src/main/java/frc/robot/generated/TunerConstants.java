@@ -90,11 +90,11 @@ public class TunerConstants {
   // This may need to be tuned to your individual robot
   private static final double kCoupleRatio = 3.5714285714285716;
 
-  private static final double kDriveGearRatio = 6.746031746031747;
+  private static final double kDriveGearRatio = 5.9;
   private static final double kSteerGearRatio = 21.428571428571427;
   // never set this to more than 2.1 path planning may not work at all if this is
   // too high
-  private static final Distance kWheelRadius = Inches.of(2.0);
+  private static final Distance kWheelRadius = Inches.of(2);
 
   private static final boolean kInvertLeftSide = false;
   private static final boolean kInvertRightSide = true;

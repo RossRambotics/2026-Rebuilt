@@ -5,12 +5,6 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "Right Tench - Neutral Zone"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "Intake.Deploy"
@@ -19,7 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Right Side Collect + Shoot"
+            "pathName": "Right Trench Bump - 1st Run"
           }
         },
         {
@@ -31,25 +25,19 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.0
+            "waitTime": 5.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Right Side Collect + Shoot ReRun"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot.Start"
+            "pathName": "HP Collect"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "ReRun",
+  "folder": "HP & Depot",
   "choreoAuto": false
 }

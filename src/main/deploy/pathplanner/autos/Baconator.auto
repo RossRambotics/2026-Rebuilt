@@ -13,7 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Left Side Collect + Shoot = Trench"
+            "pathName": "Left Trench ReRun - 1st Run"
           }
         },
         {
@@ -115,13 +115,55 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Left Side Collect + Shoot = Trench ReRun"
+            "pathName": "Left Trench ReRun - 2nd Run"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Shoot.Start"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake.Retract"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake.Deploy"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake.Retract"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake.Deploy"
           }
         }
       ]

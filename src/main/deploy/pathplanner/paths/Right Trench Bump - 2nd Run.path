@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.1449036144578315,
-        "y": 2.4176987951807236
+        "x": 2.2488313253012047,
+        "y": 2.4395542168674704
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8455882879040817,
-        "y": 2.4460240087332217
+        "x": 1.9495159987474548,
+        "y": 2.4678794304199685
       },
       "isLocked": true,
       "linkedName": "Right Bump Rerun"
@@ -80,12 +80,12 @@
     },
     {
       "anchor": {
-        "x": 3.1449036144578315,
-        "y": 2.4176987951807236
+        "x": 2.2488313253012047,
+        "y": 2.4395542168674704
       },
       "prevControl": {
-        "x": 3.1532873541134414,
-        "y": 2.1433065286107356
+        "x": 2.2572150649568146,
+        "y": 2.1651619502974824
       },
       "nextControl": null,
       "isLocked": true,
@@ -94,8 +94,12 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 3.356846473029007,
-      "rotationDegrees": 45.0
+      "waypointRelativePos": 3.1825726141078685,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 4.601659751037314,
+      "rotationDegrees": 0.0
     }
   ],
   "constraintZones": [],
@@ -123,8 +127,8 @@
   ],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.5,
-    "maxAcceleration": 1.5,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

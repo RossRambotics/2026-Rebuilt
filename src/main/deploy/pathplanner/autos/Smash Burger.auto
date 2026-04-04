@@ -5,12 +5,6 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "Left Tench - Neutral Zone"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "Intake.Deploy"
@@ -19,7 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Left Side Collect + Shoot"
+            "pathName": "Right Trench Bump - 1st Run"
           }
         },
         {
@@ -35,15 +29,9 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "Shoot.Stop"
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "Left Side Collect + Shoot ReRun"
+            "pathName": "Right Trench Bump - 2nd Run"
           }
         },
         {
