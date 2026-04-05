@@ -65,7 +65,7 @@ public final class IntakeConstants {
   // ---------------------------------------------------------------------------
   // Deploy arm — hardware limits
   // ---------------------------------------------------------------------------
-  public static final double ARM_STATOR_CURRENT_LIMIT_AMPS = 15.0;
+  public static final double ARM_STATOR_CURRENT_LIMIT_AMPS = 40.0;
   // TODO: Update arm length and mass once measured
   public static final double ARM_LENGTH_M = 0.4;
   public static final double ARM_MASS_LBS = 5.0;
@@ -135,4 +135,18 @@ public final class IntakeConstants {
 
   // How often to re-nudge the arm against the deployed hard stop while deployed
   public static final double ARM_DEPLOY_NUDGE_INTERVAL_SEC = 2.0;
+
+  // ---------------------------------------------------------------------------
+  // Deploy arm — torque control (TorqueCurrentFOC)
+  // ---------------------------------------------------------------------------
+  // Gentle deploy torque current (amps) — negative drives toward DEPLOY_ANGLE_DEG
+  public static final double ARM_DEPLOY_TORQUE_AMPS = -8.0;
+  // Stronger retract torque current (amps) — positive drives toward RETRACT_ANGLE_DEG
+  public static final double ARM_RETRACT_TORQUE_AMPS = 30.0;
+  // Initial burst torque for deploy (stronger than hold torque, still gentler than duty cycle
+  // burst)
+  public static final double ARM_DEPLOY_BURST_TORQUE_AMPS = -15.0;
+  public static final double ARM_DEPLOY_BURST_TORQUE_SEC = 0.3;
+  // Retract burst duration using torque control
+  public static final double ARM_RETRACT_BURST_TORQUE_SEC = 0.5;
 }

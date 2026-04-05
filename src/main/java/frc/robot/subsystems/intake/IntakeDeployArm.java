@@ -17,6 +17,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -61,6 +62,24 @@ public class IntakeDeployArm extends TimedSubsystem {
   // Bypasses limits so the arm can press firmly into the deployed hard stop.
   private final DutyCycleOut armDeployHardStopRequest =
       new DutyCycleOut(IntakeConstants.ARM_DEPLOY_HARDSTOP_DUTY_CYCLE)
+          .withIgnoreHardwareLimits(true)
+          .withIgnoreSoftwareLimits(true);
+
+  // Torque-based deploy request: gentle torque current toward DEPLOY_ANGLE_DEG.
+  private final TorqueCurrentFOC armDeployTorqueRequest =
+      new TorqueCurrentFOC(IntakeConstants.ARM_DEPLOY_TORQUE_AMPS)
+          .withIgnoreHardwareLimits(true)
+          .withIgnoreSoftwareLimits(true);
+
+  // Torque-based deploy burst: initial stronger torque to get the arm moving.
+  private final TorqueCurrentFOC armDeployBurstTorqueRequest =
+      new TorqueCurrentFOC(IntakeConstants.ARM_DEPLOY_BURST_TORQUE_AMPS)
+          .withIgnoreHardwareLimits(true)
+          .withIgnoreSoftwareLimits(true);
+
+  // Torque-based retract request: stronger torque current toward RETRACT_ANGLE_DEG.
+  private final TorqueCurrentFOC armRetractTorqueRequest =
+      new TorqueCurrentFOC(IntakeConstants.ARM_RETRACT_TORQUE_AMPS)
           .withIgnoreHardwareLimits(true)
           .withIgnoreSoftwareLimits(true);
 
@@ -262,6 +281,70 @@ public class IntakeDeployArm extends TimedSubsystem {
         .until(isDeployHardStop)
         .andThen(setDutyCycle(0.0).withTimeout(IntakeConstants.ARM_DEPLOY_SETTLE_SEC))
         .withName("IntakeDeployArm/DriveToDeployedHardStop");
+  }
+
+  /**
+   * Gently drives the arm toward its deployed hard stop using torque current control
+   * (TorqueCurrentFOC). Commands ARM_DEPLOY_TORQUE_AMPS directly, allowing independent torque
+   * limits for deploy vs retract without changing the stator current limit.
+   *
+   * <p>Ends when a velocity drop and current spike are detected (isDeployHardStop), then coasts for
+   * ARM_DEPLOY_SETTLE_SEC. Does not re-zero the encoder.
+   *
+   * <p>Returns immediately as a no-op when the subsystem is stubbed.
+   *
+   * @return Command to run
+   */
+  public Command driveToDeployedHardStopTorque() {
+    if (!m_isReal) {
+      return this.runOnce(() -> m_stubbedAngle = Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG))
+          .withName("IntakeDeployArm/DriveToDeployedHardStopTorque");
+    }
+    return run(() -> armMotor.setControl(armDeployTorqueRequest))
+        .until(isDeployHardStop)
+        .andThen(setDutyCycle(0.0).withTimeout(IntakeConstants.ARM_DEPLOY_SETTLE_SEC))
+        .withName("IntakeDeployArm/DriveToDeployedHardStopTorque");
+  }
+
+  /**
+   * Bursts the arm toward the deploy position using torque current, then seats against the deployed
+   * hard stop with gentler torque. Uses TorqueCurrentFOC for precise torque control.
+   *
+   * <p>Returns immediately as a no-op when the subsystem is stubbed.
+   *
+   * @return Command to run
+   */
+  public Command deployWithTorque() {
+    if (!m_isReal) {
+      return this.runOnce(() -> m_stubbedAngle = Degrees.of(IntakeConstants.DEPLOY_ANGLE_DEG))
+          .withName("IntakeDeployArm/DeployWithTorque");
+    }
+    return run(() -> armMotor.setControl(armDeployBurstTorqueRequest))
+        .withTimeout(IntakeConstants.ARM_DEPLOY_BURST_TORQUE_SEC)
+        .andThen(driveToDeployedHardStopTorque())
+        .withName("IntakeDeployArm/DeployWithTorque");
+  }
+
+  /**
+   * Retracts the arm using torque current control (TorqueCurrentFOC). Commands
+   * ARM_RETRACT_TORQUE_AMPS directly, providing enough force to reliably retract without being
+   * limited by the stator current limit.
+   *
+   * <p>Runs for ARM_RETRACT_BURST_TORQUE_SEC then coasts.
+   *
+   * <p>Returns immediately as a no-op when the subsystem is stubbed.
+   *
+   * @return Command to run
+   */
+  public Command retractWithTorque() {
+    if (!m_isReal) {
+      return this.runOnce(() -> m_stubbedAngle = Degrees.of(IntakeConstants.RETRACT_ANGLE_DEG))
+          .withName("IntakeDeployArm/RetractWithTorque");
+    }
+    return run(() -> armMotor.setControl(armRetractTorqueRequest))
+        .withTimeout(IntakeConstants.ARM_RETRACT_BURST_TORQUE_SEC)
+        .andThen(setDutyCycle(0.0))
+        .withName("IntakeDeployArm/RetractWithTorque");
   }
 
   /**

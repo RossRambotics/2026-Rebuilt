@@ -51,20 +51,16 @@ public class Intake extends TimedSubsystem {
   public Command getDeployCmd() {
     Command armSequence =
         Commands.either(
-                // Already deployed — skip burst, just re-seat
-                m_deployArm.driveToDeployedHardStop(),
-                // First deploy — burst first, then seat, then mark deployed
+                // Already deployed — just re-seat with gentle torque
+                m_deployArm.driveToDeployedHardStopTorque(),
+                // First deploy — burst then seat, then mark deployed
                 Commands.sequence(
-                    m_deployArm
-                        .setDutyCycle(IntakeConstants.DEPLOY_BURST_DUTY_CYCLE)
-                        .withTimeout(IntakeConstants.DEPLOY_BURST_SEC),
-                    m_deployArm.driveToDeployedHardStop(),
-                    Commands.runOnce(() -> m_isDeployed = true)),
+                    m_deployArm.deployWithTorque(), Commands.runOnce(() -> m_isDeployed = true)),
                 () -> m_isDeployed)
             .andThen(
                 Commands.sequence(
                         Commands.waitSeconds(IntakeConstants.ARM_DEPLOY_NUDGE_INTERVAL_SEC),
-                        m_deployArm.driveToDeployedHardStop())
+                        m_deployArm.driveToDeployedHardStopTorque())
                     .repeatedly());
 
     return Commands.parallel(
@@ -91,15 +87,9 @@ public class Intake extends TimedSubsystem {
     return Commands.sequence(
             Commands.runOnce(() -> m_isDeployed = false),
             m_roller.setVelocity(RPM.of(IntakeConstants.ROLLER_INTAKE_RPM)).withTimeout(0.1),
-            m_deployArm
-                .setDutyCycle(IntakeConstants.RETRACT_BURST_DUTY_CYCLE)
-                .withTimeout(IntakeConstants.RETRACT_BURST_SEC),
-            m_deployArm.setDutyCycle(0.0),
+            m_deployArm.retractWithTorque(),
             m_roller.stop())
         .withName("Intake/Retract");
-    // .withTimeout(
-    // IntakeConstants.RETRACT_BURST_DUTY_CYCLE + IntakeConstants.RETRACT_BURST_SEC
-    // + 0.1);
   }
 
   // ---------------------------------------------------------------------------
