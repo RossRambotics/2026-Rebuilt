@@ -46,7 +46,7 @@ public class ShooterTargetSelector extends TimedSubsystem {
    */
   public void selectAuto(ShootingTarget target) {
     if (!m_isAutoEnabled) return;
-    if (target == m_selectedTarget) return;
+    // if (target == m_selectedTarget) return;
     m_selectedTarget = target;
     m_shooter.setTargetPose(target.displayName, target.getFieldPose3d());
   }
