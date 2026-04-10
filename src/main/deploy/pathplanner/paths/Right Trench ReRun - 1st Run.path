@@ -76,12 +76,7 @@
       "linkedName": "Right Trench ReRun - End"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.009958506224066768,
-      "rotationDegrees": 180.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [
     {
@@ -92,6 +87,16 @@
       "rotationOffset": 0.0,
       "minWaypointRelativePos": 1.33,
       "maxWaypointRelativePos": 1.742928039702257,
+      "name": "Point Towards Zone"
+    },
+    {
+      "fieldPosition": {
+        "x": -0.0,
+        "y": 2.8
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 2.1002481389578156,
+      "maxWaypointRelativePos": 2.751364764267999,
       "name": "Point Towards Zone"
     }
   ],

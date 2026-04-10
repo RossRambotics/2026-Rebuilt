@@ -126,7 +126,7 @@ public class BottomFlyWheel extends TimedSubsystem {
               .withMotorInverted(false)
               .withIdleMode(MotorMode.COAST)
               .withFollowers(new Pair<Object, Boolean>(rightMotor, true))
-              .withStatorCurrentLimit(Amps.of(40));
+              .withStatorCurrentLimit(Amps.of(30));
 
       var falconSmartMotorController =
           new TalonFXWrapper(leftMotor, DCMotor.getKrakenX60(2), smcConfig);
