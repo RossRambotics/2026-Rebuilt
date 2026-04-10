@@ -102,7 +102,7 @@ public final class IntakeConstants {
   // ---------------------------------------------------------------------------
   // Intake roller — hardware
   // ---------------------------------------------------------------------------
-  public static final double ROLLER_STATOR_CURRENT_LIMIT_AMPS = 30.0;
+  public static final double ROLLER_STATOR_CURRENT_LIMIT_AMPS = 35.0;
   // TODO: Update roller diameter and mass once measured
   public static final double ROLLER_DIAMETER_IN = 2.0;
   public static final double ROLLER_MASS_LBS = 0.5;
@@ -141,9 +141,11 @@ public final class IntakeConstants {
   // ---------------------------------------------------------------------------
   // Gentle deploy torque current (amps) — negative drives toward DEPLOY_ANGLE_DEG
   public static final double ARM_DEPLOY_TORQUE_AMPS = -8.0;
-  // Stronger retract torque current (amps) — positive drives toward RETRACT_ANGLE_DEG
+  // Stronger retract torque current (amps) — positive drives toward
+  // RETRACT_ANGLE_DEG
   public static final double ARM_RETRACT_TORQUE_AMPS = 30.0;
-  // Initial burst torque for deploy (stronger than hold torque, still gentler than duty cycle
+  // Initial burst torque for deploy (stronger than hold torque, still gentler
+  // than duty cycle
   // burst)
   public static final double ARM_DEPLOY_BURST_TORQUE_AMPS = -15.0;
   public static final double ARM_DEPLOY_BURST_TORQUE_SEC = 0.3;

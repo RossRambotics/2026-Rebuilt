@@ -56,7 +56,7 @@ public class Shooter extends TimedSubsystem {
   private final BottomFlyWheel m_bottomFlyWheel;
 
   // Kicker and spindexer (intake/feeds)
-  private final Kicker m_kicker;
+  public final Kicker m_kicker;
   private final Spindexer m_spindexer;
 
   // Whether turret auto-targeting is active
