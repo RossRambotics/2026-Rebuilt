@@ -12,14 +12,19 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 /**
  * Predefined shooting targets the shooter can aim at.
  *
- * <p>All poses are defined for the <strong>Blue alliance</strong>. Call {@link #getFieldPose3d()}
- * to obtain the alliance-correct pose at runtime. Use {@link #flipIfRed3d(Pose3d)} for raw Pose3d
+ * <p>
+ * All poses are defined for the <strong>Blue alliance</strong>. Call
+ * {@link #getFieldPose3d()}
+ * to obtain the alliance-correct pose at runtime. Use
+ * {@link #flipIfRed3d(Pose3d)} for raw Pose3d
  * values.
  *
- * <p>TODO: Replace placeholder Pose3d values with actual 2026 field coordinates once available.
+ * <p>
+ * TODO: Replace placeholder Pose3d values with actual 2026 field coordinates
+ * once available.
  */
 public enum ShootingTarget {
-  HUB("Hub", new Pose3d(4.6, 4.04, 1.83, new Rotation3d())),
+  HUB("Hub", new Pose3d(4.6, 4.14, 1.83, new Rotation3d())),
 
   NEUTRAL_LEFT("Neutral Left", new Pose3d(2.2, 6.2, 0.0, new Rotation3d())),
 
@@ -52,7 +57,9 @@ public enum ShootingTarget {
   /**
    * Mirrors a Blue-alliance Pose3d to Red if the Driver Station reports Red.
    *
-   * <p>Same X/Y flip as {@link FieldSpot#flipIfRed}; Z height is unchanged; rotation is rotated
+   * <p>
+   * Same X/Y flip as {@link FieldSpot#flipIfRed}; Z height is unchanged; rotation
+   * is rotated
    * 180° around Z.
    *
    * @param pose Blue-alliance pose
